@@ -1,7 +1,7 @@
 use crate::backend::square::Square;
 use crate::constants::SQUARES_AMOUNT;
 use std::fmt::{Display, Formatter};
-use std::ops::{BitAnd, BitOr, BitXor, Not};
+use std::ops::{BitAnd, BitOr, BitOrAssign, BitXor, Not};
 
 /// A struct that represents a BitBoard.
 /// Each bit in the `u64` value represents a specific position on the board.
@@ -114,6 +114,12 @@ impl BitOr for BitBoard {
         BitBoard {
             value: self.value | rhs.value,
         }
+    }
+}
+
+impl BitOrAssign for BitBoard {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.value |= rhs.value;
     }
 }
 

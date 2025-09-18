@@ -1,6 +1,12 @@
 use crate::backend::bitboard::BitBoard;
 use crate::backend::piece::{Piece, PieceColor, PieceType};
+use crate::backend::square::Square;
 use crate::constants::{PIECE_TYPE_COUNT, SIDES};
+
+const WHITE_START_INDEX: usize = 0;
+const WHITE_END_INDEX: usize = 5;
+const BLACK_START_INDEX: usize = 6;
+const BLACK_END_INDEX: usize = 11;
 
 /// A struct that manages bitboards used for representing chess pieces and their positions on a chessboard.
 /// # Fields
@@ -43,6 +49,56 @@ impl BitBoardManager {
         }
     }
 
+    pub fn get_bitboard(&mut self, piece: Piece) -> &mut BitBoard {
+        let index = self.piece_to_bitboards_index(piece);
+        &mut self.bitboards[index]
+    }
+
+    pub fn get_readonly_bitboard(&self, piece: Piece) -> &BitBoard {
+        let index = self.piece_to_bitboards_index(piece);
+        &self.bitboards[index]
+    }
+
+    pub fn get_piece_at_square(&self, square: Square) -> Option<Piece> {
+        let index = self.get_index_for_piece_at_square(square)?;
+        Some(self.bitboard_index_to_piece[index])
+    }
+
+    pub fn get_bitboard_for_piece_at_square(&self, square: Square) -> Option<BitBoard> {
+        let index = self.get_index_for_piece_at_square(square)?;
+        Some(self.bitboards[index])
+    }
+
+    pub fn get_all_pieces_off(&self, color: PieceColor) -> BitBoard {
+        let mut resulting_bitboard = BitBoard::new();
+
+        let start_index = match color {
+            PieceColor::White => WHITE_START_INDEX,
+            PieceColor::Black => BLACK_START_INDEX,
+        };
+
+        let end_index = match color {
+            PieceColor::White => WHITE_END_INDEX,
+            PieceColor::Black => BLACK_END_INDEX,
+        };
+
+        for index in start_index..end_index {
+            resulting_bitboard |= self.bitboards[index];
+        }
+
+        resulting_bitboard
+    }
+
+    fn get_index_for_piece_at_square(&self, square: Square) -> Option<usize> {
+        for index in 0..self.bitboards.len() {
+            let bitboard = self.bitboards[index];
+            if bitboard.get_square(square) {
+                return Some(index);
+            }
+        }
+        None
+    }
+
     /// Converts a `Piece` instance into a corresponding index for bitboard representation.
     ///
     /// # Parameters
@@ -62,18 +118,5 @@ impl BitBoardManager {
         // white: pawn: 0, rook: 1, knight: 2, bishop: 3, queen: 4, king: 5
         // black: pawn: 6, rook: 7, knight: 8, bishop: 9, queen: 10, king: 11
         index
-    }
-
-    /// Retrieves the `Piece` associated with the given bitboard index.
-    ///
-    /// # Arguments
-    ///
-    /// * `index` - A `usize` value representing the bitboard index.
-    ///
-    /// # Returns
-    ///
-    /// * A `Piece` instance corresponding to the provided bitboard index.
-    fn bitboard_index_to_piece(&self, index: usize) -> Piece {
-        self.bitboard_index_to_piece[index]
     }
 }

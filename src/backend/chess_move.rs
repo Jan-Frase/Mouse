@@ -24,16 +24,16 @@ pub enum PromotionType {
 ///    In the end it comes down to a trade-off between cache locality and number of instructions per read.
 /// 2. It would certainly make the code less readable.
 #[derive(Copy, Clone)]
-pub struct Move {
+pub struct ChessMove {
     from: Square,
     to: Square,
     promotion_type: PromotionType,
 }
 
-impl Move {
+impl ChessMove {
     /// Creates a new `Move` instance with 'promotion_type' set to 0.
-    pub fn new(from: Square, to: Square) -> Move {
-        Move {
+    pub fn new(from: Square, to: Square) -> ChessMove {
+        ChessMove {
             from,
             to,
             promotion_type: PromotionType::None,
