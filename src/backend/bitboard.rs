@@ -1,5 +1,7 @@
 use crate::backend::square::Square;
+use crate::constants::SQUARES_AMOUNT;
 use std::fmt::{Display, Formatter};
+use std::ops::{BitAnd, BitOr, BitXor, Not};
 
 /// A struct that represents a BitBoard.
 /// Each bit in the `u64` value represents a specific position on the board.
@@ -64,6 +66,17 @@ impl BitBoard {
         self.value ^= bit;
     }
 
+    pub fn get_all_true_squares(&self) -> Vec<Square> {
+        let mut squares = Vec::new();
+        for i in 0..SQUARES_AMOUNT {
+            let bit = 1 << i;
+            if self.value & bit != 0 {
+                squares.push(Square::index_to_square(i as i8));
+            }
+        }
+        squares
+    }
+
     /// Converts a given `Square` into a corresponding 64-bit bitmask.
     ///
     /// # Parameters
@@ -80,13 +93,51 @@ impl BitBoard {
     }
 }
 
+impl Not for BitBoard {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        BitBoard { value: !self.value }
+    }
+}
+
+impl BitAnd for BitBoard {
+    type Output = Self;
+
+    fn bitand(self, rhs: Self) -> Self::Output {
+        BitBoard {
+            value: self.value & rhs.value,
+        }
+    }
+}
+
+impl BitOr for BitBoard {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        BitBoard {
+            value: self.value | rhs.value,
+        }
+    }
+}
+
+impl BitXor for BitBoard {
+    type Output = Self;
+
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        BitBoard {
+            value: self.value ^ rhs.value,
+        }
+    }
+}
+
 impl Display for BitBoard {
     /// Formats the bitboard (`self`) into a string representation,
     /// can be used for debugging purposes.
     ///
     /// The moves of a king on A1 get displayed like this:
-    ///_ _ _ _ _ _ _ _
-    ///  _ _ _ _ _ _ _ _
+    /// _ _ _ _ _ _ _ _
+    /// _ _ _ _ _ _ _ _
     /// _ _ _ _ _ _ _ _
     /// _ _ _ _ _ _ _ _
     /// _ _ _ _ _ _ _ _

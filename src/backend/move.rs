@@ -3,6 +3,7 @@ use crate::backend::square::Square;
 /// Represents the various types of promotions that can occur in a game of chess.
 ///
 /// Has an additional `NONE` option to represent no promotion.
+#[derive(Copy, Clone)]
 pub enum PromotionType {
     Rook,
     Knight,
@@ -22,6 +23,7 @@ pub enum PromotionType {
 ///    Sure, the move would be smaller, but accessing a variable would be slower, since it requires bit shifting etc.
 ///    In the end it comes down to a trade-off between cache locality and number of instructions per read.
 /// 2. It would certainly make the code less readable.
+#[derive(Copy, Clone)]
 pub struct Move {
     from: Square,
     to: Square,
