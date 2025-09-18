@@ -6,11 +6,16 @@
 /// or put differently: file => vertical / x part, rank => horizontal / y part
 #[derive(Copy, Clone)]
 pub struct Square {
-    pub file: i8,
-    pub rank: i8,
+    file: i8,
+    rank: i8,
 }
 
 impl Square {
+    /// Creates a new 'Square' instance.
+    pub const fn new(file: i8, rank: i8) -> Self {
+        Self { file, rank }
+    }
+
     /// Converts a given index (i8) to a `Square` object.
     ///
     /// # Parameters
@@ -57,5 +62,37 @@ impl Square {
     /// * `false` - If the object is valid.
     pub fn is_not_valid(&self) -> bool {
         !self.is_valid()
+    }
+
+    /// Returns the 'file' attribute of the current instance.
+    ///
+    /// # Returns
+    /// * `i8` - The value of the `file` field.
+    pub const fn file(&self) -> i8 {
+        self.file
+    }
+
+    /// Returns the 'rank' attribute of the current instance.
+    ///
+    /// # Returns
+    /// * `i8` - The value of the `file` field.
+    pub const fn rank(&self) -> i8 {
+        self.rank
+    }
+
+    /// Sets the 'file' value for the current object.
+    ///
+    /// # Arguments
+    /// * `file` - An 8-bit signed integer (`i8`) representing the new value to be set for the file.
+    pub fn set_file(&mut self, file: i8) {
+        self.file = file;
+    }
+
+    /// Sets the 'rank' value for the current object.
+    ///
+    /// # Arguments
+    /// * `file` - An 8-bit signed integer (`i8`) representing the new value to be set for the file.
+    pub fn set_rank(&mut self, rank: i8) {
+        self.rank = rank;
     }
 }

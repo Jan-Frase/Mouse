@@ -25,13 +25,6 @@ pub struct Piece {
 
 impl Piece {
     /// Creates a new instance of a `Piece` with the specified type and color.
-    ///
-    /// # Parameters
-    /// - `piece_type`: The type of the piece (e.g., King, Queen, Rook, etc.), represented by the `PieceType` enum.
-    /// - `piece_color`: The color of the piece (e.g., White or Black), represented by the `PieceColor` enum.
-    ///
-    /// # Returns
-    /// A new `Piece` instance with the given type and color.
     pub fn new(piece_type: PieceType, piece_color: PieceColor) -> Self {
         Piece {
             piece_type,

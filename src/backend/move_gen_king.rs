@@ -27,10 +27,8 @@ const fn generate_king_move(square: Square) -> BitBoard {
                 continue;
             }
             // create the relevant square
-            let current_square = Square {
-                file: square.file + file_offset,
-                rank: square.rank + rank_offset,
-            };
+            let current_square =
+                Square::new(square.file() + file_offset, square.rank() + rank_offset);
 
             // and add it if it's valid
             if current_square.is_valid() {

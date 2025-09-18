@@ -31,16 +31,7 @@ pub struct Move {
 }
 
 impl Move {
-    /// Creates a new `Move` instance.
-    ///
-    /// # Parameters
-    /// - `from`: A `Square` representing the starting position of the move.
-    /// - `to`: A `Square` representing the destination position of the move.
-    ///
-    /// # Returns
-    /// A `Move` struct with the specified `from` and `to` positions. The `promotion`
-    /// field is initialized to `0` by default, indicating that no promotion is
-    /// applied.
+    /// Creates a new `Move` instance with 'promotion_type' set to 0.
     pub fn new(from: Square, to: Square) -> Move {
         Move {
             from,

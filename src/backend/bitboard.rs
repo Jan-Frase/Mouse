@@ -15,10 +15,6 @@ pub struct BitBoard {
 
 impl BitBoard {
     /// Creates a new `BitBoard` instance with an initial value of 0.
-    ///
-    /// # Returns
-    ///
-    /// A `BitBoard` instance with the `value` field set to 0.
     pub const fn new() -> Self {
         BitBoard { value: 0 }
     }

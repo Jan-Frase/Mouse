@@ -2,12 +2,19 @@ use crate::backend::bitboard::BitBoard;
 use crate::backend::piece::{Piece, PieceColor, PieceType};
 use crate::constants::{PIECE_TYPE_COUNT, SIDES};
 
+/// A struct that manages bitboards used for representing chess pieces and their positions on a chessboard.
+/// # Fields
+/// - `bitboards`: An array of bitboards where each entry represents the board state
+///
+/// - `bitboard_index_to_piece`: An array that maps each index in the `bitboards` array
+///   back to its corresponding `Piece`.
 pub struct BitBoardManager {
     bitboards: [BitBoard; PIECE_TYPE_COUNT * SIDES],
     bitboard_index_to_piece: [Piece; PIECE_TYPE_COUNT * SIDES],
 }
 
 impl BitBoardManager {
+    /// Generates a new BitBoardManager with all bitboards set to empty.
     pub fn new() -> BitBoardManager {
         let bitboards = [BitBoard::new(); PIECE_TYPE_COUNT * SIDES];
 
