@@ -43,6 +43,13 @@ impl BitBoardManager {
         }
     }
 
+    /// Converts a `Piece` instance into a corresponding index for bitboard representation.
+    ///
+    /// # Parameters
+    /// - `piece`: A `Piece` instance for which the bitboard index needs to be determined.
+    ///
+    /// # Returns
+    /// - `usize`: The index corresponding to the given `piece` in the bitboard.
     fn piece_to_bitboards_index(&self, piece: Piece) -> usize {
         let mut index = 0;
 
@@ -57,6 +64,15 @@ impl BitBoardManager {
         index
     }
 
+    /// Retrieves the `Piece` associated with the given bitboard index.
+    ///
+    /// # Arguments
+    ///
+    /// * `index` - A `usize` value representing the bitboard index.
+    ///
+    /// # Returns
+    ///
+    /// * A `Piece` instance corresponding to the provided bitboard index.
     fn bitboard_index_to_piece(&self, index: usize) -> Piece {
         self.bitboard_index_to_piece[index]
     }

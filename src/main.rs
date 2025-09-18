@@ -1,10 +1,19 @@
-use backend::move_gen_king;
+use crate::backend::game_state::GameState;
 
 mod backend;
 mod constants;
 
 fn main() {
-    println!("Hello, world!");
-    let king_moves = move_gen_king::KING_MOVES[0];
-    println!("{king_moves}");
+    let game_state = GameState::new();
+    let nodes = perft(4);
+}
+
+fn perft(depth: u8) -> u64 {
+    if depth == 0 {
+        return 1;
+    }
+
+    let mut nodes = 0;
+
+    nodes
 }
