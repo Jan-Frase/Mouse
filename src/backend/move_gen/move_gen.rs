@@ -1,8 +1,9 @@
-use crate::backend::game_state::GameState;
 use crate::backend::moove::Moove;
-use crate::backend::move_gen_king::{KING_MOVES, get_moves_for_piece};
+use crate::backend::move_gen::move_gen_king::KING_MOVES;
+use crate::backend::move_gen::move_gen_non_sliders::get_moves_for_piece;
 use crate::backend::piece::Piece;
 use crate::backend::piece::PieceType::King;
+use crate::backend::state::game_state::GameState;
 
 pub fn get_moves(game_state: &GameState) -> Vec<Moove> {
     // Idea: have separate functions for each piece type

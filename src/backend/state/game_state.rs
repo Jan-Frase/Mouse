@@ -1,7 +1,6 @@
-use crate::backend::bitboard_manager::BitBoardManager;
 use crate::backend::moove::Moove;
 use crate::backend::piece::PieceColor;
-use crate::backend::piece::PieceColor::{Black, White};
+use crate::backend::state::bitboard_manager::BitBoardManager;
 use getset::{CloneGetters, Getters, MutGetters};
 
 #[derive(Debug, Getters, MutGetters, CloneGetters)]
@@ -42,10 +41,7 @@ impl GameState {
         // Fill the square it moved to.
         moved_piece_bitboard.fill_square(chess_move.to());
 
-        self.active_color = match self.active_color() {
-            PieceColor::White => Black,
-            PieceColor::Black => PieceColor::White,
-        }
+        self.active_color = self.active_color.opposite();
     }
 
     pub fn unmake_move(&mut self, chess_move: Moove) {
@@ -61,9 +57,6 @@ impl GameState {
         // Clear the square it moved to.
         moved_piece_bitboard.clear_square(chess_move.to());
 
-        self.active_color = match self.active_color() {
-            White => Black,
-            Black => White,
-        }
+        self.active_color = self.active_color.opposite();
     }
 }

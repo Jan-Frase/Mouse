@@ -28,6 +28,15 @@ impl BitBoard {
         self.value == 0
     }
 
+    /// Checks if the value of the current instance is empty or zero.
+    ///
+    /// # Returns
+    /// - `true` if the value of the instance is `0`.
+    /// - `false` otherwise.
+    pub fn is_not_empty(&self) -> bool {
+        self.value != 0
+    }
+
     /// Checks if a given square is occupied.
     ///
     /// # Arguments

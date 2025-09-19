@@ -18,6 +18,15 @@ pub enum PieceColor {
     Black,
 }
 
+impl PieceColor {
+    pub fn opposite(self) -> PieceColor {
+        match self {
+            PieceColor::White => PieceColor::Black,
+            PieceColor::Black => PieceColor::White,
+        }
+    }
+}
+
 /// The `Piece` struct stores the type and color of a chess piece.
 #[derive(Copy, Clone, Debug, CloneGetters)]
 pub struct Piece {
