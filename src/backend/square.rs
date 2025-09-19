@@ -1,12 +1,17 @@
+use getset::Setters;
+use std::fmt::{Display, Formatter};
+
 /// This represents a square on the chess board.
 /// The square A1 is at file == 0 and rank == 0.
 /// The square H1 is at file == 7 and rank == 0.
 ///
 /// To make it easier to memorize: file => the letter part, rank => the number part
 /// or put differently: file => vertical / x part, rank => horizontal / y part
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Setters)]
 pub struct Square {
+    #[getset(set = "pub")]
     file: i8,
+    #[getset(set = "pub")]
     rank: i8,
 }
 
@@ -64,7 +69,7 @@ impl Square {
         !self.is_valid()
     }
 
-    /// Returns the 'file' attribute of the current instance.
+    /// Returns the 'file' attribute of the current instance. These aren't derived from getset because they need to be const.
     ///
     /// # Returns
     /// * `i8` - The value of the `file` field.
@@ -72,27 +77,43 @@ impl Square {
         self.file
     }
 
-    /// Returns the 'rank' attribute of the current instance.
+    /// Returns the 'rank' attribute of the current instance. These aren't derived from getset because they need to be const.
     ///
     /// # Returns
     /// * `i8` - The value of the `file` field.
     pub const fn rank(&self) -> i8 {
         self.rank
     }
+}
 
-    /// Sets the 'file' value for the current object.
-    ///
-    /// # Arguments
-    /// * `file` - An 8-bit signed integer (`i8`) representing the new value to be set for the file.
-    pub fn set_file(&mut self, file: i8) {
-        self.file = file;
-    }
+/// Turns a `Square` instance into a string like "a1".
+impl Display for Square {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut result = String::new();
+        result.push_str(match self.file {
+            0 => "a",
+            1 => "b",
+            2 => "c",
+            3 => "d",
+            4 => "e",
+            5 => "f",
+            6 => "g",
+            7 => "h",
+            _ => panic!("Invalid file value"),
+        });
 
-    /// Sets the 'rank' value for the current object.
-    ///
-    /// # Arguments
-    /// * `file` - An 8-bit signed integer (`i8`) representing the new value to be set for the file.
-    pub fn set_rank(&mut self, rank: i8) {
-        self.rank = rank;
+        result.push_str(match self.rank {
+            0 => "1",
+            1 => "2",
+            2 => "3",
+            3 => "4",
+            4 => "5",
+            5 => "6",
+            6 => "7",
+            7 => "8",
+            _ => panic!("Invalid rank value"),
+        });
+
+        write!(f, "{}", result)
     }
 }
