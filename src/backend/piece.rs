@@ -1,7 +1,7 @@
 use getset::CloneGetters;
 
 /// Represents the different pieces.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum PieceType {
     Pawn,
     Rook,
@@ -12,14 +12,14 @@ pub enum PieceType {
 }
 
 /// Represents the color of a piece.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum PieceColor {
     White,
     Black,
 }
 
 /// The `Piece` struct stores the type and color of a chess piece.
-#[derive(Copy, Clone, CloneGetters)]
+#[derive(Copy, Clone, Debug, CloneGetters)]
 pub struct Piece {
     #[getset(get_clone = "pub")]
     piece_type: PieceType,

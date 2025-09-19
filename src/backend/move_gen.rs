@@ -1,10 +1,10 @@
-use crate::backend::chess_move::ChessMove;
 use crate::backend::game_state::GameState;
+use crate::backend::moove::Moove;
 use crate::backend::move_gen_king::{KING_MOVES, get_moves_for_piece};
 use crate::backend::piece::Piece;
 use crate::backend::piece::PieceType::King;
 
-pub fn get_moves(game_state: &GameState) -> Vec<ChessMove> {
+pub fn get_moves(game_state: &GameState) -> Vec<Moove> {
     // Idea: have separate functions for each piece type
     // and then call them from here
     // each of them should iterate over their relevant bitboard

@@ -1,10 +1,10 @@
 use crate::backend::bitboard_manager::BitBoardManager;
-use crate::backend::chess_move::ChessMove;
+use crate::backend::moove::Moove;
 use crate::backend::piece::PieceColor;
 use crate::backend::piece::PieceColor::{Black, White};
 use getset::{CloneGetters, Getters, MutGetters};
 
-#[derive(Getters, MutGetters, CloneGetters)]
+#[derive(Debug, Getters, MutGetters, CloneGetters)]
 pub struct GameState {
     #[getset(get = "pub", get_mut = "pub")]
     bit_board_manager: BitBoardManager,
@@ -19,7 +19,7 @@ impl GameState {
             active_color: PieceColor::White,
         }
     }
-    pub fn make_move(&mut self, chess_move: ChessMove) {
+    pub fn make_move(&mut self, chess_move: Moove) {
         // Get the bitboard for the piece that was captured if it exists.
         let captured_piece_bitboard = self
             .bit_board_manager
@@ -48,7 +48,7 @@ impl GameState {
         }
     }
 
-    pub fn unmake_move(&mut self, chess_move: ChessMove) {
+    pub fn unmake_move(&mut self, chess_move: Moove) {
         // Get the bitboard for the piece that was moved.
         let moved_piece_bitboard = self
             .bit_board_manager

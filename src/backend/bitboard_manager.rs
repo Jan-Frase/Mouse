@@ -14,6 +14,7 @@ const BLACK_END_INDEX: usize = 11;
 ///
 /// - `bitboard_index_to_piece`: An array that maps each index in the `bitboards` array
 ///   back to its corresponding `Piece`.
+#[derive(Debug)]
 pub struct BitBoardManager {
     bitboards: [BitBoard; PIECE_TYPE_COUNT * SIDES],
     bitboard_index_to_piece: [Piece; PIECE_TYPE_COUNT * SIDES],

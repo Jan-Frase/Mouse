@@ -1,4 +1,5 @@
 use getset::Setters;
+use std::fmt::{Display, Formatter};
 
 /// This represents a square on the chess board.
 /// The square A1 is at file == 0 and rank == 0.
@@ -6,7 +7,7 @@ use getset::Setters;
 ///
 /// To make it easier to memorize: file => the letter part, rank => the number part
 /// or put differently: file => vertical / x part, rank => horizontal / y part
-#[derive(Copy, Clone, Setters)]
+#[derive(Copy, Clone, Debug, Setters)]
 pub struct Square {
     #[getset(set = "pub")]
     file: i8,
@@ -82,5 +83,36 @@ impl Square {
     /// * `i8` - The value of the `file` field.
     pub const fn rank(&self) -> i8 {
         self.rank
+    }
+}
+
+impl Display for Square {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut result = String::new();
+        result.push_str(match self.file {
+            0 => "a",
+            1 => "b",
+            2 => "c",
+            3 => "d",
+            4 => "e",
+            5 => "f",
+            6 => "g",
+            7 => "h",
+            _ => panic!("Invalid file value"),
+        });
+
+        result.push_str(match self.rank {
+            0 => "1",
+            1 => "2",
+            2 => "3",
+            3 => "4",
+            4 => "5",
+            5 => "6",
+            6 => "7",
+            7 => "8",
+            _ => panic!("Invalid rank value"),
+        });
+
+        write!(f, "{}", result)
     }
 }

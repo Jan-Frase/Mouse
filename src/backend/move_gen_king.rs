@@ -1,5 +1,5 @@
 use crate::backend::bitboard::BitBoard;
-use crate::backend::chess_move::ChessMove;
+use crate::backend::moove::Moove;
 use crate::backend::square::Square;
 use crate::constants::SQUARES_AMOUNT;
 
@@ -76,8 +76,8 @@ pub fn get_moves_for_piece(
     moves_cache: [BitBoard; SQUARES_AMOUNT],
     piece_bitboard: BitBoard,
     friendly_pieces_bitboard: BitBoard,
-) -> Vec<ChessMove> {
-    let mut moves: Vec<ChessMove> = Vec::new();
+) -> Vec<Moove> {
+    let mut moves: Vec<Moove> = Vec::new();
 
     let squares_with_piece = piece_bitboard.get_all_true_squares();
     for square in squares_with_piece.iter() {
@@ -93,7 +93,7 @@ fn get_moves_for_square(
     moves_cache: [BitBoard; SQUARES_AMOUNT],
     square: Square,
     friendly_pieces_bitboard: BitBoard,
-) -> Vec<ChessMove> {
+) -> Vec<Moove> {
     // This is a bitboard with a 1 at every square the piece can move to if nothing is blocking it.
     // For a king at A1 it would look like this:
     //  _ _ _ _ _ _ _ _
@@ -143,9 +143,9 @@ fn get_moves_for_square(
     let squares_we_can_move_to = moves_bitboard.get_all_true_squares();
 
     // generate all the moves
-    let mut moves: Vec<ChessMove> = Vec::new();
+    let mut moves: Vec<Moove> = Vec::new();
     for to_square in squares_we_can_move_to {
-        moves.push(ChessMove::new(square, to_square))
+        moves.push(Moove::new(square, to_square))
     }
     // Done :)
     moves

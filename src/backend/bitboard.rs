@@ -8,7 +8,7 @@ use std::ops::{BitAnd, BitOr, BitOrAssign, BitXor, Not};
 ///
 /// # Fields
 /// - `value` (`u64`): The underlying 64-bit integer used to store the board's state.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct BitBoard {
     value: u64,
 }

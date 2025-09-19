@@ -18,8 +18,32 @@ fn main() {
         .get_bitboard_mut(Piece::new(PieceType::King, PieceColor::Black));
     black_king_bitboard.fill_square(backend::square::Square::new(4, 7));
 
-    let nodes = perft(&mut game_state, 2);
-    println!("Nodes: {}", nodes);
+    let nodes = root_debug_perft(&mut game_state, 2);
+}
+
+fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
+    if depth == 0 {
+        return 1;
+    }
+
+    let mut nodes = 0;
+    let moves = get_moves(&game_state);
+    for chess_move in moves {
+        game_state.make_move(chess_move);
+        // TODO: check if the positions is legal else unmake
+
+        nodes += perft(game_state, depth - 1);
+
+        // print info for https://github.com/agausmann/perftree
+        println!("{} {:?}", chess_move, nodes);
+
+        game_state.unmake_move(chess_move);
+    }
+
+    println!();
+    println!("{:?}", nodes);
+
+    nodes
 }
 
 fn perft(game_state: &mut GameState, depth: u8) -> u64 {
