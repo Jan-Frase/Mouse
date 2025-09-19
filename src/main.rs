@@ -32,10 +32,10 @@ fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
         game_state.make_move(chess_move);
         // TODO: check if the positions is legal else unmake
 
-        nodes += perft(game_state, depth - 1);
-
+        let nodes_for_this_position = perft(game_state, depth - 1);
+        nodes += nodes_for_this_position;
         // print info for https://github.com/agausmann/perftree
-        println!("{} {:?}", chess_move, nodes);
+        println!("{} {:?}", chess_move, nodes_for_this_position);
 
         game_state.unmake_move(chess_move);
     }

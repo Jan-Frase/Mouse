@@ -56,10 +56,10 @@ impl GameState {
             .unwrap();
 
         // Fill the square that the piece was moved from.
-        moved_piece_bitboard.clear_square(chess_move.from());
+        moved_piece_bitboard.fill_square(chess_move.from());
 
         // Clear the square it moved to.
-        moved_piece_bitboard.fill_square(chess_move.to());
+        moved_piece_bitboard.clear_square(chess_move.to());
 
         self.active_color = match self.active_color() {
             White => Black,
