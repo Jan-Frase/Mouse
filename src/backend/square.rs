@@ -1,12 +1,16 @@
+use getset::Setters;
+
 /// This represents a square on the chess board.
 /// The square A1 is at file == 0 and rank == 0.
 /// The square H1 is at file == 7 and rank == 0.
 ///
 /// To make it easier to memorize: file => the letter part, rank => the number part
 /// or put differently: file => vertical / x part, rank => horizontal / y part
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Setters)]
 pub struct Square {
+    #[getset(set = "pub")]
     file: i8,
+    #[getset(set = "pub")]
     rank: i8,
 }
 
@@ -64,7 +68,7 @@ impl Square {
         !self.is_valid()
     }
 
-    /// Returns the 'file' attribute of the current instance.
+    /// Returns the 'file' attribute of the current instance. These aren't derived from getset because they need to be const.
     ///
     /// # Returns
     /// * `i8` - The value of the `file` field.
@@ -72,27 +76,11 @@ impl Square {
         self.file
     }
 
-    /// Returns the 'rank' attribute of the current instance.
+    /// Returns the 'rank' attribute of the current instance. These aren't derived from getset because they need to be const.
     ///
     /// # Returns
     /// * `i8` - The value of the `file` field.
     pub const fn rank(&self) -> i8 {
         self.rank
-    }
-
-    /// Sets the 'file' value for the current object.
-    ///
-    /// # Arguments
-    /// * `file` - An 8-bit signed integer (`i8`) representing the new value to be set for the file.
-    pub fn set_file(&mut self, file: i8) {
-        self.file = file;
-    }
-
-    /// Sets the 'rank' value for the current object.
-    ///
-    /// # Arguments
-    /// * `file` - An 8-bit signed integer (`i8`) representing the new value to be set for the file.
-    pub fn set_rank(&mut self, rank: i8) {
-        self.rank = rank;
     }
 }

@@ -1,4 +1,5 @@
 use crate::backend::square::Square;
+use getset::{CloneGetters, Setters};
 
 /// Represents the various types of promotions that can occur in a game of chess.
 ///
@@ -23,10 +24,13 @@ pub enum PromotionType {
 ///    Sure, the move would be smaller, but accessing a variable would be slower, since it requires bit shifting etc.
 ///    In the end it comes down to a trade-off between cache locality and number of instructions per read.
 /// 2. It would certainly make the code less readable.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, CloneGetters, Setters)]
 pub struct ChessMove {
+    #[getset(get_clone = "pub", set = "pub")]
     from: Square,
+    #[getset(get_clone = "pub", set = "pub")]
     to: Square,
+    #[getset(get_clone = "pub", set = "pub")]
     promotion_type: PromotionType,
 }
 
@@ -38,50 +42,5 @@ impl ChessMove {
             to,
             promotion_type: PromotionType::None,
         }
-    }
-
-    /// Returns the `from` field of the current instance.
-    /// # Returns
-    /// A `Square` object representing the value of the `from` field.
-    pub fn from(&self) -> Square {
-        self.from
-    }
-
-    /// Returns the `to` field of the current instance.
-    /// # Returns
-    /// A `Square` object representing the value of the `to` field.
-    pub fn to(&self) -> Square {
-        self.to
-    }
-
-    /// Returns the `promotion_type` field of the current instance.
-    /// # Returns
-    /// A `PromotionType` object representing the value of the `promotion_type` field.
-    pub fn promotion_type(&self) -> &PromotionType {
-        &self.promotion_type
-    }
-
-    /// Sets the starting square (`from`) for a move.
-    ///
-    /// # Parameters
-    /// - `from`: A `Square` value representing the starting position of a move.
-    pub fn set_from(&mut self, from: Square) {
-        self.from = from;
-    }
-
-    /// Sets the target square (`to`) for a move.
-    ///
-    /// # Parameters
-    /// - `to`: A `Square` value representing the target position of a move.
-    pub fn set_to(&mut self, to: Square) {
-        self.to = to;
-    }
-
-    /// Sets the `promotion_type` for a move.
-    ///
-    /// # Parameters
-    /// - `promotion_type`: A `PromotionType` value representing the promotion type of a move.
-    pub fn set_promotion(&mut self, promotion_type: PromotionType) {
-        self.promotion_type = promotion_type;
     }
 }

@@ -3,3 +3,6 @@ name = "Mouse"
 version = "0.1.0"
 edition = "2024"
 
+[dependencies]
+getset = "0.1.6"
+

@@ -79,9 +79,10 @@ pub fn get_moves_for_piece(
 ) -> Vec<ChessMove> {
     let mut moves: Vec<ChessMove> = Vec::new();
 
-    for square in piece_bitboard.get_all_true_squares() {
+    let squares_with_piece = piece_bitboard.get_all_true_squares();
+    for square in squares_with_piece.iter() {
         let mut moves_for_square =
-            get_moves_for_square(moves_cache, square, friendly_pieces_bitboard);
+            get_moves_for_square(moves_cache, *square, friendly_pieces_bitboard);
         moves.append(moves_for_square.as_mut());
     }
 

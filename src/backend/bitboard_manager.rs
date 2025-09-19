@@ -49,12 +49,12 @@ impl BitBoardManager {
         }
     }
 
-    pub fn get_bitboard(&mut self, piece: Piece) -> &mut BitBoard {
+    pub fn get_bitboard_mut(&mut self, piece: Piece) -> &mut BitBoard {
         let index = self.piece_to_bitboards_index(piece);
         &mut self.bitboards[index]
     }
 
-    pub fn get_readonly_bitboard(&self, piece: Piece) -> &BitBoard {
+    pub fn get_bitboard(&self, piece: Piece) -> &BitBoard {
         let index = self.piece_to_bitboards_index(piece);
         &self.bitboards[index]
     }
@@ -62,6 +62,14 @@ impl BitBoardManager {
     pub fn get_piece_at_square(&self, square: Square) -> Option<Piece> {
         let index = self.get_index_for_piece_at_square(square)?;
         Some(self.bitboard_index_to_piece[index])
+    }
+
+    pub fn get_bitboard_for_piece_at_square_mut(
+        &mut self,
+        square: Square,
+    ) -> Option<&mut BitBoard> {
+        let index = self.get_index_for_piece_at_square(square)?;
+        Some(&mut self.bitboards[index])
     }
 
     pub fn get_bitboard_for_piece_at_square(&self, square: Square) -> Option<BitBoard> {
@@ -82,7 +90,7 @@ impl BitBoardManager {
             PieceColor::Black => BLACK_END_INDEX,
         };
 
-        for index in start_index..end_index {
+        for index in start_index..=end_index {
             resulting_bitboard |= self.bitboards[index];
         }
 

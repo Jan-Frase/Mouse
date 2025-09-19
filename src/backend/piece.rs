@@ -1,3 +1,5 @@
+use getset::CloneGetters;
+
 /// Represents the different pieces.
 #[derive(Copy, Clone)]
 pub enum PieceType {
@@ -17,9 +19,11 @@ pub enum PieceColor {
 }
 
 /// The `Piece` struct stores the type and color of a chess piece.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, CloneGetters)]
 pub struct Piece {
+    #[getset(get_clone = "pub")]
     piece_type: PieceType,
+    #[getset(get_clone = "pub")]
     piece_color: PieceColor,
 }
 
@@ -30,21 +34,5 @@ impl Piece {
             piece_type,
             piece_color,
         }
-    }
-
-    /// Returns the `PieceType` of the current piece.
-    ///
-    /// # Returns
-    /// * `PieceType` - The type of the piece.
-    pub fn piece_type(&self) -> PieceType {
-        self.piece_type
-    }
-
-    /// Returns the color of the chess piece.
-    ///
-    /// # Returns
-    /// * `PieceColor` - The color of the chess piece, represented by the `PieceColor` enum.
-    pub fn piece_color(&self) -> PieceColor {
-        self.piece_color
     }
 }
