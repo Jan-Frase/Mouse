@@ -69,4 +69,15 @@ pub const fn init_king_moves() -> [BitBoard; SQUARES_AMOUNT] {
 
 /// All of this gets generated at compile time, in the functions above.
 /// At runtime, we only have to read the values.
+/// It contains for each square, a bitboard with every square that the king could potentially move to set to 1.
+/// Example:
+/// This: `KING_MOVES[Square::new(0,0)]` returns at bitboard that looks like this:
+/// `_ _ _ _ _ _ _ _`
+/// `_ _ _ _ _ _ _ _`
+/// `_ _ _ _ _ _ _ _`
+/// `_ _ _ _ _ _ _ _`
+/// `_ _ _ _ _ _ _ _`
+/// `_ _ _ _ _ _ _ _`
+/// `X X _ _ _ _ _ _`
+/// `_ X _ _ _ _ _ _`
 pub const KING_MOVES: [BitBoard; SQUARES_AMOUNT] = init_king_moves();

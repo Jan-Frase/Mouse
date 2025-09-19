@@ -86,6 +86,7 @@ impl Square {
     }
 }
 
+/// Turns a `Square` instance into a string like "a1".
 impl Display for Square {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut result = String::new();

@@ -24,7 +24,7 @@ fn main() {
 
     // Start timer to calculate nodes per second.
     let now = Instant::now();
-    let nodes = perft(&mut game_state, 10);
+    let nodes = perft(&mut game_state, 9);
     let elapsed = now.elapsed();
     println!("{:?}", nodes);
     let nodes_per_second = nodes as f64 / elapsed.as_secs_f64();

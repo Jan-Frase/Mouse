@@ -19,6 +19,7 @@ pub enum PieceColor {
 }
 
 impl PieceColor {
+    /// Returns the opposite color of the current `PieceColor`.
     pub fn opposite(self) -> PieceColor {
         match self {
             PieceColor::White => PieceColor::Black,

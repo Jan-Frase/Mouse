@@ -1,5 +1,5 @@
 use crate::backend::square::Square;
-use crate::constants::SQUARES_AMOUNT;
+use crate::constants::{FILES_AMOUNT, SQUARES_AMOUNT};
 use std::fmt::{Display, Formatter};
 use std::ops::{BitAnd, BitOr, BitOrAssign, BitXor, Not};
 
@@ -71,13 +71,25 @@ impl BitBoard {
         self.value ^= bit;
     }
 
+    /// Retrieves all `Square` instances that correspond to the true bits
+    /// in the bitboard.
+    /// PERF: Speeding this up would be very useful.
+    ///
+    /// # Returns
+    ///
+    /// A `Vec<Square>` containing all `Square` instances corresponding to active bits
+    /// in the bitboard.
     pub fn get_all_true_squares(&self) -> Vec<Square> {
-        let mut squares = Vec::new();
+        // Init the vec with enough capacity for all pawns.
+        let mut squares = Vec::with_capacity(FILES_AMOUNT);
+        // Loop over all squares and check if the bit is set.
+        let mut bit = 1;
         for i in 0..SQUARES_AMOUNT {
-            let bit = 1 << i;
             if self.value & bit != 0 {
                 squares.push(Square::index_to_square(i as i8));
             }
+            // Shift the mask bit one to the left.
+            bit <<= 1;
         }
         squares
     }
@@ -98,6 +110,7 @@ impl BitBoard {
     }
 }
 
+// Various bitwise operations on BitBoards.
 impl Not for BitBoard {
     type Output = Self;
 
@@ -142,19 +155,21 @@ impl BitXor for BitBoard {
     }
 }
 
+// Display implementation for BitBoards - useful for debugging.
+// Sadly, RustRover does not display them when debugging.
 impl Display for BitBoard {
     /// Formats the bitboard (`self`) into a string representation,
     /// can be used for debugging purposes.
     ///
     /// The moves of a king on A1 get displayed like this:
-    /// _ _ _ _ _ _ _ _
-    /// _ _ _ _ _ _ _ _
-    /// _ _ _ _ _ _ _ _
-    /// _ _ _ _ _ _ _ _
-    /// _ _ _ _ _ _ _ _
-    /// _ _ _ _ _ _ _ _
-    /// X X _ _ _ _ _ _
-    /// _ X _ _ _ _ _ _
+    /// `_ _ _ _ _ _ _ _`
+    /// `_ _ _ _ _ _ _ _`
+    /// `_ _ _ _ _ _ _ _`
+    /// `_ _ _ _ _ _ _ _`
+    /// `_ _ _ _ _ _ _ _`
+    /// `_ _ _ _ _ _ _ _`
+    /// `X X _ _ _ _ _ _`
+    /// `_ X _ _ _ _ _ _`
     ///
     /// # Parameters
     /// - `f`: A mutable reference to a formatter that implements the `Formatter` trait, used

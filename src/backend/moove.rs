@@ -18,7 +18,7 @@ pub enum PromotionType {
 /// It knows where a piece moved from and where it moved to.
 /// Also stores to which piece a pawn promoted if one did at all.
 ///
-/// PERFORMANCE: This could be squeezed into a bitfield like, for example, stockfish does;
+/// PERF: This could be squeezed into a bitfield like, for example, stockfish does;
 /// Around line 370: https://github.com/official-stockfish/Stockfish/blob/master/src/types.h
 /// I have not done this yet for two reasons:
 /// 1. I'm not sure, without any benchmarks if it gains any performance.
@@ -46,6 +46,7 @@ impl Moove {
     }
 }
 
+/// Converts a `Move` instance into an uci formatted string.
 impl Display for Moove {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut result = String::new();
