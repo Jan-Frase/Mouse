@@ -31,7 +31,7 @@ pub fn get_moves_for_non_slider_piece(
     // We then iterate over all these squares...
     for square in squares_with_piece.iter() {
         // ... get the potential moves for the piece on that square...
-        // (This only works this easily for non-sliders)
+        // SLIDER: (This only works this easily for non-sliders)
         let potential_moves_bitboard = moves_cache[square.square_to_index()];
         //... and get all the moves for the piece on that square.
         let mut moves_for_square =
@@ -44,7 +44,7 @@ pub fn get_moves_for_non_slider_piece(
 }
 
 /// Computes all possible moves for a given square and friendly piece positions.
-/// Should also work for sliders.
+/// SLIDER: Should also work for sliders.
 ///
 /// # Parameters
 ///
@@ -64,7 +64,7 @@ fn get_moves_for_square(
     square: Square,
     friendly_pieces_bitboard: BitBoard,
 ) -> Vec<Moove> {
-    // I think the following code should also work for sliders.
+    // SLIDER: I think the following code should also work for sliders.
 
     // `potential_moves_bitboard` is a BitBoard with a 1 at every square the piece can move to if nothing is blocking it.
     // For a king at A1 it would look like this:

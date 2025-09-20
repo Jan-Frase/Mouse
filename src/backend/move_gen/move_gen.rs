@@ -48,6 +48,7 @@ pub fn get_moves(game_state: &GameState) -> Vec<Moove> {
     all_pseudo_legal_moves
 }
 
+/// Gets all pseudo legal moves for one piece.
 fn get_moves_for_piece(
     all_pseudo_legal_moves: &mut Vec<Moove>,
     piece_type: PieceType,

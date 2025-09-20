@@ -35,14 +35,21 @@ pub fn is_in_check(game_state: &GameState, color: PieceColor) -> bool {
     // I hope this makes sense :)
     let king_square = get_kings_square(game_state, color);
 
+    // SLIDER: I think this needs to be changed for sliders.
+    // Iterate over all pieces. Let`s assume we are checking for knights.
     for piece_type in PieceType::get_all_types() {
+        // Get the move cache for the knight...
         let moves_cache = get_moves_cache_for_piece(piece_type);
-        let piece_bitboard = moves_cache[king_square.square_to_index()];
+        // ...and get the potential moves for the knight from the square of the king.
+        let piece_move_bitboard = moves_cache[king_square.square_to_index()];
 
+        // Get bitboard that marks where enemy knights are standing.
         let enemy_piece = Piece::new(piece_type, color.opposite());
         let enemy_piece_bitboard = game_state.bit_board_manager().get_bitboard(enemy_piece);
 
-        let resulting_bitboard = piece_bitboard & *enemy_piece_bitboard;
+        // Check if at least one of the places we could move to contains an enemy knight.
+        let resulting_bitboard = piece_move_bitboard & *enemy_piece_bitboard;
+        // If so, we know that the king is in check.
         if resulting_bitboard.is_not_empty() {
             return true;
         }
@@ -50,6 +57,7 @@ pub fn is_in_check(game_state: &GameState, color: PieceColor) -> bool {
     false
 }
 
+/// Returns the square where the king of the respective side is located.
 fn get_kings_square(game_state: &GameState, color: PieceColor) -> Square {
     let king = Piece::new(PieceType::King, color);
     let king_bitboard = game_state.bit_board_manager().get_bitboard(king);
