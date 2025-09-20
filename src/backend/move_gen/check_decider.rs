@@ -1,5 +1,4 @@
-use crate::backend::move_gen::move_gen_king::KING_MOVES;
-use crate::backend::piece::PieceType::King;
+use crate::backend::move_gen::compile_time::move_cache_non_sliders::get_moves_cache_for_piece;
 use crate::backend::piece::{Piece, PieceColor, PieceType};
 use crate::backend::square::Square;
 use crate::backend::state::game_state::GameState;
@@ -36,13 +35,19 @@ pub fn is_in_check(game_state: &GameState, color: PieceColor) -> bool {
     // I hope this makes sense :)
     let king_square = get_kings_square(game_state, color);
 
-    // For now, I will just implement it for the king.
-    let king_move_bitboard = KING_MOVES[king_square.square_to_index() as usize];
-    let enemey_king_bitboard = game_state
-        .bit_board_manager()
-        .get_bitboard(Piece::new(King, color.opposite()));
-    let resulting_bitboard = king_move_bitboard & *enemey_king_bitboard;
-    resulting_bitboard.is_not_empty()
+    for piece_type in PieceType::get_all_types() {
+        let moves_cache = get_moves_cache_for_piece(piece_type);
+        let piece_bitboard = moves_cache[king_square.square_to_index()];
+
+        let enemy_piece = Piece::new(piece_type, color.opposite());
+        let enemy_piece_bitboard = game_state.bit_board_manager().get_bitboard(enemy_piece);
+
+        let resulting_bitboard = piece_bitboard & *enemy_piece_bitboard;
+        if resulting_bitboard.is_not_empty() {
+            return true;
+        }
+    }
+    false
 }
 
 fn get_kings_square(game_state: &GameState, color: PieceColor) -> Square {

@@ -11,6 +11,13 @@ pub enum PieceType {
     King,
 }
 
+impl PieceType {
+    /// Returns an array containing all piece types. For now, it's just Knight and King.
+    pub fn get_all_types() -> [PieceType; 2] {
+        [PieceType::Knight, PieceType::King]
+    }
+}
+
 /// Represents the color of a piece.
 #[derive(Copy, Clone, Debug)]
 pub enum PieceColor {

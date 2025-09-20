@@ -15,11 +15,12 @@ use crate::constants::SQUARES_AMOUNT;
 ///
 /// # Returns
 /// A `Vec<Moove>` containing all the possible moves for the given piece(s).
-pub fn get_moves_for_piece(
+pub fn get_moves_for_non_slider_piece(
     moves_cache: [BitBoard; SQUARES_AMOUNT],
     piece_bitboard: BitBoard,
     friendly_pieces_bitboard: BitBoard,
 ) -> Vec<Moove> {
+    // PERF: Instead of creating a new vector for each piece, we could reuse the same vector and append to it.
     let mut moves: Vec<Moove> = Vec::new();
 
     // Example: We are doing this for all knights.
@@ -29,9 +30,12 @@ pub fn get_moves_for_piece(
     let squares_with_piece = piece_bitboard.get_all_true_squares();
     // We then iterate over all these squares...
     for square in squares_with_piece.iter() {
+        // ... get the potential moves for the piece on that square...
+        // (This only works this easily for non-sliders)
+        let potential_moves_bitboard = moves_cache[square.square_to_index()];
         //... and get all the moves for the piece on that square.
         let mut moves_for_square =
-            get_moves_for_square(moves_cache, *square, friendly_pieces_bitboard);
+            get_moves_for_square(potential_moves_bitboard, *square, friendly_pieces_bitboard);
         // Lastly, we append them :)
         moves.append(moves_for_square.as_mut());
     }
@@ -40,6 +44,7 @@ pub fn get_moves_for_piece(
 }
 
 /// Computes all possible moves for a given square and friendly piece positions.
+/// Should also work for sliders.
 ///
 /// # Parameters
 ///
@@ -55,11 +60,13 @@ pub fn get_moves_for_piece(
 /// A `Vec` of `Moove` structs that represent all legal moves
 /// the piece on the provided square can make.
 fn get_moves_for_square(
-    moves_cache: [BitBoard; SQUARES_AMOUNT],
+    potential_moves_bitboard: BitBoard,
     square: Square,
     friendly_pieces_bitboard: BitBoard,
 ) -> Vec<Moove> {
-    // This is a bitboard with a 1 at every square the piece can move to if nothing is blocking it.
+    // I think the following code should also work for sliders.
+
+    // `potential_moves_bitboard` is a BitBoard with a 1 at every square the piece can move to if nothing is blocking it.
     // For a king at A1 it would look like this:
     //  _ _ _ _ _ _ _ _
     //  _ _ _ _ _ _ _ _
@@ -69,7 +76,6 @@ fn get_moves_for_square(
     //  _ _ _ _ _ _ _ _
     //  X X _ _ _ _ _ _
     //  _ X _ _ _ _ _ _
-    let potential_moves_bitboard = moves_cache[square.square_to_index() as usize];
 
     // The friendly pieces bitboard might look like this if we have the king on A1 and a pawn on A2 and B2:
     //  _ _ _ _ _ _ _ _
