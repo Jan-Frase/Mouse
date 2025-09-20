@@ -20,11 +20,22 @@ fn main() {
         .get_bitboard_mut(Piece::new(PieceType::King, PieceColor::Black));
     black_king_bitboard.fill_square(backend::square::Square::new(4, 7));
 
-    // root_debug_perft(&mut game_state, 9);
+    let white_knight_bitboard = game_state
+        .bit_board_manager_mut()
+        .get_bitboard_mut(Piece::new(PieceType::Knight, PieceColor::White));
+    white_knight_bitboard.fill_square(backend::square::Square::new(1, 0));
+
+    let black_knight_bitboard = game_state
+        .bit_board_manager_mut()
+        .get_bitboard_mut(Piece::new(PieceType::Knight, PieceColor::Black));
+    black_knight_bitboard.fill_square(backend::square::Square::new(1, 7));
 
     // Start timer to calculate nodes per second.
     let now = Instant::now();
-    let nodes = perft(&mut game_state, 9);
+
+    let nodes = root_debug_perft(&mut game_state, 4);
+    // let nodes = perft(&mut game_state, 1);
+
     let elapsed = now.elapsed();
     println!("{:?}", nodes);
     let nodes_per_second = nodes as f64 / elapsed.as_secs_f64();
@@ -32,7 +43,7 @@ fn main() {
     println!("{:?}", elapsed);
 }
 
-fn root_debug_perft(game_state: &mut GameState, depth: u8) {
+fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
     // Total nodes searched.
     let mut nodes = 0;
 
@@ -57,6 +68,7 @@ fn root_debug_perft(game_state: &mut GameState, depth: u8) {
 
     println!();
     println!("{:?}", nodes);
+    nodes
 }
 
 fn perft(game_state: &mut GameState, depth: u8) -> u64 {

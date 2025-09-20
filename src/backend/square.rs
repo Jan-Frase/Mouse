@@ -42,9 +42,9 @@ impl Square {
     ///
     /// This is useful for representing a chessboard square as a single integer from 0 to 63
     /// # Returns
-    /// A signed 8-bit integer (`i8`) representing the square's index.
-    pub const fn square_to_index(&self) -> i8 {
-        self.file + self.rank * 8
+    /// A usize representing the square's index.
+    pub const fn square_to_index(&self) -> usize {
+        (self.file + self.rank * 8) as usize
     }
 
     /// Checks if the current position is valid.
