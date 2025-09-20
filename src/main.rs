@@ -33,14 +33,14 @@ fn main() {
     // Start timer to calculate nodes per second.
     let now = Instant::now();
 
-    let nodes = root_debug_perft(&mut game_state, 4);
+    let nodes = root_debug_perft(&mut game_state, 8);
     // let nodes = perft(&mut game_state, 1);
 
     let elapsed = now.elapsed();
-    println!("{:?}", nodes);
+    println!("Nodes searched: {:?}", nodes);
     let nodes_per_second = nodes as f64 / elapsed.as_secs_f64();
-    println!("{:?}", nodes_per_second); // 577620 nps in dev - 8676006 nps in release
-    println!("{:?}", elapsed);
+    println!("with {:?} nodes per second,", nodes_per_second); // 577620 nps in dev - 8676006 nps in release
+    println!("took {:?}.", elapsed);
 }
 
 fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
