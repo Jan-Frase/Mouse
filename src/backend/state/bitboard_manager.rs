@@ -97,7 +97,7 @@ impl BitBoardManager {
     /// # Arguments
     ///
     /// * `square` - A `Square` that specifies the location of the piece whose `BitBoard` is
-    ///              to be retrieved.
+    ///   to be retrieved.
     ///
     /// # Returns
     ///
@@ -130,7 +130,7 @@ impl BitBoardManager {
     /// # Arguments
     ///
     /// * `color` - A `PieceColor` enum value (`PieceColor::White` or `PieceColor::Black`)
-    ///             indicating the color of the pieces whose positions should be retrieved.
+    ///   indicating the color of the pieces whose positions should be retrieved.
     ///
     /// # Returns
     ///

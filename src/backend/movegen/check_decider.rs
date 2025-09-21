@@ -1,4 +1,4 @@
-use crate::backend::move_gen::compile_time::move_cache_non_sliders::get_moves_cache_for_piece;
+use crate::backend::movegen::compile_time::move_cache_non_sliders::get_moves_cache_for_piece;
 use crate::backend::piece::{Piece, PieceColor, PieceType};
 use crate::backend::square::Square;
 use crate::backend::state::game_state::GameState;

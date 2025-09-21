@@ -1,6 +1,6 @@
 use crate::backend::moove::Moove;
-use crate::backend::move_gen::compile_time::move_cache_non_sliders::get_moves_cache_for_piece;
-use crate::backend::move_gen::move_gen_non_sliders::get_moves_for_non_slider_piece;
+use crate::backend::movegen::compile_time::move_cache_non_sliders::get_moves_cache_for_piece;
+use crate::backend::movegen::move_gen_non_sliders::get_moves_for_non_slider_piece;
 use crate::backend::piece::{Piece, PieceColor, PieceType};
 use crate::backend::state::bitboard::BitBoard;
 use crate::backend::state::bitboard_manager::BitBoardManager;

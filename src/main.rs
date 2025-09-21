@@ -1,5 +1,5 @@
-use crate::backend::move_gen::check_decider::is_in_check;
-use crate::backend::move_gen::move_gen::get_moves;
+use crate::backend::movegen::check_decider::is_in_check;
+use crate::backend::movegen::move_gen::get_moves;
 use crate::backend::piece::{Piece, PieceColor, PieceType};
 use backend::state::game_state::GameState;
 use std::time::Instant;
@@ -55,7 +55,7 @@ fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
     let mut nodes = 0;
 
     // Generate all root moves.
-    let moves = get_moves(&game_state);
+    let moves = get_moves(game_state);
     for chess_move in moves {
         game_state.make_move(chess_move);
         // If we are in check after making the move -> skip.
@@ -84,7 +84,7 @@ fn perft(game_state: &mut GameState, depth: u8) -> u64 {
     }
 
     let mut nodes = 0;
-    let moves = get_moves(&game_state);
+    let moves = get_moves(game_state);
     for chess_move in moves {
         game_state.make_move(chess_move);
         // If we are in check after making the move -> skip.

@@ -37,7 +37,7 @@ pub fn parse_fen(
     let half_move_clock_string = fen_string[4];
     *half_move_clock = half_move_clock_string.parse::<u16>().unwrap();
 
-    let full_move_number_string = fen_string[5];
+    let _full_move_number_string = fen_string[5];
     // I don't store this data as it isn't used for anything.
 }
 
