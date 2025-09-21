@@ -3,7 +3,16 @@ use crate::backend::square::Square;
 use crate::backend::state::bitboard_manager::BitBoardManager;
 use crate::backend::state::irreversible_data::IrreversibleData;
 
-/// This parses a fen string.
+/// Parses a FEN (Forsyth-Edwards Notation) string and updates the corresponding game state.
+/// https://www.chessprogramming.org/Forsyth-Edwards_Notation
+///
+/// # Arguments
+///
+/// * `fen_string` - A string slice containing the FEN representation of the chess game.
+/// * `bit_board_manager` - A mutable reference to a `BitBoardManager` to update the board positions.
+/// * `active_color` - A mutable reference to a `PieceColor` to set the active player.
+/// * `irreversible_data` - A mutable reference to `IrreversibleData`.
+/// * `half_move_clock` - A mutable reference to a `u16` to update the current half-move clock count.
 pub fn parse_fen(
     fen_string: &str,
     bit_board_manager: &mut BitBoardManager,
