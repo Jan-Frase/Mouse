@@ -8,32 +8,39 @@ mod backend;
 mod constants;
 
 fn main() {
-    let mut game_state = GameState::new();
+    let mut game_state = GameState::new_parse_fen("1n2k3/8/8/8/8/8/8/1N2K3 w - - 0 1");
 
-    let white_king_bitboard = game_state
-        .bit_board_manager_mut()
-        .get_bitboard_mut(Piece::new(PieceType::King, PieceColor::White));
-    white_king_bitboard.fill_square(backend::square::Square::new(4, 0));
+    println!("{:?}", game_state);
 
-    let black_king_bitboard = game_state
-        .bit_board_manager_mut()
-        .get_bitboard_mut(Piece::new(PieceType::King, PieceColor::Black));
-    black_king_bitboard.fill_square(backend::square::Square::new(4, 7));
-
-    let white_knight_bitboard = game_state
-        .bit_board_manager_mut()
-        .get_bitboard_mut(Piece::new(PieceType::Knight, PieceColor::White));
-    white_knight_bitboard.fill_square(backend::square::Square::new(1, 0));
-
-    let black_knight_bitboard = game_state
-        .bit_board_manager_mut()
-        .get_bitboard_mut(Piece::new(PieceType::Knight, PieceColor::Black));
-    black_knight_bitboard.fill_square(backend::square::Square::new(1, 7));
+    println!(
+        "{}",
+        game_state
+            .bit_board_manager()
+            .get_bitboard(Piece::new(PieceType::Knight, PieceColor::White))
+    );
+    println!(
+        "{}",
+        game_state
+            .bit_board_manager()
+            .get_bitboard(Piece::new(PieceType::Knight, PieceColor::Black))
+    );
+    println!(
+        "{}",
+        game_state
+            .bit_board_manager()
+            .get_bitboard(Piece::new(PieceType::King, PieceColor::White))
+    );
+    println!(
+        "{}",
+        game_state
+            .bit_board_manager()
+            .get_bitboard(Piece::new(PieceType::King, PieceColor::Black))
+    );
 
     // Start timer to calculate nodes per second.
     let now = Instant::now();
 
-    let nodes = root_debug_perft(&mut game_state, 5);
+    let nodes = root_debug_perft(&mut game_state, 8);
     // let nodes = perft(&mut game_state, 1);
 
     let elapsed = now.elapsed();
