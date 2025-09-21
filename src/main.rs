@@ -33,7 +33,7 @@ fn main() {
     // Start timer to calculate nodes per second.
     let now = Instant::now();
 
-    let nodes = root_debug_perft(&mut game_state, 8);
+    let nodes = root_debug_perft(&mut game_state, 5);
     // let nodes = perft(&mut game_state, 1);
 
     let elapsed = now.elapsed();

@@ -1,6 +1,7 @@
 use crate::backend::moove::Moove;
 use crate::backend::piece::{Piece, PieceColor};
 use crate::backend::state::bitboard_manager::BitBoardManager;
+use crate::backend::state::fen_parser::parse_fen;
 use crate::backend::state::irreversible_data::IrreversibleData;
 use getset::{CloneGetters, Getters, MutGetters};
 
@@ -9,10 +10,12 @@ pub struct GameState {
     // TODO: Remove this mutable getter. It`s only needed for the tests atm.
     #[getset(get = "pub", get_mut = "pub")]
     bit_board_manager: BitBoardManager,
+    #[getset(get = "pub")]
+    irreversible_data_stack: Vec<IrreversibleData>,
     #[getset(get_clone = "pub")]
     active_color: PieceColor,
     #[getset(get = "pub")]
-    irreversible_data_stack: Vec<IrreversibleData>,
+    half_move_clock: u16,
 }
 
 impl GameState {
@@ -28,6 +31,29 @@ impl GameState {
             bit_board_manager: BitBoardManager::new(),
             active_color: PieceColor::White,
             irreversible_data_stack: vec![],
+            half_move_clock: 0,
+        }
+    }
+
+    pub fn new_parse_fen(fen_string: &str) -> GameState {
+        let mut bit_board_manager = BitBoardManager::new();
+        let mut active_color = PieceColor::White;
+        let mut irreversible_data = IrreversibleData::new();
+        let mut half_move_clock = 0;
+
+        parse_fen(
+            fen_string,
+            &mut bit_board_manager,
+            &mut active_color,
+            &mut irreversible_data,
+            &mut half_move_clock,
+        );
+
+        GameState {
+            bit_board_manager,
+            active_color,
+            irreversible_data_stack: vec![irreversible_data],
+            half_move_clock,
         }
     }
 
