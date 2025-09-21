@@ -20,12 +20,6 @@ pub struct GameState {
 
 impl GameState {
     /// Creates a new `GameState` instance with default values.
-    ///
-    /// # Returns
-    ///
-    /// A `GameState` object with:
-    /// - `bit_board_manager` initialized as a new instance of `BitBoardManager`.
-    /// - `active_color` set to `PieceColor::White` (indicating White's turn).
     pub fn new() -> GameState {
         GameState {
             bit_board_manager: BitBoardManager::new(),
@@ -35,6 +29,7 @@ impl GameState {
         }
     }
 
+    /// Creates a new `GameState` instance based on the fen string.
     pub fn new_parse_fen(fen_string: &str) -> GameState {
         let mut bit_board_manager = BitBoardManager::new();
         let mut active_color = PieceColor::White;
