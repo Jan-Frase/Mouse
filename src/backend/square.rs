@@ -22,6 +22,24 @@ impl Square {
         Self { file, rank }
     }
 
+    pub fn new_from_uci_notation(uci_notation: &str) -> Self {
+        let mut file = 0;
+        let mut rank = 0;
+
+        for char in uci_notation.chars() {
+            match char {
+                'a'..='h' => file = char.to_digit(10).unwrap() - 1,
+                '1'..='8' => rank = char.to_digit(10).unwrap() - 1,
+                _ => panic!("Invalid uci notation"),
+            }
+        }
+
+        Square {
+            file: file as i8,
+            rank: rank as i8,
+        }
+    }
+
     /// Converts a given index (i8) to a `Square` object.
     ///
     /// # Parameters

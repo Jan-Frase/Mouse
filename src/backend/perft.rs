@@ -1,6 +1,8 @@
+use crate::backend::moove::Moove;
 use crate::backend::movegen::check_decider::is_in_check;
 use crate::backend::movegen::move_gen::get_moves;
 use crate::backend::state::game_state::GameState;
+use std::env::Args;
 
 pub fn perft(game_state: &mut GameState, depth: u8) -> u64 {
     // PERFT: I would love to make this work, but it does not atm.
@@ -27,6 +29,32 @@ pub fn perft(game_state: &mut GameState, depth: u8) -> u64 {
     }
 
     nodes
+}
+
+// --------------------------------------------- //
+// PERFTREE DEBUGGING
+// https://github.com/agausmann/perftree
+// --------------------------------------------- //
+
+pub fn run_perftree_debug(input: Args) {
+    let mut input: Vec<String> = input.collect();
+
+    input.remove(0);
+
+    let depth = input[0].parse::<i32>().unwrap();
+
+    let fen = &input[1];
+    let mut game_state = GameState::new_parse_fen(fen);
+
+    let moves = input[2..].to_vec();
+    moves
+        .iter()
+        .map(|moove_str| Moove::new_from_uci_notation(moove_str))
+        .for_each(|moove| {
+            game_state.make_move(moove);
+        });
+
+    root_debug_perft(&mut game_state, depth as u8);
 }
 
 fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
@@ -60,6 +88,19 @@ fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
 // TESTING
 // --------------------------------------------- //
 
+// let mut game_state = GameState::new_parse_fen("1n2k3/8/8/8/8/8/8/1N2K3 w - - 0 1");
+//
+//  Start timer to calculate nodes per second.
+// let now = Instant::now();
+//
+// let nodes = root_debug_perft(&mut game_state, 9);
+// let nodes = perft(&mut game_state, 9);
+//
+// let elapsed = now.elapsed();
+// println!("Nodes searched: {:?}", nodes);
+// let nodes_per_second = nodes as f64 / elapsed.as_secs_f64();
+// println!("with {:?} nodes per second,", nodes_per_second); // 577620 nps in dev - 8.676.006 nps in release - 25.104.754 nps
+// println!("took {:?}.", elapsed);
 #[cfg(test)]
 mod tests {
     use super::*;

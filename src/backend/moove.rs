@@ -44,6 +44,29 @@ impl Moove {
             promotion_type: PromotionType::None,
         }
     }
+
+    pub fn new_from_uci_notation(uci_notation: &str) -> Moove {
+        let from = Square::new_from_uci_notation(&uci_notation[0..2]);
+        let to = Square::new_from_uci_notation(&uci_notation[2..4]);
+
+        let promotion_char = uci_notation.chars().nth(4);
+        let promotion_type = match promotion_char {
+            None => PromotionType::None,
+            Some(char) => match char {
+                'r' => PromotionType::Rook,
+                'n' => PromotionType::Knight,
+                'b' => PromotionType::Bishop,
+                'q' => PromotionType::Queen,
+                _ => panic!("Invalid promotion type"),
+            },
+        };
+
+        Moove {
+            from,
+            to,
+            promotion_type,
+        }
+    }
 }
 
 /// Converts a `Move` instance into an uci formatted string.
