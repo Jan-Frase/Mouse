@@ -1,3 +1,4 @@
+use crate::backend::piece::PieceColor;
 use getset::Setters;
 use std::fmt::{Display, Formatter};
 
@@ -83,6 +84,28 @@ impl Square {
     /// * `i8` - The value of the `file` field.
     pub const fn rank(&self) -> i8 {
         self.rank
+    }
+
+    pub const fn is_pawn_start(&self, color: PieceColor) -> bool {
+        match color {
+            PieceColor::White => self.rank == 1,
+            PieceColor::Black => self.rank == 6,
+        }
+    }
+
+    pub const fn forward_by_one(&self, color: PieceColor) -> Square {
+        match color {
+            PieceColor::White => Square::new(self.file, self.rank + 1),
+            PieceColor::Black => Square::new(self.file, self.rank - 1),
+        }
+    }
+
+    pub const fn right_by_one(&self) -> Square {
+        Square::new(self.file + 1, self.rank)
+    }
+
+    pub const fn left_by_one(&self) -> Square {
+        Square::new(self.file - 1, self.rank)
     }
 }
 

@@ -1,6 +1,9 @@
-use crate::backend::movegen::compile_time::move_cache_non_sliders::get_moves_cache_for_piece;
+use crate::backend::movegen::compile_time::move_cache_non_sliders::{
+    KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES,
+};
 use crate::backend::piece::{Piece, PieceColor, PieceType};
 use crate::backend::square::Square;
+use crate::backend::state::bitboard::BitBoard;
 use crate::backend::state::game_state::GameState;
 
 /// Checks if a given player's king is in check in the current game state.
@@ -38,17 +41,16 @@ pub fn is_in_check(game_state: &GameState, color: PieceColor) -> bool {
     // SLIDER: I think this needs to be changed for sliders.
     // Iterate over all pieces. Let`s assume we are checking for knights.
     for piece_type in PieceType::get_all_types() {
-        // Get the move cache for the knight...
-        let moves_cache = get_moves_cache_for_piece(piece_type);
-        // ...and get the potential moves for the knight from the square of the king.
-        let piece_move_bitboard = moves_cache[king_square.square_to_index()];
+        // Get the bitboard that represents all possible attacks.
+        let attack_bitboard =
+            get_attack_bitboard_for_piece_and_square(piece_type, color, king_square);
 
         // Get bitboard that marks where enemy knights are standing.
         let enemy_piece = Piece::new(piece_type, color.opposite());
         let enemy_piece_bitboard = game_state.bit_board_manager().get_bitboard(enemy_piece);
 
         // Check if at least one of the places we could move to contains an enemy knight.
-        let resulting_bitboard = piece_move_bitboard & *enemy_piece_bitboard;
+        let resulting_bitboard = attack_bitboard & *enemy_piece_bitboard;
         // If so, we know that the king is in check.
         if resulting_bitboard.is_not_empty() {
             return true;
@@ -63,4 +65,17 @@ fn get_kings_square(game_state: &GameState, color: PieceColor) -> Square {
     let king_bitboard = game_state.bit_board_manager().get_bitboard(king);
     let king_square = king_bitboard.get_all_true_squares();
     king_square[0]
+}
+
+fn get_attack_bitboard_for_piece_and_square(
+    piece_type: PieceType,
+    piece_color: PieceColor,
+    square: Square,
+) -> BitBoard {
+    match piece_type {
+        PieceType::King => KING_MOVES[square.square_to_index()],
+        PieceType::Knight => KNIGHT_MOVES[square.square_to_index()],
+        PieceType::Pawn => PAWN_CAPTURE_MOVES[piece_color as usize][square.square_to_index()],
+        _ => panic!("Not implemented yet"),
+    }
 }

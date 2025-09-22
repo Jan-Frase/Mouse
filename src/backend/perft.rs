@@ -76,4 +76,12 @@ mod tests {
         // let nodes = perft(&mut game_state, 5);
         // assert_eq!(nodes, 11949411);
     }
+
+    #[test]
+    fn test_perft_02() {
+        let mut game_state =
+            GameState::new_parse_fen("4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1");
+        let nodes = perft(&mut game_state, 4);
+        assert_eq!(nodes, 98766);
+    }
 }

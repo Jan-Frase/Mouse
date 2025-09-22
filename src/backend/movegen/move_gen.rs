@@ -1,6 +1,11 @@
 use crate::backend::moove::Moove;
-use crate::backend::movegen::compile_time::move_cache_non_sliders::get_moves_cache_for_piece;
-use crate::backend::movegen::move_gen_non_sliders::get_moves_for_non_slider_piece;
+use crate::backend::movegen::compile_time::move_cache_non_sliders::{
+    KING_MOVES, KNIGHT_MOVES, PAWN_QUIET_MOVES,
+};
+use crate::backend::movegen::move_gen_non_sliders::{
+    get_moves_for_non_slider_piece, get_pawn_attack_moves,
+};
+use crate::backend::piece::PieceType::{King, Knight, Pawn};
 use crate::backend::piece::{Piece, PieceColor, PieceType};
 use crate::backend::state::bitboard::BitBoard;
 use crate::backend::state::bitboard_manager::BitBoardManager;
@@ -26,30 +31,54 @@ pub fn get_moves(game_state: &GameState) -> Vec<Moove> {
     let bitboard_manager = game_state.bit_board_manager();
     // Bitboard containing all pieces of the active color. These block moves.
     let friendly_pieces_bitboard = bitboard_manager.get_all_pieces_off(game_state.active_color());
+    let enemy_pieces_bitboard =
+        bitboard_manager.get_all_pieces_off(game_state.active_color().opposite());
 
     let mut all_pseudo_legal_moves = Vec::new();
     let active_color = game_state.active_color();
 
-    // Iterate over all piece types. This might need adjustment for sliding pieces.
-    for piece_type in PieceType::get_all_types() {
-        // Get the moves cache for the current piece type.
-        let moves_cache = get_moves_cache_for_piece(piece_type);
-        // Get all moves for the current piece type.
-        get_moves_for_piece(
-            &mut all_pseudo_legal_moves,
-            piece_type,
-            active_color,
-            moves_cache,
-            bitboard_manager,
-            friendly_pieces_bitboard,
-        );
-    }
+    // King moves
+    get_moves_for_trivial_piece(
+        &mut all_pseudo_legal_moves,
+        King,
+        active_color,
+        KING_MOVES,
+        bitboard_manager,
+        friendly_pieces_bitboard,
+    );
+
+    // Rook moves
+    get_moves_for_trivial_piece(
+        &mut all_pseudo_legal_moves,
+        Knight,
+        active_color,
+        KNIGHT_MOVES,
+        bitboard_manager,
+        friendly_pieces_bitboard,
+    );
+
+    // Quiet pawn moves
+    get_moves_for_trivial_piece(
+        &mut all_pseudo_legal_moves,
+        Pawn,
+        active_color,
+        PAWN_QUIET_MOVES[active_color as usize],
+        bitboard_manager,
+        friendly_pieces_bitboard,
+    );
+
+    // Capture pawn moves
+    all_pseudo_legal_moves.append(&mut get_pawn_attack_moves(
+        *bitboard_manager.get_bitboard(Piece::new(Pawn, active_color)),
+        active_color,
+        enemy_pieces_bitboard,
+    ));
 
     all_pseudo_legal_moves
 }
 
 /// Gets all pseudo legal moves for one piece.
-fn get_moves_for_piece(
+fn get_moves_for_trivial_piece(
     all_pseudo_legal_moves: &mut Vec<Moove>,
     piece_type: PieceType,
     active_color: PieceColor,
