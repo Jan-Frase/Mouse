@@ -8,8 +8,7 @@ use getset::{CloneGetters, Getters, MutGetters};
 
 #[derive(Debug, Getters, MutGetters, CloneGetters)]
 pub struct GameState {
-    // TODO: Remove this mutable getter. It`s only needed for the tests atm.
-    #[getset(get = "pub", get_mut = "pub")]
+    #[getset(get = "pub")]
     bit_board_manager: BitBoardManager,
     #[getset(get = "pub")]
     irreversible_data_stack: Vec<IrreversibleData>,
