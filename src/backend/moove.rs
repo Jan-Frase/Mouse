@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use crate::backend::square::Square;
 use getset::{CloneGetters, Setters};
 use std::fmt::{Display, Formatter};
@@ -5,7 +6,7 @@ use std::fmt::{Display, Formatter};
 /// Represents the various types of promotions that can occur in a game of chess.
 ///
 /// Has an additional `NONE` option to represent no promotion.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Ord, Eq, PartialEq, PartialOrd)]
 pub enum PromotionType {
     Rook,
     Knight,
@@ -25,7 +26,7 @@ pub enum PromotionType {
 ///    Sure, the move would be smaller, but accessing a variable would be slower, since it requires bit shifting etc.
 ///    In the end it comes down to a trade-off between cache locality and number of instructions per read.
 /// 2. It would certainly make the code less readable.
-#[derive(Copy, Clone, Debug, CloneGetters, Setters)]
+#[derive(Copy, Clone, Debug, CloneGetters, Setters, Ord, Eq, PartialEq, PartialOrd)]
 pub struct Moove {
     #[getset(get_clone = "pub", set = "pub")]
     from: Square,

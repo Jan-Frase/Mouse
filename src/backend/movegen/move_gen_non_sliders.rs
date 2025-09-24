@@ -1,5 +1,5 @@
 use crate::backend::moove::Moove;
-use crate::backend::movegen::compile_time::move_cache_non_sliders::PAWN_CAPTURE_MOVES;
+use crate::backend::movegen::compile_time::move_cache_non_sliders::{PAWN_CAPTURE_MOVES, PAWN_QUIET_MOVES};
 use crate::backend::piece::PieceColor;
 use crate::backend::square::Square;
 use crate::backend::state::bitboard::BitBoard;
@@ -40,6 +40,35 @@ pub fn get_moves_for_non_slider_piece(
             get_moves_for_square(potential_moves_bitboard, *square, friendly_pieces_bitboard);
         // Lastly, we append them :)
         moves.append(moves_for_square.as_mut());
+    }
+
+    moves
+}
+
+pub fn get_pawn_quiet_moves(
+    pawn_bitboard: BitBoard,
+    piece_color: PieceColor,
+    combined_bitboard: BitBoard,
+) -> Vec<Moove> {
+    let mut moves: Vec<Moove> = Vec::new();
+    // Example: We are doing this for all knights.
+    // The `moves_cache` array would for each square contain all viable moves for a knight.
+
+    // Assuming we are in the starting position as white `squares_with_piece` would be [B1, G1].
+    let squares_with_piece = pawn_bitboard.get_all_true_squares();
+    // We then iterate over all these squares...
+    for square in squares_with_piece.iter() {
+        // ... get the potential moves for the piece on that square...
+        let potential_moves_bitboard =
+            PAWN_QUIET_MOVES[piece_color as usize][square.square_to_index()];
+        //... and get all the moves for the piece on that square.
+        let potential_moves_bitboard = potential_moves_bitboard & !combined_bitboard;
+
+        let squares_we_can_move_to = potential_moves_bitboard.get_all_true_squares();
+        // generate all the moves
+        for to_square in squares_we_can_move_to {
+            moves.push(Moove::new(*square, to_square))
+        }
     }
 
     moves

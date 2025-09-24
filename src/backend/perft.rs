@@ -46,16 +46,12 @@ pub fn run_perftree_debug(mut input: Args) {
     let fen = &input.next().unwrap();
     let mut game_state = GameState::new_parse_fen(fen);
 
-    let mooves = input.next();
-    // Code golfing
-    match mooves {
-        None => {}
-        Some(mooves) => {
-            mooves
-                .split_whitespace()
-                .map(|moove| Moove::new_from_uci_notation(moove))
-                .for_each(|moove| game_state.make_move(moove));
-        }
+    for mooves in input{
+        // Code golfing
+        mooves
+            .split_whitespace()
+            .map(|moove| Moove::new_from_uci_notation(moove))
+            .for_each(|moove| game_state.make_move(moove));
     }
 
     root_debug_perft(&mut game_state, depth as u8);
@@ -66,7 +62,9 @@ fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
     let mut nodes = 0;
 
     // Generate all root moves.
-    let moves = get_moves(game_state);
+    let mut moves = get_moves(game_state);
+    // Sort them in the same way as perftree does
+    // moves.sort();
     for chess_move in moves {
         game_state.make_move(chess_move);
         // If we are in check after making the move -> skip.

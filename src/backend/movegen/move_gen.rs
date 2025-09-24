@@ -2,9 +2,7 @@ use crate::backend::moove::Moove;
 use crate::backend::movegen::compile_time::move_cache_non_sliders::{
     KING_MOVES, KNIGHT_MOVES, PAWN_QUIET_MOVES,
 };
-use crate::backend::movegen::move_gen_non_sliders::{
-    get_moves_for_non_slider_piece, get_pawn_attack_moves,
-};
+use crate::backend::movegen::move_gen_non_sliders::{get_moves_for_non_slider_piece, get_pawn_attack_moves, get_pawn_quiet_moves};
 use crate::backend::piece::PieceType::{King, Knight, Pawn};
 use crate::backend::piece::{Piece, PieceColor, PieceType};
 use crate::backend::state::bitboard::BitBoard;
@@ -58,14 +56,11 @@ pub fn get_moves(game_state: &GameState) -> Vec<Moove> {
     );
 
     // Quiet pawn moves
-    get_moves_for_trivial_piece(
-        &mut all_pseudo_legal_moves,
-        Pawn,
+    all_pseudo_legal_moves.append(&mut get_pawn_quiet_moves(
+        *bitboard_manager.get_bitboard(Piece::new(Pawn, active_color)),
         active_color,
-        PAWN_QUIET_MOVES[active_color as usize],
-        bitboard_manager,
-        friendly_pieces_bitboard,
-    );
+        enemy_pieces_bitboard | friendly_pieces_bitboard,
+    ));
 
     // Capture pawn moves
     all_pseudo_legal_moves.append(&mut get_pawn_attack_moves(

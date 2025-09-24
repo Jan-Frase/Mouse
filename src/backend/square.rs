@@ -8,7 +8,7 @@ use std::fmt::{Display, Formatter};
 ///
 /// To make it easier to memorize: file => the letter part, rank => the number part
 /// or put differently: file => vertical / x part, rank => horizontal / y part
-#[derive(Copy, Clone, Debug, Setters)]
+#[derive(Copy, Clone, Debug, Setters, Ord, Eq, PartialEq, PartialOrd)]
 pub struct Square {
     #[getset(set = "pub")]
     file: i8,
