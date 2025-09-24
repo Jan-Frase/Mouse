@@ -1,6 +1,4 @@
 use crate::backend::moove::Moove;
-use crate::backend::movegen::compile_time::move_cache_non_sliders::{PAWN_CAPTURE_MOVES, PAWN_QUIET_MOVES};
-use crate::backend::piece::PieceColor;
 use crate::backend::square::Square;
 use crate::backend::state::bitboard::BitBoard;
 use crate::constants::SQUARES_AMOUNT;
@@ -20,7 +18,7 @@ use crate::constants::SQUARES_AMOUNT;
 pub fn get_moves_for_non_slider_piece(
     moves_cache: [BitBoard; SQUARES_AMOUNT],
     piece_bitboard: BitBoard,
-    friendly_pieces_bitboard: BitBoard,
+    mask_bitboard: BitBoard,
 ) -> Vec<Moove> {
     // PERF: Instead of creating a new vector for each piece, we could reuse the same vector and append to it.
     let mut moves: Vec<Moove> = Vec::new();
@@ -37,68 +35,9 @@ pub fn get_moves_for_non_slider_piece(
         let potential_moves_bitboard = moves_cache[square.square_to_index()];
         //... and get all the moves for the piece on that square.
         let mut moves_for_square =
-            get_moves_for_square(potential_moves_bitboard, *square, friendly_pieces_bitboard);
+            get_moves_for_square(potential_moves_bitboard, *square, mask_bitboard);
         // Lastly, we append them :)
         moves.append(moves_for_square.as_mut());
-    }
-
-    moves
-}
-
-pub fn get_pawn_quiet_moves(
-    pawn_bitboard: BitBoard,
-    piece_color: PieceColor,
-    combined_bitboard: BitBoard,
-) -> Vec<Moove> {
-    let mut moves: Vec<Moove> = Vec::new();
-    // Example: We are doing this for all knights.
-    // The `moves_cache` array would for each square contain all viable moves for a knight.
-
-    // Assuming we are in the starting position as white `squares_with_piece` would be [B1, G1].
-    let squares_with_piece = pawn_bitboard.get_all_true_squares();
-    // We then iterate over all these squares...
-    for square in squares_with_piece.iter() {
-        // ... get the potential moves for the piece on that square...
-        let potential_moves_bitboard =
-            PAWN_QUIET_MOVES[piece_color as usize][square.square_to_index()];
-        //... and get all the moves for the piece on that square.
-        let potential_moves_bitboard = potential_moves_bitboard & !combined_bitboard;
-
-        let squares_we_can_move_to = potential_moves_bitboard.get_all_true_squares();
-        // generate all the moves
-        for to_square in squares_we_can_move_to {
-            moves.push(Moove::new(*square, to_square))
-        }
-    }
-
-    moves
-}
-
-pub fn get_pawn_attack_moves(
-    pawn_bitboard: BitBoard,
-    piece_color: PieceColor,
-    enemy_bitboard: BitBoard,
-) -> Vec<Moove> {
-    let mut moves: Vec<Moove> = Vec::new();
-
-    // Example: We are doing this for all knights.
-    // The `moves_cache` array would for each square contain all viable moves for a knight.
-
-    // Assuming we are in the starting position as white `squares_with_piece` would be [B1, G1].
-    let squares_with_piece = pawn_bitboard.get_all_true_squares();
-    // We then iterate over all these squares...
-    for square in squares_with_piece.iter() {
-        // ... get the potential moves for the piece on that square...
-        let potential_moves_bitboard =
-            PAWN_CAPTURE_MOVES[piece_color as usize][square.square_to_index()];
-        //... and get all the moves for the piece on that square.
-        let potential_moves_bitboard = potential_moves_bitboard & enemy_bitboard;
-
-        let squares_we_can_move_to = potential_moves_bitboard.get_all_true_squares();
-        // generate all the moves
-        for to_square in squares_we_can_move_to {
-            moves.push(Moove::new(*square, to_square))
-        }
     }
 
     moves
@@ -123,7 +62,7 @@ pub fn get_pawn_attack_moves(
 fn get_moves_for_square(
     potential_moves_bitboard: BitBoard,
     square: Square,
-    friendly_pieces_bitboard: BitBoard,
+    mask_bitboard: BitBoard,
 ) -> Vec<Moove> {
     // SLIDER: I think the following code should also work for sliders.
 
@@ -169,7 +108,7 @@ fn get_moves_for_square(
     //  _ _ _ _ _ _ _ _
     //  _ _ _ _ _ _ _ _
     //  _ X _ _ _ _ _ _
-    let moves_bitboard = potential_moves_bitboard & !friendly_pieces_bitboard;
+    let moves_bitboard = potential_moves_bitboard & !mask_bitboard;
 
     // Now take the resulting bitboard and convert all true squares to a list of squares.
     let squares_we_can_move_to = moves_bitboard.get_all_true_squares();

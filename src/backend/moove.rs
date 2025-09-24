@@ -1,4 +1,3 @@
-use std::cmp::Ordering;
 use crate::backend::square::Square;
 use getset::{CloneGetters, Setters};
 use std::fmt::{Display, Formatter};

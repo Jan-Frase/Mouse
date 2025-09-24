@@ -1,8 +1,8 @@
 use crate::backend::moove::Moove;
 use crate::backend::movegen::compile_time::move_cache_non_sliders::{
-    KING_MOVES, KNIGHT_MOVES, PAWN_QUIET_MOVES,
+    KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES, PAWN_QUIET_MOVES,
 };
-use crate::backend::movegen::move_gen_non_sliders::{get_moves_for_non_slider_piece, get_pawn_attack_moves, get_pawn_quiet_moves};
+use crate::backend::movegen::move_gen_non_sliders::get_moves_for_non_slider_piece;
 use crate::backend::piece::PieceType::{King, Knight, Pawn};
 use crate::backend::piece::{Piece, PieceColor, PieceType};
 use crate::backend::state::bitboard::BitBoard;
@@ -56,18 +56,26 @@ pub fn get_moves(game_state: &GameState) -> Vec<Moove> {
     );
 
     // Quiet pawn moves
-    all_pseudo_legal_moves.append(&mut get_pawn_quiet_moves(
-        *bitboard_manager.get_bitboard(Piece::new(Pawn, active_color)),
+    get_moves_for_trivial_piece(
+        &mut all_pseudo_legal_moves,
+        Pawn,
         active_color,
-        enemy_pieces_bitboard | friendly_pieces_bitboard,
-    ));
+        PAWN_QUIET_MOVES[active_color as usize],
+        bitboard_manager,
+        // pawns cant capture forward so we need to mask for friendly and enemy pieces
+        friendly_pieces_bitboard | enemy_pieces_bitboard,
+    );
 
     // Capture pawn moves
-    all_pseudo_legal_moves.append(&mut get_pawn_attack_moves(
-        *bitboard_manager.get_bitboard(Piece::new(Pawn, active_color)),
+    get_moves_for_trivial_piece(
+        &mut all_pseudo_legal_moves,
+        Pawn,
         active_color,
-        enemy_pieces_bitboard,
-    ));
+        PAWN_CAPTURE_MOVES[active_color as usize],
+        bitboard_manager,
+        // pawns cant capture forward so we need to mask for friendly and enemy pieces
+        !enemy_pieces_bitboard,
+    );
 
     all_pseudo_legal_moves
 }
@@ -79,11 +87,10 @@ fn get_moves_for_trivial_piece(
     active_color: PieceColor,
     moves_cache: [BitBoard; SQUARES_AMOUNT],
     bitboard_manager: &BitBoardManager,
-    friendly_pieces_bitboard: BitBoard,
+    mask_bitboard: BitBoard,
 ) {
     let piece = Piece::new(piece_type, active_color);
     let piece_bitboard = bitboard_manager.get_bitboard(piece);
-    let mut moves =
-        get_moves_for_non_slider_piece(moves_cache, *piece_bitboard, friendly_pieces_bitboard);
+    let mut moves = get_moves_for_non_slider_piece(moves_cache, *piece_bitboard, mask_bitboard);
     all_pseudo_legal_moves.append(&mut moves);
 }

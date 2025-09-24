@@ -46,7 +46,7 @@ pub fn run_perftree_debug(mut input: Args) {
     let fen = &input.next().unwrap();
     let mut game_state = GameState::new_parse_fen(fen);
 
-    for mooves in input{
+    for mooves in input {
         // Code golfing
         mooves
             .split_whitespace()
