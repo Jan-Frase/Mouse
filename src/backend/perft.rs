@@ -41,7 +41,7 @@ pub fn run_perftree_debug(mut input: Args) {
     input.next();
 
     let depth = input.next().unwrap();
-    let depth = depth.parse::<i32>().unwrap();
+    let mut depth = depth.parse::<i32>().unwrap();
 
     let fen = &input.next().unwrap();
     let mut game_state = GameState::new_parse_fen(fen);
@@ -51,7 +51,10 @@ pub fn run_perftree_debug(mut input: Args) {
         mooves
             .split_whitespace()
             .map(|moove| Moove::new_from_uci_notation(moove))
-            .for_each(|moove| game_state.make_move(moove));
+            .for_each(|moove| {
+                game_state.make_move(moove);
+                depth -= 1;
+            });
     }
 
     root_debug_perft(&mut game_state, depth as u8);
@@ -126,5 +129,13 @@ mod tests {
             GameState::new_parse_fen("4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1");
         let nodes = perft(&mut game_state, 4);
         assert_eq!(nodes, 98766);
+    }
+
+    #[test]
+    fn test_perft_03() {
+        let mut game_state = GameState::new_parse_fen("4k3/ppp5/7p/8/8/8/PPP5/4K3 w - - 0 1");
+
+        let nodes = perft(&mut game_state, 5);
+        assert_eq!(nodes, 17);
     }
 }

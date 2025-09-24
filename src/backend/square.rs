@@ -111,6 +111,7 @@ impl Square {
         }
     }
 
+    // forward means the direction that the pawns travel in for that side
     pub const fn forward_by_one(&self, color: PieceColor) -> Square {
         match color {
             PieceColor::White => Square::new(self.file, self.rank + 1),

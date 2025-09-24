@@ -1,4 +1,5 @@
 use crate::backend::moove::Moove;
+use crate::backend::piece::PieceType::Pawn;
 use crate::backend::piece::{Piece, PieceColor};
 use crate::backend::state::bitboard_manager::BitBoardManager;
 use crate::backend::state::fen_parser::parse_fen;
@@ -24,7 +25,7 @@ impl GameState {
         GameState {
             bit_board_manager: BitBoardManager::new(),
             active_color: PieceColor::White,
-            irreversible_data_stack: vec![],
+            irreversible_data_stack: vec![IrreversibleData::new()],
             half_move_clock: 0,
         }
     }
@@ -61,8 +62,37 @@ impl GameState {
         // The new irreversible data.
         let mut irreversible_data = IrreversibleData::new();
 
-        // Get the bitboard for the piece that was captured if it exists.
-        let captured_piece = self.bit_board_manager.get_piece_at_square(moove.to());
+        // Get the type of moved piece.
+        let moved_piece = self
+            .bit_board_manager
+            .get_piece_at_square(moove.from())
+            .unwrap();
+
+        // Usually the piece something was captured on (if something was captured at all) is the square we moved to...
+        let mut capture_square = moove.to().clone();
+
+        // ... unless this is an en passant capture ...
+        if moved_piece.piece_type() == Pawn {
+            let ep_square = self
+                .irreversible_data_stack
+                .last()
+                .unwrap()
+                .en_passant_square();
+            match ep_square {
+                None => {}
+                Some(square) => {
+                    // ... in this case we need to update the square.
+                    let en_passant_capture_square =
+                        moove.get_en_passant_capture_square(self.active_color);
+                    if en_passant_capture_square == square {
+                        capture_square = en_passant_capture_square;
+                    }
+                }
+            }
+        }
+
+        // Get the type of the captured piece if it exists.
+        let captured_piece = self.bit_board_manager.get_piece_at_square(capture_square);
 
         // Clear the square on the captured piece's bitboard if it exists.
         if let Some(captured_piece) = captured_piece {
@@ -70,14 +100,19 @@ impl GameState {
             irreversible_data.set_captured_piece(Some(captured_piece.piece_type()));
             // Remove the captured piece from its bitboard.
             let captured_piece_bitboard = self.bit_board_manager.get_bitboard_mut(captured_piece);
-            captured_piece_bitboard.clear_square(moove.to());
+            captured_piece_bitboard.clear_square(capture_square);
+        }
+
+        // Check if a double pawn push was played and store the en passant file
+        if moved_piece.piece_type() == Pawn && moove.is_double_pawn_push() {
+            // the pawn starting square + one forward
+            let ep_square = moove.from().forward_by_one(self.active_color);
+
+            irreversible_data.set_en_passant_square(Some(ep_square));
         }
 
         // Get the bitboard for the piece that was moved.
-        let moved_piece_bitboard = self
-            .bit_board_manager
-            .get_bitboard_for_piece_at_square_mut(moove.from())
-            .unwrap();
+        let moved_piece_bitboard = self.bit_board_manager.get_bitboard_mut(moved_piece);
 
         // Clear the square that the piece was moved from.
         moved_piece_bitboard.clear_square(moove.from());
@@ -118,6 +153,23 @@ impl GameState {
         if let Some(captured_piece) = irreversible_data.captured_piece() {
             let piece = Piece::new(captured_piece, self.active_color.opposite());
             let bitboard = self.bit_board_manager.get_bitboard_mut(piece);
+
+            let mut capture_square = chess_move.to();
+            // en passant
+            let sq = self
+                .irreversible_data_stack
+                .last()
+                .unwrap()
+                .en_passant_square();
+            match sq {
+                None => {}
+                Some(s) => {
+                    if s == chess_move.to() {
+                        capture_square = s;
+                    }
+                }
+            }
+
             bitboard.fill_square(chess_move.to());
         }
     }

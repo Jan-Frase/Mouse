@@ -1,3 +1,4 @@
+use crate::backend::piece::PieceColor;
 use crate::backend::square::Square;
 use getset::{CloneGetters, Setters};
 use std::fmt::{Display, Formatter};
@@ -42,6 +43,23 @@ impl Moove {
             from,
             to,
             promotion_type: PromotionType::None,
+        }
+    }
+
+    /// This assumes that the moved piece is a pawn and only checks if the rank changed by 2.
+    pub fn is_double_pawn_push(&self) -> bool {
+        (self.from.rank() - self.to.rank()).abs() == 2
+    }
+
+    pub fn is_pawn_attack(&self) -> bool {
+        (self.from.rank() - self.to.rank()).abs() == 1
+            && (self.from.file() - self.to.file()).abs() == 1
+    }
+
+    pub fn get_en_passant_capture_square(&self, active_color: PieceColor) -> Square {
+        match active_color {
+            PieceColor::White => Square::new(self.to.file(), self.to.rank() - 1),
+            PieceColor::Black => Square::new(self.to.file(), self.to.rank() + 1),
         }
     }
 

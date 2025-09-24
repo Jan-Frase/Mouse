@@ -66,6 +66,20 @@ pub fn get_moves(game_state: &GameState) -> Vec<Moove> {
         friendly_pieces_bitboard | enemy_pieces_bitboard,
     );
 
+    let mut pawn_capture_mask = enemy_pieces_bitboard;
+    match game_state
+        .irreversible_data_stack()
+        .last()
+        .unwrap()
+        .en_passant_square()
+    {
+        None => {}
+        Some(ep_square) => {
+            pawn_capture_mask.fill_square(ep_square);
+        }
+    }
+    pawn_capture_mask = !pawn_capture_mask;
+
     // Capture pawn moves
     get_moves_for_trivial_piece(
         &mut all_pseudo_legal_moves,
@@ -73,8 +87,7 @@ pub fn get_moves(game_state: &GameState) -> Vec<Moove> {
         active_color,
         PAWN_CAPTURE_MOVES[active_color as usize],
         bitboard_manager,
-        // pawns cant capture forward so we need to mask for friendly and enemy pieces
-        !enemy_pieces_bitboard,
+        pawn_capture_mask,
     );
 
     all_pseudo_legal_moves
