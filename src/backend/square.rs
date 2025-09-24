@@ -28,7 +28,7 @@ impl Square {
 
         for char in uci_notation.chars() {
             match char {
-                'a'..='h' => file = char.to_digit(10).unwrap() - 1,
+                'a'..='h' => file = char.to_digit(36).unwrap() - 10,
                 '1'..='8' => rank = char.to_digit(10).unwrap() - 1,
                 _ => panic!("Invalid uci notation"),
             }
