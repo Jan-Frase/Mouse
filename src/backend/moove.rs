@@ -57,7 +57,7 @@ impl Moove {
                 'n' => PromotionType::Knight,
                 'b' => PromotionType::Bishop,
                 'q' => PromotionType::Queen,
-                _ => panic!("Invalid promotion type"),
+                _ => panic!("Invalid promotion type {:?}", uci_notation),
             },
         };
 

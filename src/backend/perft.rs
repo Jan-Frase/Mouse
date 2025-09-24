@@ -36,23 +36,27 @@ pub fn perft(game_state: &mut GameState, depth: u8) -> u64 {
 // https://github.com/agausmann/perftree
 // --------------------------------------------- //
 
-pub fn run_perftree_debug(input: Args) {
-    let mut input: Vec<String> = input.collect();
+pub fn run_perftree_debug(mut input: Args) {
+    // Remove the first useless input.
+    input.next();
 
-    input.remove(0);
+    let depth = input.next().unwrap();
+    let depth = depth.parse::<i32>().unwrap();
 
-    let depth = input[0].parse::<i32>().unwrap();
-
-    let fen = &input[1];
+    let fen = &input.next().unwrap();
     let mut game_state = GameState::new_parse_fen(fen);
 
-    let moves = input[2..].to_vec();
-    moves
-        .iter()
-        .map(|moove_str| Moove::new_from_uci_notation(moove_str))
-        .for_each(|moove| {
-            game_state.make_move(moove);
-        });
+    let mooves = input.next();
+    // Code golfing
+    match mooves {
+        None => {}
+        Some(mooves) => {
+            mooves
+                .split_whitespace()
+                .map(|moove| Moove::new_from_uci_notation(moove))
+                .for_each(|moove| game_state.make_move(moove));
+        }
+    }
 
     root_debug_perft(&mut game_state, depth as u8);
 }
