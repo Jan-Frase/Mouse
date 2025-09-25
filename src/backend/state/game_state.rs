@@ -1,5 +1,6 @@
 use crate::backend::moove::Moove;
-use crate::backend::piece::PieceType::Pawn;
+use crate::backend::piece::PieceColor::{Black, White};
+use crate::backend::piece::PieceType::{King, Pawn};
 use crate::backend::piece::{Piece, PieceColor};
 use crate::backend::state::bitboard_manager::BitBoardManager;
 use crate::backend::state::fen_parser::parse_fen;
@@ -71,19 +72,19 @@ impl GameState {
         let mut capture_square = moove.to().clone();
 
         // ... unless this is an en passant capture ...
+        let ep_square = self
+            .irreversible_data_stack
+            .last()
+            .unwrap()
+            .en_passant_square();
         if moved_piece.piece_type() == Pawn {
-            let ep_square = self
-                .irreversible_data_stack
-                .last()
-                .unwrap()
-                .en_passant_square();
             match ep_square {
                 None => {}
-                Some(square) => {
+                Some(ep_square) => {
                     // ... in this case we need to update the square.
                     let en_passant_capture_square =
                         moove.get_en_passant_capture_square(self.active_color);
-                    if en_passant_capture_square == square {
+                    if moove.to() == ep_square {
                         capture_square = en_passant_capture_square;
                     }
                 }
@@ -104,7 +105,7 @@ impl GameState {
 
         // Check if a double pawn push was played and store the en passant file
         if moved_piece.piece_type() == Pawn && moove.is_double_pawn_push() {
-            // the pawn starting square + one forward
+            // the pawn starting square and one forward
             let ep_square = moove.from().forward_by_one(self.active_color);
 
             irreversible_data.set_en_passant_square(Some(ep_square));
@@ -122,6 +123,22 @@ impl GameState {
         // Take care of some basics.
         self.active_color = self.active_color.opposite();
         self.irreversible_data_stack.push(irreversible_data);
+
+        if self
+            .bit_board_manager
+            .get_bitboard(Piece::new(King, White))
+            .is_empty()
+        {
+            panic!("King is missing");
+        }
+
+        if self
+            .bit_board_manager
+            .get_bitboard(Piece::new(King, Black))
+            .is_empty()
+        {
+            panic!("King is missing");
+        }
     }
 
     /// Reverts the last move made, restoring the board state to what it was
@@ -132,6 +149,8 @@ impl GameState {
     pub fn unmake_move(&mut self, chess_move: Moove) {
         // Flip whose turn it is.
         self.active_color = self.active_color.opposite();
+        // Get the last irreversible data.
+        let irreversible_data = self.irreversible_data_stack.pop().unwrap();
 
         // Get the bitboard for the piece that was moved.
         let moved_piece_bitboard = self
@@ -144,9 +163,6 @@ impl GameState {
 
         // Clear the square it moved to.
         moved_piece_bitboard.clear_square(chess_move.to());
-
-        // Get the last irreversible data.
-        let irreversible_data = self.irreversible_data_stack.pop().unwrap();
 
         // If some piece was captured, put it back on the board.
         if let Some(captured_piece) = irreversible_data.captured_piece() {
@@ -169,7 +185,23 @@ impl GameState {
                 }
             }
 
-            bitboard.fill_square(chess_move.to());
+            bitboard.fill_square(capture_square);
+        }
+
+        if self
+            .bit_board_manager
+            .get_bitboard(Piece::new(King, White))
+            .is_empty()
+        {
+            panic!("King is missing");
+        }
+
+        if self
+            .bit_board_manager
+            .get_bitboard(Piece::new(King, Black))
+            .is_empty()
+        {
+            panic!("King is missing");
         }
     }
 }
