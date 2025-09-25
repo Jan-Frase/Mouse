@@ -1,4 +1,3 @@
-use crate::backend::piece::PieceColor;
 use crate::backend::square::Square;
 use getset::{CloneGetters, Setters};
 use std::fmt::{Display, Formatter};
@@ -54,13 +53,6 @@ impl Moove {
     pub fn is_pawn_attack(&self) -> bool {
         (self.from.rank() - self.to.rank()).abs() == 1
             && (self.from.file() - self.to.file()).abs() == 1
-    }
-
-    pub fn get_en_passant_capture_square(&self, active_color: PieceColor) -> Square {
-        match active_color {
-            PieceColor::White => Square::new(self.to.file(), self.to.rank() - 1),
-            PieceColor::Black => Square::new(self.to.file(), self.to.rank() + 1),
-        }
     }
 
     pub fn new_from_uci_notation(uci_notation: &str) -> Moove {

@@ -66,7 +66,7 @@ fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
     // Generate all root moves.
     let mut moves = get_moves(game_state);
     // Sort them in the same way as perftree does
-    // moves.sort();
+    moves.sort();
     for chess_move in moves {
         game_state.make_move(chess_move);
         // If we are in check after making the move -> skip.
@@ -148,9 +148,9 @@ mod tests {
 
     #[test]
     fn test_perft_05() {
-        let mut game_state = GameState::new_parse_fen("7k/3p4/8/2P5/8/8/8/7K w - - 0 1");
+        let mut game_state = GameState::new_parse_fen("7k/3p4/8/2P5/8/8/8/7K b - - 0 1");
 
-        let nodes = perft(&mut game_state, 4);
+        let nodes = root_debug_perft(&mut game_state, 2);
         assert_eq!(nodes, 884);
     }
 }

@@ -119,6 +119,10 @@ impl Square {
         }
     }
 
+    pub const fn back_by_one(&self, color: PieceColor) -> Square {
+        self.forward_by_one(color.opposite())
+    }
+
     pub const fn right_by_one(&self) -> Square {
         Square::new(self.file + 1, self.rank)
     }
