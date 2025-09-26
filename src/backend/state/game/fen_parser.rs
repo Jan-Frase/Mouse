@@ -1,7 +1,7 @@
-use crate::backend::piece::{Piece, PieceColor, PieceType};
-use crate::backend::square::Square;
-use crate::backend::state::bitboard_manager::BitBoardManager;
-use crate::backend::state::irreversible_data::IrreversibleData;
+use crate::backend::state::board::bitboard_manager::BitBoardManager;
+use crate::backend::state::game::irreversible_data::IrreversibleData;
+use crate::backend::state::piece::{Piece, PieceColor, PieceType};
+use crate::backend::state::square::Square;
 
 /// Parses a FEN (Forsyth-Edwards Notation) string and updates the corresponding game state.
 /// https://www.chessprogramming.org/Forsyth-Edwards_Notation

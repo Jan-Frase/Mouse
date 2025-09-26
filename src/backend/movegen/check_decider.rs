@@ -1,10 +1,10 @@
 use crate::backend::movegen::compile_time::move_cache_non_sliders::{
     KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES,
 };
-use crate::backend::piece::{Piece, PieceColor, PieceType};
-use crate::backend::square::Square;
-use crate::backend::state::bitboard::BitBoard;
-use crate::backend::state::game_state::GameState;
+use crate::backend::state::board::bitboard::BitBoard;
+use crate::backend::state::game::game_state::GameState;
+use crate::backend::state::piece::{Piece, PieceColor, PieceType};
+use crate::backend::state::square::Square;
 
 /// Checks if a given player's king is in check in the current game state.
 ///

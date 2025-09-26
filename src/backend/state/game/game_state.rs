@@ -1,9 +1,9 @@
-use crate::backend::moove::Moove;
-use crate::backend::piece::PieceType::Pawn;
-use crate::backend::piece::{Piece, PieceColor};
-use crate::backend::state::bitboard_manager::BitBoardManager;
-use crate::backend::state::fen_parser::parse_fen;
-use crate::backend::state::irreversible_data::IrreversibleData;
+use crate::backend::movegen::moove::Moove;
+use crate::backend::state::board::bitboard_manager::BitBoardManager;
+use crate::backend::state::game::fen_parser::parse_fen;
+use crate::backend::state::game::irreversible_data::IrreversibleData;
+use crate::backend::state::piece::PieceType::Pawn;
+use crate::backend::state::piece::{Piece, PieceColor};
 use getset::{CloneGetters, Getters, MutGetters};
 
 #[derive(Debug, Getters, MutGetters, CloneGetters)]

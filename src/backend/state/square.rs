@@ -1,4 +1,4 @@
-use crate::backend::piece::PieceColor;
+use crate::backend::state::piece::PieceColor;
 use getset::Setters;
 use std::fmt::{Display, Formatter};
 

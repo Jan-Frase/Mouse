@@ -1,13 +1,13 @@
-use crate::backend::moove::Moove;
 use crate::backend::movegen::compile_time::move_cache_non_sliders::{
     KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES, PAWN_QUIET_MOVES,
 };
+use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen_non_sliders::get_moves_for_non_slider_piece;
-use crate::backend::piece::PieceType::{King, Knight, Pawn};
-use crate::backend::piece::{Piece, PieceColor, PieceType};
-use crate::backend::state::bitboard::BitBoard;
-use crate::backend::state::bitboard_manager::BitBoardManager;
-use crate::backend::state::game_state::GameState;
+use crate::backend::state::board::bitboard::BitBoard;
+use crate::backend::state::board::bitboard_manager::BitBoardManager;
+use crate::backend::state::game::game_state::GameState;
+use crate::backend::state::piece::PieceType::{King, Knight, Pawn};
+use crate::backend::state::piece::{Piece, PieceColor, PieceType};
 use crate::constants::SQUARES_AMOUNT;
 
 /// Generates and returns all the valid moves for the current player's pieces
@@ -55,6 +55,12 @@ pub fn get_moves(game_state: &GameState) -> Vec<Moove> {
         friendly_pieces_bitboard,
     );
 
+    let mut pawn_quiet_mask = friendly_pieces_bitboard | enemy_pieces_bitboard;
+    let pawn_bitboard = game_state
+        .bit_board_manager()
+        .get_bitboard(Piece::new(Pawn, active_color));
+    pawn_quiet_mask &= !*pawn_bitboard;
+    pawn_quiet_mask.copy_double_pawn_push_rank_one_forward(game_state.active_color());
     // Quiet pawn moves
     get_moves_for_trivial_piece(
         &mut all_pseudo_legal_moves,
@@ -63,7 +69,7 @@ pub fn get_moves(game_state: &GameState) -> Vec<Moove> {
         PAWN_QUIET_MOVES[active_color as usize],
         bitboard_manager,
         // pawns cant capture forward so we need to mask for friendly and enemy pieces
-        friendly_pieces_bitboard | enemy_pieces_bitboard,
+        pawn_quiet_mask,
     );
 
     let mut pawn_capture_mask = enemy_pieces_bitboard;

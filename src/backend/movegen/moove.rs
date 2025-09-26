@@ -1,4 +1,4 @@
-use crate::backend::square::Square;
+use crate::backend::state::square::Square;
 use getset::{CloneGetters, Setters};
 use std::fmt::{Display, Formatter};
 

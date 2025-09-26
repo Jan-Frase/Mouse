@@ -1,6 +1,6 @@
-use crate::backend::moove::Moove;
-use crate::backend::square::Square;
-use crate::backend::state::bitboard::BitBoard;
+use crate::backend::movegen::moove::Moove;
+use crate::backend::state::board::bitboard::BitBoard;
+use crate::backend::state::square::Square;
 use crate::constants::SQUARES_AMOUNT;
 
 /// Calculates all possible moves for a given piece or set of pieces.

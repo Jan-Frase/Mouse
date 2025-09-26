@@ -1,6 +1,6 @@
-use crate::backend::piece::{PieceColor, PieceType};
-use crate::backend::square::Square;
-use crate::backend::state::bitboard::BitBoard;
+use crate::backend::state::board::bitboard::BitBoard;
+use crate::backend::state::piece::{PieceColor, PieceType};
+use crate::backend::state::square::Square;
 use crate::constants::{SIDES, SQUARES_AMOUNT};
 
 /// All of this gets generated at compile time, in the functions below.

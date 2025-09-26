@@ -1,7 +1,7 @@
-use crate::backend::moove::Moove;
 use crate::backend::movegen::check_decider::is_in_check;
+use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen::get_moves;
-use crate::backend::state::game_state::GameState;
+use crate::backend::state::game::game_state::GameState;
 use std::env::Args;
 
 pub fn perft(game_state: &mut GameState, depth: u8) -> u64 {
@@ -150,7 +150,15 @@ mod tests {
     fn test_perft_05() {
         let mut game_state = GameState::new_parse_fen("7k/3p4/8/2P5/8/8/8/7K b - - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 2);
-        assert_eq!(nodes, 884);
+        let nodes = root_debug_perft(&mut game_state, 4);
+        assert_eq!(nodes, 896);
+    }
+
+    #[test]
+    fn test_perft_06() {
+        let mut game_state = GameState::new_parse_fen("7k/8/8/8/8/2K5/2P5/8 w - - 0 1");
+
+        let nodes = root_debug_perft(&mut game_state, 1);
+        assert_eq!(nodes, 7);
     }
 }

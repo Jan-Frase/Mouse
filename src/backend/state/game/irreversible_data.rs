@@ -1,5 +1,5 @@
-use crate::backend::piece::PieceType;
-use crate::backend::square::Square;
+use crate::backend::state::piece::PieceType;
+use crate::backend::state::square::Square;
 use getset::{CloneGetters, Setters};
 
 /// The `IrreversibleData` struct stores data that is irreversible.
