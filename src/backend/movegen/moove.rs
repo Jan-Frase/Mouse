@@ -1,11 +1,11 @@
-use crate::backend::square::Square;
+use crate::backend::state::square::Square;
 use getset::{CloneGetters, Setters};
 use std::fmt::{Display, Formatter};
 
 /// Represents the various types of promotions that can occur in a game of chess.
 ///
 /// Has an additional `NONE` option to represent no promotion.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Ord, Eq, PartialEq, PartialOrd)]
 pub enum PromotionType {
     Rook,
     Knight,
@@ -25,7 +25,7 @@ pub enum PromotionType {
 ///    Sure, the move would be smaller, but accessing a variable would be slower, since it requires bit shifting etc.
 ///    In the end it comes down to a trade-off between cache locality and number of instructions per read.
 /// 2. It would certainly make the code less readable.
-#[derive(Copy, Clone, Debug, CloneGetters, Setters)]
+#[derive(Copy, Clone, Debug, CloneGetters, Setters, Ord, Eq, PartialEq, PartialOrd)]
 pub struct Moove {
     #[getset(get_clone = "pub", set = "pub")]
     from: Square,
@@ -42,6 +42,39 @@ impl Moove {
             from,
             to,
             promotion_type: PromotionType::None,
+        }
+    }
+
+    /// This assumes that the moved piece is a pawn and only checks if the rank changed by 2.
+    pub fn is_double_pawn_push(&self) -> bool {
+        (self.from.rank() - self.to.rank()).abs() == 2
+    }
+
+    pub fn is_pawn_attack(&self) -> bool {
+        (self.from.rank() - self.to.rank()).abs() == 1
+            && (self.from.file() - self.to.file()).abs() == 1
+    }
+
+    pub fn new_from_uci_notation(uci_notation: &str) -> Moove {
+        let from = Square::new_from_uci_notation(&uci_notation[0..2]);
+        let to = Square::new_from_uci_notation(&uci_notation[2..4]);
+
+        let promotion_char = uci_notation.chars().nth(4);
+        let promotion_type = match promotion_char {
+            None => PromotionType::None,
+            Some(char) => match char {
+                'r' => PromotionType::Rook,
+                'n' => PromotionType::Knight,
+                'b' => PromotionType::Bishop,
+                'q' => PromotionType::Queen,
+                _ => panic!("Invalid promotion type {:?}", uci_notation),
+            },
+        };
+
+        Moove {
+            from,
+            to,
+            promotion_type,
         }
     }
 }

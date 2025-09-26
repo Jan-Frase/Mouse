@@ -1,6 +1,6 @@
-use crate::backend::moove::Moove;
-use crate::backend::square::Square;
-use crate::backend::state::bitboard::BitBoard;
+use crate::backend::movegen::moove::Moove;
+use crate::backend::state::board::bitboard::BitBoard;
+use crate::backend::state::square::Square;
 use crate::constants::SQUARES_AMOUNT;
 
 /// Calculates all possible moves for a given piece or set of pieces.
@@ -18,7 +18,7 @@ use crate::constants::SQUARES_AMOUNT;
 pub fn get_moves_for_non_slider_piece(
     moves_cache: [BitBoard; SQUARES_AMOUNT],
     piece_bitboard: BitBoard,
-    friendly_pieces_bitboard: BitBoard,
+    mask_bitboard: BitBoard,
 ) -> Vec<Moove> {
     // PERF: Instead of creating a new vector for each piece, we could reuse the same vector and append to it.
     let mut moves: Vec<Moove> = Vec::new();
@@ -35,7 +35,7 @@ pub fn get_moves_for_non_slider_piece(
         let potential_moves_bitboard = moves_cache[square.square_to_index()];
         //... and get all the moves for the piece on that square.
         let mut moves_for_square =
-            get_moves_for_square(potential_moves_bitboard, *square, friendly_pieces_bitboard);
+            get_moves_for_square(potential_moves_bitboard, *square, mask_bitboard);
         // Lastly, we append them :)
         moves.append(moves_for_square.as_mut());
     }
@@ -62,7 +62,7 @@ pub fn get_moves_for_non_slider_piece(
 fn get_moves_for_square(
     potential_moves_bitboard: BitBoard,
     square: Square,
-    friendly_pieces_bitboard: BitBoard,
+    mask_bitboard: BitBoard,
 ) -> Vec<Moove> {
     // SLIDER: I think the following code should also work for sliders.
 
@@ -108,13 +108,13 @@ fn get_moves_for_square(
     //  _ _ _ _ _ _ _ _
     //  _ _ _ _ _ _ _ _
     //  _ X _ _ _ _ _ _
-    let moves_bitboard = potential_moves_bitboard & !friendly_pieces_bitboard;
+    let moves_bitboard = potential_moves_bitboard & !mask_bitboard;
 
     // Now take the resulting bitboard and convert all true squares to a list of squares.
     let squares_we_can_move_to = moves_bitboard.get_all_true_squares();
 
     // generate all the moves
-    let mut moves: Vec<Moove> = Vec::with_capacity(squares_we_can_move_to.len() + 20);
+    let mut moves: Vec<Moove> = Vec::with_capacity(squares_we_can_move_to.len());
     for to_square in squares_we_can_move_to {
         moves.push(Moove::new(square, to_square))
     }

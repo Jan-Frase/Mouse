@@ -1,7 +1,12 @@
-use crate::backend::square::Square;
+use crate::backend::state::piece::PieceColor;
+use crate::backend::state::square::Square;
 use crate::constants::{FILES_AMOUNT, SQUARES_AMOUNT};
 use std::fmt::{Display, Formatter};
-use std::ops::{BitAnd, BitOr, BitOrAssign, BitXor, Not};
+use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, Not};
+
+/// Used as a mask for double pawn push.
+const third_rank: BitBoard = BitBoard::new_from_rank(2);
+const six_rank: BitBoard = BitBoard::new_from_rank(5);
 
 /// A struct that represents a BitBoard.
 /// Each bit in the `u64` value represents a specific position on the board.
@@ -17,6 +22,18 @@ impl BitBoard {
     /// Creates a new `BitBoard` instance with an initial value of 0.
     pub const fn new() -> Self {
         BitBoard { value: 0 }
+    }
+
+    pub const fn new_from_rank(rank: i8) -> Self {
+        let mut bitboard = BitBoard::new();
+
+        let mut file = 0;
+        while file < FILES_AMOUNT {
+            bitboard.fill_square(Square::new(file as i8, rank));
+            file += 1;
+        }
+
+        bitboard
     }
 
     /// Checks if the value of the current instance is empty or zero.
@@ -69,6 +86,29 @@ impl BitBoard {
     pub fn clear_square(&mut self, square: Square) {
         let bit = Self::square_to_bitmask(square);
         self.value ^= bit;
+    }
+
+    pub fn copy_double_pawn_push_rank_one_forward(&mut self, piece_color: PieceColor) {
+        let mask = match piece_color {
+            PieceColor::White => third_rank,
+            PieceColor::Black => six_rank,
+        };
+
+        let mut masked_part = self.clone();
+        masked_part = masked_part & mask;
+        masked_part.shift_one_forward(piece_color);
+        self.value |= masked_part.value;
+    }
+
+    fn shift_one_forward(&mut self, piece_color: PieceColor) {
+        match piece_color {
+            PieceColor::White => {
+                self.value <<= FILES_AMOUNT;
+            }
+            PieceColor::Black => {
+                self.value >>= FILES_AMOUNT;
+            }
+        }
     }
 
     /// Retrieves all `Square` instances that correspond to the true bits
@@ -129,6 +169,12 @@ impl BitAnd for BitBoard {
     }
 }
 
+impl BitAndAssign for BitBoard {
+    fn bitand_assign(&mut self, rhs: Self) {
+        self.value &= rhs.value;
+    }
+}
+
 impl BitOr for BitBoard {
     type Output = Self;
 
@@ -136,6 +182,12 @@ impl BitOr for BitBoard {
         BitBoard {
             value: self.value | rhs.value,
         }
+    }
+}
+
+impl BitOrAssign<BitBoard> for &mut BitBoard {
+    fn bitor_assign(&mut self, rhs: BitBoard) {
+        self.value |= rhs.value;
     }
 }
 

@@ -1,7 +1,7 @@
-use crate::backend::piece::{Piece, PieceColor, PieceType};
-use crate::backend::square::Square;
-use crate::backend::state::bitboard_manager::BitBoardManager;
-use crate::backend::state::irreversible_data::IrreversibleData;
+use crate::backend::state::board::bitboard_manager::BitBoardManager;
+use crate::backend::state::game::irreversible_data::IrreversibleData;
+use crate::backend::state::piece::{Piece, PieceColor, PieceType};
+use crate::backend::state::square::Square;
 
 /// Parses a FEN (Forsyth-Edwards Notation) string and updates the corresponding game state.
 /// https://www.chessprogramming.org/Forsyth-Edwards_Notation
@@ -42,20 +42,24 @@ pub fn parse_fen(
 }
 
 fn parse_en_passant(irreversible_data: &mut IrreversibleData, en_passant_file_string: &str) {
+    if en_passant_file_string == "-" {
+        irreversible_data.set_en_passant_square(None);
+        return;
+    }
+
+    let mut en_passant_square = Square::new(0, 0);
     for char in en_passant_file_string.chars() {
         match char {
-            '-' => {
-                irreversible_data.set_en_passant_file(None);
-            }
             'a'..='h' => {
-                irreversible_data.set_en_passant_file(Some(char.to_digit(10).unwrap() as i8 - 1));
+                en_passant_square.set_file(char.to_digit(36).unwrap() as i8 - 10);
             }
             '3' | '6' => {
-                // I don't store this data as it is redundant.
+                en_passant_square.set_rank(char.to_digit(10).unwrap() as i8 - 1);
             }
             _ => panic!("Invalid character in FEN string"),
         }
     }
+    irreversible_data.set_en_passant_square(Some(en_passant_square));
 }
 
 fn parse_castling_rights(irreversible_data: &mut IrreversibleData, castling_rights_string: &str) {
