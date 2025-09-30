@@ -152,11 +152,22 @@ mod tests {
 
         let nodes = root_debug_perft(&mut game_state, 4);
         assert_eq!(nodes, 896);
+
+        let nodes = root_debug_perft(&mut game_state, 5);
+        assert_eq!(nodes, 6583);
     }
 
     #[test]
     fn test_perft_06() {
         let mut game_state = GameState::new_parse_fen("7k/8/8/8/8/2K5/2P5/8 w - - 0 1");
+
+        let nodes = root_debug_perft(&mut game_state, 1);
+        assert_eq!(nodes, 7);
+    }
+
+    #[test]
+    fn test_perft_07() {
+        let mut game_state = GameState::new_parse_fen("8/3P1k2/8/8/8/8/8/7K b - - 0 1");
 
         let nodes = root_debug_perft(&mut game_state, 1);
         assert_eq!(nodes, 7);

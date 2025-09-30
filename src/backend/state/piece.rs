@@ -1,7 +1,7 @@
 use getset::CloneGetters;
 
 /// Represents the different pieces.
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, Ord, Eq, PartialEq, PartialOrd)]
 pub enum PieceType {
     Pawn,
     Rook,
@@ -15,6 +15,16 @@ impl PieceType {
     /// Returns an array containing all piece types. For now, it's just Knight and King.
     pub fn get_all_types() -> [PieceType; 3] {
         [PieceType::Knight, PieceType::King, PieceType::Pawn]
+    }
+
+    /// Returns an array containing all piece types that a pawn can promote to.
+    pub fn get_promotable_types() -> [PieceType; 4] {
+        [
+            PieceType::Rook,
+            PieceType::Knight,
+            PieceType::Bishop,
+            PieceType::Queen,
+        ]
     }
 }
 

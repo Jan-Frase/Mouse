@@ -108,11 +108,20 @@ impl GameState {
         }
 
         // Get the bitboard for the piece that was moved.
-        let moved_piece_bitboard = self.bit_board_manager.get_bitboard_mut(moved_piece);
+        let mut moved_piece_bitboard = self.bit_board_manager.get_bitboard_mut(moved_piece);
 
         // Clear the square that the piece was moved from.
         moved_piece_bitboard.clear_square(moove.from());
 
+        // Update the moved piece bb if it was a pawn promotion
+        match moove.promotion_type() {
+            None => {}
+            Some(promotion_type) => {
+                moved_piece_bitboard = self
+                    .bit_board_manager
+                    .get_bitboard_mut(Piece::new(promotion_type, self.active_color));
+            }
+        }
         // Fill the square it moved to.
         moved_piece_bitboard.fill_square(moove.to());
 
@@ -133,13 +142,23 @@ impl GameState {
         let irreversible_data = self.irreversible_data_stack.pop().unwrap();
 
         // Get the bitboard for the piece that was moved.
-        let moved_piece_bitboard = self
+        let mut moved_piece_bitboard = self
             .bit_board_manager
             .get_bitboard_for_piece_at_square_mut(moove.to())
             .unwrap();
 
         // Fill the square that the piece was moved from.
         moved_piece_bitboard.fill_square(moove.from());
+
+        // Update the moved piece bb if it was a pawn promotion
+        match moove.promotion_type() {
+            None => {}
+            Some(promotion_type) => {
+                moved_piece_bitboard = self
+                    .bit_board_manager
+                    .get_bitboard_mut(Piece::new(promotion_type, self.active_color));
+            }
+        }
 
         // Clear the square it moved to.
         moved_piece_bitboard.clear_square(moove.to());

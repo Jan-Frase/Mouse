@@ -193,8 +193,8 @@ const fn generate_attack_pawn_moves() -> [[BitBoard; 64]; 2] {
         let mut potential_moves = [BitBoard::new(); SQUARES_AMOUNT];
 
         // iterate over all squares
-        let mut square_index: usize = 8;
-        while square_index < SQUARES_AMOUNT - 8 {
+        let mut square_index: usize = 0;
+        while square_index < SQUARES_AMOUNT {
             let mut bitboard = BitBoard::new();
             // generate a square struct from the index
             let square = Square::index_to_square(square_index as i8);

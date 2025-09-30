@@ -1,18 +1,8 @@
+use crate::backend::state::piece::PieceType;
+use crate::backend::state::piece::PieceType::{Bishop, Knight, Queen, Rook};
 use crate::backend::state::square::Square;
 use getset::{CloneGetters, Setters};
 use std::fmt::{Display, Formatter};
-
-/// Represents the various types of promotions that can occur in a game of chess.
-///
-/// Has an additional `NONE` option to represent no promotion.
-#[derive(Copy, Clone, Debug, Ord, Eq, PartialEq, PartialOrd)]
-pub enum PromotionType {
-    Rook,
-    Knight,
-    Bishop,
-    Queen,
-    None,
-}
 
 /// This encodes a single move. Sidenote: This is called Moove, since Move is a keyword in Rust...
 /// It knows where a piece moved from and where it moved to.
@@ -32,7 +22,7 @@ pub struct Moove {
     #[getset(get_clone = "pub", set = "pub")]
     to: Square,
     #[getset(get_clone = "pub", set = "pub")]
-    promotion_type: PromotionType,
+    promotion_type: Option<PieceType>,
 }
 
 impl Moove {
@@ -41,7 +31,7 @@ impl Moove {
         Moove {
             from,
             to,
-            promotion_type: PromotionType::None,
+            promotion_type: Option::None,
         }
     }
 
@@ -61,12 +51,12 @@ impl Moove {
 
         let promotion_char = uci_notation.chars().nth(4);
         let promotion_type = match promotion_char {
-            None => PromotionType::None,
+            None => Option::None,
             Some(char) => match char {
-                'r' => PromotionType::Rook,
-                'n' => PromotionType::Knight,
-                'b' => PromotionType::Bishop,
-                'q' => PromotionType::Queen,
+                'r' => Some(Rook),
+                'n' => Some(Knight),
+                'b' => Some(Bishop),
+                'q' => Some(Queen),
                 _ => panic!("Invalid promotion type {:?}", uci_notation),
             },
         };
@@ -87,11 +77,14 @@ impl Display for Moove {
         result.push_str(&self.from.to_string());
         result.push_str(&self.to.to_string());
         result.push_str(match self.promotion_type {
-            PromotionType::Rook => "r",
-            PromotionType::Knight => "n",
-            PromotionType::Bishop => "b",
-            PromotionType::Queen => "q",
-            PromotionType::None => "",
+            None => "",
+            Some(promotion_type) => match promotion_type {
+                Rook => "r",
+                Knight => "n",
+                Bishop => "b",
+                Queen => "q",
+                _ => panic!("Invalid promotion type {:?}", promotion_type),
+            },
         });
 
         write!(f, "{}", result)

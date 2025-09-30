@@ -6,7 +6,7 @@ use crate::backend::movegen::move_gen_non_sliders::get_moves_for_non_slider_piec
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::board::bitboard_manager::BitBoardManager;
 use crate::backend::state::game::game_state::GameState;
-use crate::backend::state::piece::PieceType::{King, Knight, Pawn};
+use crate::backend::state::piece::PieceType::{King, Knight, Pawn, Queen};
 use crate::backend::state::piece::{Piece, PieceColor, PieceType};
 use crate::constants::SQUARES_AMOUNT;
 
@@ -111,5 +111,23 @@ fn get_moves_for_trivial_piece(
     let piece = Piece::new(piece_type, active_color);
     let piece_bitboard = bitboard_manager.get_bitboard(piece);
     let mut moves = get_moves_for_non_slider_piece(moves_cache, *piece_bitboard, mask_bitboard);
+
+    if piece_type == Pawn && !moves.is_empty() {
+        for index in moves.len() - 1..0 {
+            let mut moove = moves[index];
+            if moove.to().is_on_promotion_rank() {
+                moove.set_promotion_type(Some(Queen));
+                for piece_type in PieceType::get_promotable_types() {
+                    if piece_type == Queen {
+                        continue;
+                    }
+                    let mut moove = moove.clone();
+                    moove.set_promotion_type(Some(piece_type));
+                    moves.push(moove);
+                }
+            }
+        }
+    }
+
     all_pseudo_legal_moves.append(&mut moves);
 }

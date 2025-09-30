@@ -104,6 +104,10 @@ impl Square {
         self.rank
     }
 
+    pub fn is_on_promotion_rank(&self) -> bool {
+        self.rank == 0 || self.rank == 7
+    }
+
     pub const fn is_pawn_start(&self, color: PieceColor) -> bool {
         match color {
             PieceColor::White => self.rank == 1,
