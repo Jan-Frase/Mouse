@@ -40,11 +40,6 @@ impl Moove {
         (self.from.rank() - self.to.rank()).abs() == 2
     }
 
-    pub fn is_pawn_attack(&self) -> bool {
-        (self.from.rank() - self.to.rank()).abs() == 1
-            && (self.from.file() - self.to.file()).abs() == 1
-    }
-
     pub fn new_from_uci_notation(uci_notation: &str) -> Moove {
         let from = Square::new_from_uci_notation(&uci_notation[0..2]);
         let to = Square::new_from_uci_notation(&uci_notation[2..4]);

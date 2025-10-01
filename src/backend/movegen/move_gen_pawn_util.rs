@@ -15,9 +15,7 @@ pub fn get_double_pawn_push_moves(
 ) -> Vec<Moove> {
     let mut moves: Vec<Moove> = Vec::new();
 
-    let mut pawn_bitboard = bitboard_manager
-        .get_bitboard(Piece::new(Pawn, active_color))
-        .clone();
+    let mut pawn_bitboard = *bitboard_manager.get_bitboard(Piece::new(Pawn, active_color));
 
     let starting_bitboard = match active_color {
         PieceColor::White => BitBoard::new_from_rank(1),
@@ -28,14 +26,14 @@ pub fn get_double_pawn_push_moves(
 
     for square in pawn_bitboard.get_all_true_squares() {
         let mut single_push_bb = PAWN_QUIET_MOVES[active_color as usize][square.square_to_index()];
-        single_push_bb = single_push_bb & all_pieces_bb;
+        single_push_bb &= all_pieces_bb;
         if !single_push_bb.is_empty() {
             continue;
         }
 
         let mut double_push_bb =
             PAWN_DOUBLE_PUSH_MOVES[active_color as usize][square.square_to_index()];
-        double_push_bb = double_push_bb & all_pieces_bb;
+        double_push_bb &= all_pieces_bb;
         if !double_push_bb.is_empty() {
             continue;
         }
@@ -85,7 +83,7 @@ pub fn promotion_logic(moves: &mut Vec<Moove>) {
                     moves[index].set_promotion_type(Some(Queen));
                     continue;
                 }
-                let mut moove = moove.clone();
+                let mut moove = moove;
                 moove.set_promotion_type(Some(piece_type));
                 moves.push(moove);
             }

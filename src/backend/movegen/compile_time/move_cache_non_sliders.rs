@@ -149,9 +149,7 @@ const fn generate_knight_moves(square: Square) -> BitBoard {
     bitboard
 }
 
-pub const fn generate_pawn_moves(
-    pawn_move_type: PawnMoveType,
-) -> [[BitBoard; SQUARES_AMOUNT]; SIDES] {
+const fn generate_pawn_moves(pawn_move_type: PawnMoveType) -> [[BitBoard; SQUARES_AMOUNT]; SIDES] {
     let mut quiet_moves = [[BitBoard::new(); SQUARES_AMOUNT]; SIDES];
 
     let mut side_index = 0;

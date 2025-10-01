@@ -30,7 +30,7 @@ impl GameState {
     }
 
     /// Creates a new `GameState` instance based on the fen string.
-    pub fn new_parse_fen(fen_string: &str) -> GameState {
+    pub fn new_from_fen(fen_string: &str) -> GameState {
         let mut bit_board_manager = BitBoardManager::new();
         let mut active_color = PieceColor::White;
         let mut irreversible_data = IrreversibleData::new();
@@ -68,7 +68,7 @@ impl GameState {
             .unwrap();
 
         // Usually the piece something was captured on (if something was captured at all) the square we moved to...
-        let mut capture_square = moove.to().clone();
+        let mut capture_square = moove.to();
 
         // ... unless this is an en passant capture ...
         let ep_square = self
@@ -78,8 +78,9 @@ impl GameState {
             .en_passant_square();
 
         // if we moved a pawn and an en passant square exists
-        if moved_piece.piece_type() == Pawn && ep_square.is_some() {
-            let ep_square = ep_square.unwrap();
+        if let Some(ep_square) = ep_square
+            && moved_piece.piece_type() == Pawn
+        {
             // and if we moved to the ep_square
             if ep_square == moove.to() {
                 // update the captured square to the ep_square - offset
@@ -153,7 +154,7 @@ impl GameState {
         // Update the moved piece bb if it was a pawn promotion
         match moove.promotion_type() {
             None => {}
-            Some(promotion_type) => {
+            Some(_) => {
                 moved_piece_bitboard = self
                     .bit_board_manager
                     .get_bitboard_mut(Piece::new(Pawn, self.active_color));
@@ -175,11 +176,11 @@ impl GameState {
                 .last()
                 .unwrap()
                 .en_passant_square();
-            if en_passant_square.is_some() {
-                let en_passant_square = en_passant_square.unwrap();
-                if moove.to() == en_passant_square {
-                    capture_square = moove.to().back_by_one(self.active_color);
-                }
+
+            if let Some(en_passant_square) = en_passant_square
+                && moove.to() == en_passant_square
+            {
+                capture_square = moove.to().back_by_one(self.active_color);
             }
 
             bitboard.fill_square(capture_square);

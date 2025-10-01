@@ -44,13 +44,13 @@ pub fn run_perftree_debug(mut input: Args) {
     let depth = depth.parse::<i32>().unwrap();
 
     let fen = &input.next().unwrap();
-    let mut game_state = GameState::new_parse_fen(fen);
+    let mut game_state = GameState::new_from_fen(fen);
 
     for mooves in input {
         // Code golfing
         mooves
             .split_whitespace()
-            .map(|moove| Moove::new_from_uci_notation(moove))
+            .map(Moove::new_from_uci_notation)
             .for_each(|moove| {
                 game_state.make_move(moove);
             });
@@ -112,8 +112,7 @@ mod tests {
 
     #[test]
     fn test_perft_01() {
-        let mut game_state =
-            GameState::new_parse_fen("8/1n2k3/5n1n/2n5/4N3/2N5/1N2KN2/8 w - - 0 1");
+        let mut game_state = GameState::new_from_fen("8/1n2k3/5n1n/2n5/4N3/2N5/1N2KN2/8 w - - 0 1");
         let nodes = perft(&mut game_state, 4);
         assert_eq!(nodes, 472915);
 
@@ -124,15 +123,14 @@ mod tests {
 
     #[test]
     fn test_perft_02() {
-        let mut game_state =
-            GameState::new_parse_fen("4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1");
+        let mut game_state = GameState::new_from_fen("4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1");
         let nodes = perft(&mut game_state, 4);
         assert_eq!(nodes, 98766);
     }
 
     #[test]
     fn test_perft_03() {
-        let mut game_state = GameState::new_parse_fen("4k3/ppp5/7p/8/8/8/PPP5/4K3 w - - 0 1");
+        let mut game_state = GameState::new_from_fen("4k3/ppp5/7p/8/8/8/PPP5/4K3 w - - 0 1");
 
         let nodes = perft(&mut game_state, 4);
         assert_eq!(nodes, 17684);
@@ -140,7 +138,7 @@ mod tests {
 
     #[test]
     fn test_perft_04() {
-        let mut game_state = GameState::new_parse_fen("4k3/ppp5/7p/8/8/8/PPP5/4K3 w - - 0 1");
+        let mut game_state = GameState::new_from_fen("4k3/ppp5/7p/8/8/8/PPP5/4K3 w - - 0 1");
 
         let nodes = perft(&mut game_state, 5);
         assert_eq!(nodes, 197056);
@@ -148,7 +146,7 @@ mod tests {
 
     #[test]
     fn test_perft_05() {
-        let mut game_state = GameState::new_parse_fen("7k/3p4/8/2P5/8/8/8/7K b - - 0 1");
+        let mut game_state = GameState::new_from_fen("7k/3p4/8/2P5/8/8/8/7K b - - 0 1");
 
         let nodes = root_debug_perft(&mut game_state, 4);
         assert_eq!(nodes, 896);
@@ -159,7 +157,7 @@ mod tests {
 
     #[test]
     fn test_perft_06() {
-        let mut game_state = GameState::new_parse_fen("7k/8/8/8/8/2K5/2P5/8 w - - 0 1");
+        let mut game_state = GameState::new_from_fen("7k/8/8/8/8/2K5/2P5/8 w - - 0 1");
 
         let nodes = root_debug_perft(&mut game_state, 1);
         assert_eq!(nodes, 7);
@@ -167,7 +165,7 @@ mod tests {
 
     #[test]
     fn test_perft_07() {
-        let mut game_state = GameState::new_parse_fen("8/3P1k2/8/8/8/8/8/7K b - - 0 1");
+        let mut game_state = GameState::new_from_fen("8/3P1k2/8/8/8/8/8/7K b - - 0 1");
 
         let nodes = root_debug_perft(&mut game_state, 1);
         assert_eq!(nodes, 7);
@@ -182,7 +180,7 @@ mod tests {
 
     #[test]
     fn test_perft_08() {
-        let mut game_state = GameState::new_parse_fen("8/1ppP1k2/1n6/3P2P1/8/8/8/7K b - - 0 1");
+        let mut game_state = GameState::new_from_fen("8/1ppP1k2/1n6/3P2P1/8/8/8/7K b - - 0 1");
 
         let nodes = root_debug_perft(&mut game_state, 2);
         assert_eq!(nodes, 117);
@@ -190,7 +188,7 @@ mod tests {
 
     #[test]
     fn test_perft_09() {
-        let mut game_state = GameState::new_parse_fen("7k/P7/8/8/8/8/8/7K w - - 0 1");
+        let mut game_state = GameState::new_from_fen("7k/P7/8/8/8/8/8/7K w - - 0 1");
 
         let nodes = root_debug_perft(&mut game_state, 1);
         assert_eq!(nodes, 7);
