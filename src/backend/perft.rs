@@ -196,10 +196,10 @@ mod tests {
 
     #[test]
     fn test_perft_10() {
-        let mut game_state = GameState::new_from_fen("18014398509482132");
+        let mut game_state = GameState::new_from_fen("6k1/8/8/8/8/8/8/Q1R1B2K b - - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 2);
-        assert_eq!(nodes, 67);
+        let nodes = root_debug_perft(&mut game_state, 4);
+        assert_eq!(nodes, 15773);
     }
 
     #[test]
