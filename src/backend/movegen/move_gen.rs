@@ -1,12 +1,15 @@
 use crate::backend::movegen::compile_time::move_cache_non_sliders::{
-    KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES, PAWN_DOUBLE_PUSH_MOVES, PAWN_QUIET_MOVES,
+    KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES, PAWN_QUIET_MOVES,
 };
 use crate::backend::movegen::moove::Moove;
+use crate::backend::movegen::move_gen_pawn_util::{
+    create_pawn_capture_mask, get_double_pawn_push_moves, promotion_logic,
+};
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::board::bitboard_manager::BitBoardManager;
 use crate::backend::state::game::game_state::GameState;
-use crate::backend::state::piece::PieceType::{King, Knight, Pawn, Queen};
-use crate::backend::state::piece::{Piece, PieceColor, PieceType};
+use crate::backend::state::piece::PieceType::{King, Knight, Pawn};
+use crate::backend::state::piece::{Piece, PieceColor};
 use crate::backend::state::square::Square;
 use crate::constants::SQUARES_AMOUNT;
 
@@ -28,134 +31,104 @@ pub fn get_pseudo_legal_moves(game_state: &GameState) -> Vec<Moove> {
     // each of them should iterate over their relevant bitboard
     let bitboard_manager = game_state.bit_board_manager();
     // Bitboard containing all pieces of the active color. These block moves.
-    let friendly_pieces_bitboard = bitboard_manager.get_all_pieces_off(game_state.active_color());
-    let enemy_pieces_bitboard =
-        bitboard_manager.get_all_pieces_off(game_state.active_color().opposite());
+    let friendly_pieces_bb = bitboard_manager.get_all_pieces_off(game_state.active_color());
+    let enemy_pieces_bb = bitboard_manager.get_all_pieces_off(game_state.active_color().opposite());
 
     let mut all_pseudo_legal_moves = Vec::new();
     let active_color = game_state.active_color();
 
+    gen_king_moves(
+        bitboard_manager,
+        friendly_pieces_bb,
+        &mut all_pseudo_legal_moves,
+        active_color,
+    );
+
+    gen_knight_moves(
+        bitboard_manager,
+        friendly_pieces_bb,
+        &mut all_pseudo_legal_moves,
+        active_color,
+    );
+
+    gen_pawn_moves(
+        game_state,
+        bitboard_manager,
+        friendly_pieces_bb,
+        enemy_pieces_bb,
+        &mut all_pseudo_legal_moves,
+        active_color,
+    );
+
+    all_pseudo_legal_moves
+}
+
+fn gen_king_moves(
+    bitboard_manager: &BitBoardManager,
+    friendly_pieces_bb: BitBoard,
+    all_pseudo_legal_moves: &mut Vec<Moove>,
+    active_color: PieceColor,
+) {
     // King moves
     let piece_bitboard = bitboard_manager.get_bitboard(Piece::new(King, active_color));
     let mut moves =
-        get_moves_for_non_slider_piece(KING_MOVES, *piece_bitboard, friendly_pieces_bitboard);
+        iterate_over_bitboard_for_non_slider(KING_MOVES, *piece_bitboard, friendly_pieces_bb);
     all_pseudo_legal_moves.append(&mut moves);
+}
 
+fn gen_knight_moves(
+    bitboard_manager: &BitBoardManager,
+    friendly_pieces_bb: BitBoard,
+    all_pseudo_legal_moves: &mut Vec<Moove>,
+    active_color: PieceColor,
+) {
     // Knight moves
     let piece_bitboard = bitboard_manager.get_bitboard(Piece::new(Knight, active_color));
     let mut moves =
-        get_moves_for_non_slider_piece(KNIGHT_MOVES, *piece_bitboard, friendly_pieces_bitboard);
+        iterate_over_bitboard_for_non_slider(KNIGHT_MOVES, *piece_bitboard, friendly_pieces_bb);
     all_pseudo_legal_moves.append(&mut moves);
+}
 
+fn gen_pawn_moves(
+    game_state: &GameState,
+    bitboard_manager: &BitBoardManager,
+    friendly_pieces_bb: BitBoard,
+    enemy_pieces_bb: BitBoard,
+    all_pseudo_legal_moves: &mut Vec<Moove>,
+    active_color: PieceColor,
+) {
     // Quiet pawn moves
-    let piece_bitboard = bitboard_manager.get_bitboard(Piece::new(Pawn, active_color));
-    let mut moves = get_moves_for_non_slider_piece(
+    let mut moves = iterate_over_bitboard_for_non_slider(
         PAWN_QUIET_MOVES[active_color as usize],
-        *piece_bitboard,
-        friendly_pieces_bitboard | enemy_pieces_bitboard,
+        *bitboard_manager.get_bitboard(Piece::new(Pawn, active_color)),
+        friendly_pieces_bb | enemy_pieces_bb,
     );
     promotion_logic(&mut moves);
     all_pseudo_legal_moves.append(&mut moves);
 
     // Capture pawn moves
-    let mut pawn_capture_mask = enemy_pieces_bitboard;
-    match game_state
-        .irreversible_data_stack()
-        .last()
-        .unwrap()
-        .en_passant_square()
-    {
-        None => {}
-        Some(ep_square) => {
-            pawn_capture_mask.fill_square(ep_square);
-        }
-    }
-    pawn_capture_mask = !pawn_capture_mask;
-    let piece_bitboard = bitboard_manager.get_bitboard(Piece::new(Pawn, active_color));
-    let mut moves = get_moves_for_non_slider_piece(
+    let mut moves = iterate_over_bitboard_for_non_slider(
         PAWN_CAPTURE_MOVES[active_color as usize],
-        *piece_bitboard,
-        pawn_capture_mask,
+        *bitboard_manager.get_bitboard(Piece::new(Pawn, active_color)),
+        create_pawn_capture_mask(game_state, enemy_pieces_bb),
     );
     promotion_logic(&mut moves);
     all_pseudo_legal_moves.append(&mut moves);
 
-    // Double pawn push
+    // Double pawn push moves
     let mut moves = get_double_pawn_push_moves(
         bitboard_manager,
         active_color,
-        friendly_pieces_bitboard | enemy_pieces_bitboard,
+        friendly_pieces_bb | enemy_pieces_bb,
     );
     all_pseudo_legal_moves.append(&mut moves);
-
-    all_pseudo_legal_moves
 }
 
-fn get_double_pawn_push_moves(
-    bitboard_manager: &BitBoardManager,
-    active_color: PieceColor,
-    all_pieces_bb: BitBoard,
-) -> Vec<Moove> {
-    let mut moves: Vec<Moove> = Vec::new();
+// ------------------------------------
+// Move gen core logic
+// ------------------------------------
 
-    let mut pawn_bitboard = bitboard_manager
-        .get_bitboard(Piece::new(Pawn, active_color))
-        .clone();
-
-    let starting_bitboard = match active_color {
-        PieceColor::White => BitBoard::new_from_rank(1),
-        PieceColor::Black => BitBoard::new_from_rank(6),
-    };
-
-    pawn_bitboard &= starting_bitboard;
-
-    for square in pawn_bitboard.get_all_true_squares() {
-        let mut single_push_bb = PAWN_QUIET_MOVES[active_color as usize][square.square_to_index()];
-        single_push_bb = single_push_bb & all_pieces_bb;
-        if !single_push_bb.is_empty() {
-            continue;
-        }
-
-        let mut double_push_bb =
-            PAWN_DOUBLE_PUSH_MOVES[active_color as usize][square.square_to_index()];
-        double_push_bb = double_push_bb & all_pieces_bb;
-        if !double_push_bb.is_empty() {
-            continue;
-        }
-
-        let moove = Moove::new(
-            square,
-            square
-                .forward_by_one(active_color)
-                .forward_by_one(active_color),
-        );
-        moves.push(moove);
-    }
-
-    moves
-}
-
-fn promotion_logic(moves: &mut Vec<Moove>) {
-    if moves.is_empty() {
-        return;
-    }
-    for index in (0..moves.len()).rev() {
-        let moove = moves[index];
-        if moove.to().is_on_promotion_rank() {
-            for piece_type in PieceType::get_promotable_types() {
-                if piece_type == Queen {
-                    moves[index].set_promotion_type(Some(Queen));
-                    continue;
-                }
-                let mut moove = moove.clone();
-                moove.set_promotion_type(Some(piece_type));
-                moves.push(moove);
-            }
-        }
-    }
-}
-
-fn get_moves_for_non_slider_piece(
+fn iterate_over_bitboard_for_non_slider(
     moves_cache: [BitBoard; SQUARES_AMOUNT],
     piece_bitboard: BitBoard,
     mask_bitboard: BitBoard,
