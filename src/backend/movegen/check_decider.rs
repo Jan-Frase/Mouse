@@ -1,8 +1,10 @@
 use crate::backend::movegen::compile_time::move_cache_non_sliders::{
     KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES,
 };
+use crate::backend::movegen::move_gen_sliders::calculate_move_bitboard;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::game_state::GameState;
+use crate::backend::state::piece::PieceType::{Bishop, Queen, Rook};
 use crate::backend::state::piece::{Piece, PieceColor, PieceType};
 use crate::backend::state::square::Square;
 
@@ -38,12 +40,22 @@ pub fn is_in_check(game_state: &GameState, color: PieceColor) -> bool {
     // I hope this makes sense :)
     let king_square = get_kings_square(game_state, color);
 
+    let friendly_bb = game_state.bit_board_manager().get_all_pieces_off(color);
+    let enemy_bb = game_state
+        .bit_board_manager()
+        .get_all_pieces_off(color.opposite());
+
     // SLIDER: I think this needs to be changed for sliders.
     // Iterate over all pieces. Let`s assume we are checking for knights.
     for piece_type in PieceType::get_all_types() {
         // Get the bitboard that represents all possible attacks.
-        let attack_bitboard =
-            get_attack_bitboard_for_piece_and_square(piece_type, color, king_square);
+        let attack_bitboard = get_attack_bitboard_for_piece_and_square(
+            piece_type,
+            color,
+            king_square,
+            friendly_bb,
+            enemy_bb,
+        );
 
         // Get bitboard that marks where enemy knights are standing.
         let enemy_piece = Piece::new(piece_type, color.opposite());
@@ -71,11 +83,15 @@ fn get_attack_bitboard_for_piece_and_square(
     piece_type: PieceType,
     piece_color: PieceColor,
     square: Square,
+    friendly_bb: BitBoard,
+    enemy_bb: BitBoard,
 ) -> BitBoard {
     match piece_type {
         PieceType::King => KING_MOVES[square.square_to_index()],
         PieceType::Knight => KNIGHT_MOVES[square.square_to_index()],
         PieceType::Pawn => PAWN_CAPTURE_MOVES[piece_color as usize][square.square_to_index()],
-        _ => panic!("Not implemented yet"),
+        Rook => calculate_move_bitboard(Rook, square, friendly_bb, enemy_bb),
+        Bishop => calculate_move_bitboard(Bishop, square, friendly_bb, enemy_bb),
+        Queen => calculate_move_bitboard(Queen, square, friendly_bb, enemy_bb),
     }
 }

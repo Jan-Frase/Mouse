@@ -1,6 +1,10 @@
-use crate::backend::moove::Moove;
-use crate::backend::square::Square;
-use crate::backend::state::bitboard::BitBoard;
+use crate::backend::movegen::moove::Moove;
+use crate::backend::movegen::move_gen_sliders::SlideDirection::{
+    Down, DownLeft, DownRight, Left, Right, Up, UpLeft, UpRight,
+};
+use crate::backend::state::board::bitboard::BitBoard;
+use crate::backend::state::piece::PieceType;
+use crate::backend::state::square::Square;
 
 enum SlideDirection {
     Up,
@@ -24,9 +28,8 @@ const ALL_SLIDE_DIRECTIONS: [SlideDirection; 8] = [
     SlideDirection::UpLeft,
 ];
 
-
 impl SlideDirection {
-    fn next(&self, square: &Square) -> Square {
+    fn next(&self, square: Square) -> Square {
         match self {
             SlideDirection::Up => Square::new(square.file(), square.rank() + 1),
             SlideDirection::UpRight => Square::new(square.file() + 1, square.rank() + 1),
@@ -38,63 +41,53 @@ impl SlideDirection {
             SlideDirection::UpLeft => Square::new(square.file() - 1, square.rank() + 1),
         }
     }
+
+    fn directions_for_piece_type(piece_type: PieceType) -> Vec<SlideDirection> {
+        match piece_type {
+            PieceType::Rook => {
+                vec![Up, Down, Left, Right]
+            }
+            PieceType::Bishop => {
+                vec![UpRight, DownRight, DownLeft, UpLeft]
+            }
+            PieceType::Queen => {
+                vec![Up, Down, Left, Right, UpRight, DownRight, DownLeft, UpLeft]
+            }
+            _ => panic!("Piece type is not a slider"),
+        }
+    }
 }
 
 pub fn get_moves_for_non_slider_piece(
-    piece_bitboard: BitBoard,
-    friendly_pieces_bitboard: BitBoard,
-    enemy_pieces_bitboard: BitBoard,
+    piece_type: PieceType,
+    piece_bb: BitBoard,
+    friendly_pieces_bb: BitBoard,
+    enemy_pieces_bb: BitBoard,
 ) -> Vec<Moove> {
     let mut moves: Vec<Moove> = Vec::new();
-    for piece in piece_bitboard.get_all_true_squares() {
-        let mut moves_for_piece = get_moves_for_square(&piece, &friendly_pieces_bitboard, &enemy_pieces_bitboard);
-        moves.append(&mut moves_for_piece);
+    for square in piece_bb.get_all_true_squares() {
+        let moves_for_piece_bb =
+            calculate_move_bitboard(piece_type, square, friendly_pieces_bb, enemy_pieces_bb);
+
+        // Now take the resulting bitboard and convert all true squares to a list of squares.
+        let squares_we_can_move_to = moves_for_piece_bb.get_all_true_squares();
+
+        // generate all the moves
+        for to_square in squares_we_can_move_to {
+            moves.push(Moove::new(square, to_square))
+        }
     }
     moves
 }
 
-/// Computes all possible moves for a given square.
-/// # Parameters
-///
-/// - `square`: The `Square` for which moves are being calculated. This represents
-///   the current position of the piece.
-/// - `friendly_pieces_bitboard`: A `BitBoard` representing positions of all friendly
-///   pieces. Pieces located in these positions will block movement.
-///
-/// - `enemy_pieces_bitboard`: A `BitBoard` representing positions of all enemy
-///   pieces. Pieces located in these positions will block movement beyond their position.
-///
-/// # Returns
-///
-/// A `Vec` of `Moove` structs that represent all legal moves
-/// the piece on the provided square can make.
-fn get_moves_for_square(
-    square: &Square,
-    friendly_pieces_bitboard: &BitBoard,
-    enemy_pieces_bitboard: &BitBoard,
-) -> Vec<Moove> {
-    let moves_bitboard = calculate_move_bitboard(square, friendly_pieces_bitboard, enemy_pieces_bitboard);
-
-    // Now take the resulting bitboard and convert all true squares to a list of squares.
-    let squares_we_can_move_to = moves_bitboard.get_all_true_squares();
-
-    // generate all the moves
-    let mut moves: Vec<Moove> = Vec::with_capacity(squares_we_can_move_to.len());
-    for to_square in squares_we_can_move_to {
-        moves.push(Moove::new(*square, to_square))
-    }
-    // Done :)
-    moves
-}
-
-
-fn calculate_move_bitboard(
-    square: &Square,
-    friendly_pieces_bitboard: &BitBoard,
-    enemy_pieces_bitboard: &BitBoard,
+pub fn calculate_move_bitboard(
+    piece_type: PieceType,
+    square: Square,
+    friendly_pieces_bitboard: BitBoard,
+    enemy_pieces_bitboard: BitBoard,
 ) -> BitBoard {
     let mut move_bitboard: BitBoard = BitBoard::new();
-    for direction in ALL_SLIDE_DIRECTIONS.iter() {
+    for direction in SlideDirection::directions_for_piece_type(piece_type) {
         move_bitboard |= calculate_max_slide_range(
             square,
             direction,
@@ -108,10 +101,10 @@ fn calculate_move_bitboard(
 /// Computes a bitboard containing all squares
 /// that the piece on the given square can slide to in the given direction
 fn calculate_max_slide_range(
-    square: &Square,
-    direction: &SlideDirection,
-    friendly_pieces_bitboard: &BitBoard,
-    enemy_pieces_bitboard: &BitBoard,
+    square: Square,
+    direction: SlideDirection,
+    friendly_pieces_bitboard: BitBoard,
+    enemy_pieces_bitboard: BitBoard,
 ) -> BitBoard {
     let mut result = BitBoard::new();
     let mut next = direction.next(square);
@@ -120,7 +113,7 @@ fn calculate_max_slide_range(
         if enemy_pieces_bitboard.get_square(next) {
             return result;
         }
-        next = direction.next(square);
+        next = direction.next(next);
     }
     result
 }

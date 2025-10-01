@@ -5,10 +5,11 @@ use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen_pawn_util::{
     create_pawn_capture_mask, get_double_pawn_push_moves, promotion_logic,
 };
+use crate::backend::movegen::move_gen_sliders::get_moves_for_non_slider_piece;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::board::bitboard_manager::BitBoardManager;
 use crate::backend::state::game::game_state::GameState;
-use crate::backend::state::piece::PieceType::{King, Knight, Pawn};
+use crate::backend::state::piece::PieceType::{Bishop, King, Knight, Pawn, Queen, Rook};
 use crate::backend::state::piece::{Piece, PieceColor};
 use crate::backend::state::square::Square;
 use crate::constants::SQUARES_AMOUNT;
@@ -59,6 +60,30 @@ pub fn get_pseudo_legal_moves(game_state: &GameState) -> Vec<Moove> {
         &mut all_pseudo_legal_moves,
         active_color,
     );
+
+    let mut moves = get_moves_for_non_slider_piece(
+        Rook,
+        *bitboard_manager.get_bitboard(Piece::new(Rook, active_color)),
+        friendly_pieces_bb,
+        enemy_pieces_bb,
+    );
+    all_pseudo_legal_moves.append(&mut moves);
+
+    let mut moves = get_moves_for_non_slider_piece(
+        Bishop,
+        *bitboard_manager.get_bitboard(Piece::new(Bishop, active_color)),
+        friendly_pieces_bb,
+        enemy_pieces_bb,
+    );
+    all_pseudo_legal_moves.append(&mut moves);
+
+    let mut moves = get_moves_for_non_slider_piece(
+        Queen,
+        *bitboard_manager.get_bitboard(Piece::new(Queen, active_color)),
+        friendly_pieces_bb,
+        enemy_pieces_bb,
+    );
+    all_pseudo_legal_moves.append(&mut moves);
 
     all_pseudo_legal_moves
 }

@@ -12,9 +12,16 @@ pub enum PieceType {
 }
 
 impl PieceType {
-    /// Returns an array containing all piece types. For now, it's just Knight and King.
-    pub fn get_all_types() -> [PieceType; 3] {
-        [PieceType::Knight, PieceType::King, PieceType::Pawn]
+    /// Returns an array containing all piece types.
+    pub fn get_all_types() -> [PieceType; 6] {
+        [
+            PieceType::Knight,
+            PieceType::King,
+            PieceType::Pawn,
+            PieceType::Bishop,
+            PieceType::Rook,
+            PieceType::Queen,
+        ]
     }
 
     /// Returns an array containing all piece types that a pawn can promote to.
