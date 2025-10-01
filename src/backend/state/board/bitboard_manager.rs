@@ -1,6 +1,6 @@
-use crate::backend::piece::{Piece, PieceColor, PieceType};
-use crate::backend::square::Square;
-use crate::backend::state::bitboard::BitBoard;
+use crate::backend::state::board::bitboard::BitBoard;
+use crate::backend::state::piece::{Piece, PieceColor, PieceType};
+use crate::backend::state::square::Square;
 use crate::constants::{PIECE_TYPE_COUNT, SIDES};
 
 const WHITE_START_INDEX: usize = 0;

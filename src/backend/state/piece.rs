@@ -1,7 +1,7 @@
 use getset::CloneGetters;
 
 /// Represents the different pieces.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Ord, Eq, PartialEq, PartialOrd)]
 pub enum PieceType {
     Pawn,
     Rook,
@@ -13,8 +13,18 @@ pub enum PieceType {
 
 impl PieceType {
     /// Returns an array containing all piece types. For now, it's just Knight and King.
-    pub fn get_all_types() -> [PieceType; 2] {
-        [PieceType::Knight, PieceType::King]
+    pub fn get_all_types() -> [PieceType; 3] {
+        [PieceType::Knight, PieceType::King, PieceType::Pawn]
+    }
+
+    /// Returns an array containing all piece types that a pawn can promote to.
+    pub fn get_promotable_types() -> [PieceType; 4] {
+        [
+            PieceType::Rook,
+            PieceType::Knight,
+            PieceType::Bishop,
+            PieceType::Queen,
+        ]
     }
 }
 
@@ -27,7 +37,7 @@ pub enum PieceColor {
 
 impl PieceColor {
     /// Returns the opposite color of the current `PieceColor`.
-    pub fn opposite(self) -> PieceColor {
+    pub const fn opposite(self) -> PieceColor {
         match self {
             PieceColor::White => PieceColor::Black,
             PieceColor::Black => PieceColor::White,

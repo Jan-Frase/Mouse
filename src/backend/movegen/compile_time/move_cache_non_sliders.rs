@@ -1,7 +1,7 @@
-use crate::backend::piece::PieceType;
-use crate::backend::square::Square;
-use crate::backend::state::bitboard::BitBoard;
-use crate::constants::SQUARES_AMOUNT;
+use crate::backend::state::board::bitboard::BitBoard;
+use crate::backend::state::piece::{PieceColor, PieceType};
+use crate::backend::state::square::Square;
+use crate::constants::{SIDES, SQUARES_AMOUNT};
 
 /// All of this gets generated at compile time, in the functions below.
 /// At runtime, we only have to read the values.
@@ -25,15 +25,25 @@ pub const KING_MOVES: [BitBoard; SQUARES_AMOUNT] = calculate_potential_moves_cac
 pub const KNIGHT_MOVES: [BitBoard; SQUARES_AMOUNT] =
     calculate_potential_moves_cache(PieceType::Knight);
 
-pub fn get_moves_cache_for_piece(piece_type: PieceType) -> [BitBoard; SQUARES_AMOUNT] {
-    match piece_type {
-        PieceType::Knight => KNIGHT_MOVES,
-        PieceType::King => KING_MOVES,
-        _ => panic!("Invalid piece type"),
-    }
+enum PawnMoveType {
+    Quiet,
+    Capture,
+    DoublePush,
 }
 
-/// Initializes a collection of bitboards representing all possible king moves for each square.
+/// All quiet moves for pawns.
+pub const PAWN_QUIET_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
+    generate_pawn_moves(PawnMoveType::Quiet);
+
+/// All capture moves for pawns.
+pub const PAWN_CAPTURE_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
+    generate_pawn_moves(PawnMoveType::Capture);
+
+/// All capture moves for pawns.
+pub const PAWN_DOUBLE_PUSH_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
+    generate_pawn_moves(PawnMoveType::DoublePush);
+
+/// Initializes a collection of bitboards representing all possible moves for each square.
 ///
 /// Since this function is const, it can be evaluated at compile time.
 /// # Parameters
@@ -137,4 +147,91 @@ const fn generate_knight_moves(square: Square) -> BitBoard {
     }
 
     bitboard
+}
+
+const fn generate_pawn_moves(pawn_move_type: PawnMoveType) -> [[BitBoard; SQUARES_AMOUNT]; SIDES] {
+    let mut quiet_moves = [[BitBoard::new(); SQUARES_AMOUNT]; SIDES];
+
+    let mut side_index = 0;
+    while side_index < 2 {
+        let active_color = match side_index {
+            0 => PieceColor::White,
+            1 => PieceColor::Black,
+            _ => panic!("Invalid side index"),
+        };
+        let mut potential_moves = [BitBoard::new(); SQUARES_AMOUNT];
+
+        // iterate over all squares
+        let mut square_index: usize = 0;
+        while square_index < SQUARES_AMOUNT {
+            let mut bitboard = BitBoard::new();
+            // generate a square struct from the index
+            let square = Square::index_to_square(square_index as i8);
+
+            match pawn_move_type {
+                PawnMoveType::Quiet => {
+                    generate_pawn_quiet_moves(square, &mut bitboard, active_color);
+                }
+                PawnMoveType::Capture => {
+                    generate_pawn_attack_moves(square, &mut bitboard, active_color);
+                }
+                PawnMoveType::DoublePush => {
+                    generate_pawn_double_push_moves(square, &mut bitboard, active_color);
+                }
+            }
+
+            // and generate the moves for that square
+            potential_moves[square_index] = bitboard;
+
+            square_index += 1;
+        }
+
+        quiet_moves[side_index] = potential_moves;
+
+        side_index += 1;
+    }
+
+    quiet_moves
+}
+
+const fn generate_pawn_quiet_moves(
+    square: Square,
+    bitboard: &mut BitBoard,
+    active_color: PieceColor,
+) {
+    let forward_square = square.forward_by_one(active_color);
+    if forward_square.is_valid() {
+        bitboard.fill_square(forward_square);
+    }
+}
+
+const fn generate_pawn_attack_moves(
+    square: Square,
+    bitboard: &mut BitBoard,
+    active_color: PieceColor,
+) {
+    let right_diagonal_square = square.right_by_one().forward_by_one(active_color);
+    let left_diagonal_square = square.left_by_one().forward_by_one(active_color);
+
+    if right_diagonal_square.is_valid() {
+        bitboard.fill_square(right_diagonal_square);
+    }
+    if left_diagonal_square.is_valid() {
+        bitboard.fill_square(left_diagonal_square);
+    }
+}
+
+const fn generate_pawn_double_push_moves(
+    square: Square,
+    bitboard: &mut BitBoard,
+    active_color: PieceColor,
+) {
+    if !square.is_pawn_start(active_color) {
+        return;
+    }
+
+    let double_pushed_square = square
+        .forward_by_one(active_color)
+        .forward_by_one(active_color);
+    bitboard.fill_square(double_pushed_square);
 }
