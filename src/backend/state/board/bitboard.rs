@@ -15,6 +15,8 @@ pub struct BitBoard {
 
 impl BitBoard {
     /// Creates a new `BitBoard` instance with an initial value of 0.
+    /// This cant be converted to a default variant cause i need it to be const.
+    #[allow(clippy::new_without_default)]
     pub const fn new() -> Self {
         BitBoard { value: 0 }
     }
