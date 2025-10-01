@@ -1,4 +1,3 @@
-use crate::backend::state::piece::PieceColor;
 use crate::backend::state::square::Square;
 use crate::constants::{FILES_AMOUNT, SQUARES_AMOUNT};
 use std::fmt::{Display, Formatter};
@@ -86,29 +85,6 @@ impl BitBoard {
     pub fn clear_square(&mut self, square: Square) {
         let bit = Self::square_to_bitmask(square);
         self.value ^= bit;
-    }
-
-    pub fn copy_double_pawn_push_rank_one_forward(&mut self, piece_color: PieceColor) {
-        let mask = match piece_color {
-            PieceColor::White => third_rank,
-            PieceColor::Black => six_rank,
-        };
-
-        let mut masked_part = self.clone();
-        masked_part = masked_part & mask;
-        masked_part.shift_one_forward(piece_color);
-        self.value |= masked_part.value;
-    }
-
-    fn shift_one_forward(&mut self, piece_color: PieceColor) {
-        match piece_color {
-            PieceColor::White => {
-                self.value <<= FILES_AMOUNT;
-            }
-            PieceColor::Black => {
-                self.value >>= FILES_AMOUNT;
-            }
-        }
     }
 
     /// Retrieves all `Square` instances that correspond to the true bits

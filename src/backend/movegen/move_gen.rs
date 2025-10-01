@@ -55,12 +55,7 @@ pub fn get_moves(game_state: &GameState) -> Vec<Moove> {
         friendly_pieces_bitboard,
     );
 
-    let mut pawn_quiet_mask = friendly_pieces_bitboard | enemy_pieces_bitboard;
-    let pawn_bitboard = game_state
-        .bit_board_manager()
-        .get_bitboard(Piece::new(Pawn, active_color));
-    pawn_quiet_mask &= !*pawn_bitboard;
-    pawn_quiet_mask.copy_double_pawn_push_rank_one_forward(game_state.active_color());
+    let pawn_quiet_mask = friendly_pieces_bitboard | enemy_pieces_bitboard;
     // Quiet pawn moves
     get_moves_for_trivial_piece(
         &mut all_pseudo_legal_moves,
@@ -113,12 +108,12 @@ fn get_moves_for_trivial_piece(
     let mut moves = get_moves_for_non_slider_piece(moves_cache, *piece_bitboard, mask_bitboard);
 
     if piece_type == Pawn && !moves.is_empty() {
-        for index in moves.len() - 1..0 {
-            let mut moove = moves[index];
+        for index in moves.len() - 1..=0 {
+            let moove = moves[index];
             if moove.to().is_on_promotion_rank() {
-                moove.set_promotion_type(Some(Queen));
                 for piece_type in PieceType::get_promotable_types() {
                     if piece_type == Queen {
+                        moves[index].set_promotion_type(Some(Queen));
                         continue;
                     }
                     let mut moove = moove.clone();

@@ -171,5 +171,20 @@ mod tests {
 
         let nodes = root_debug_perft(&mut game_state, 1);
         assert_eq!(nodes, 7);
+
+        let nodes = root_debug_perft(&mut game_state, 2);
+        assert_eq!(nodes, 49);
+
+        // Missing slider logic atm
+        // let nodes = root_debug_perft(&mut game_state, 3);
+        // assert_eq!(nodes, 289);
+    }
+
+    #[test]
+    fn test_perft_08() {
+        let mut game_state = GameState::new_parse_fen("8/1ppP1k2/1n6/3P2P1/8/8/8/7K b - - 0 1");
+
+        let nodes = root_debug_perft(&mut game_state, 2);
+        assert_eq!(nodes, 117);
     }
 }

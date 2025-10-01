@@ -147,8 +147,8 @@ impl GameState {
             .get_bitboard_for_piece_at_square_mut(moove.to())
             .unwrap();
 
-        // Fill the square that the piece was moved from.
-        moved_piece_bitboard.fill_square(moove.from());
+        // Clear the square it moved to.
+        moved_piece_bitboard.clear_square(moove.to());
 
         // Update the moved piece bb if it was a pawn promotion
         match moove.promotion_type() {
@@ -156,12 +156,12 @@ impl GameState {
             Some(promotion_type) => {
                 moved_piece_bitboard = self
                     .bit_board_manager
-                    .get_bitboard_mut(Piece::new(promotion_type, self.active_color));
+                    .get_bitboard_mut(Piece::new(Pawn, self.active_color));
             }
         }
 
-        // Clear the square it moved to.
-        moved_piece_bitboard.clear_square(moove.to());
+        // Fill the square that the piece was moved from.
+        moved_piece_bitboard.fill_square(moove.from());
 
         // If some piece was captured, put it back on the board.
         if let Some(captured_piece) = irreversible_data.captured_piece() {
