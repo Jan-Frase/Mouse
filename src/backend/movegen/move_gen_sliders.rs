@@ -34,7 +34,7 @@ impl SlideDirection {
             SlideDirection::Up => Square::new(square.file(), square.rank() + 1),
             SlideDirection::UpRight => Square::new(square.file() + 1, square.rank() + 1),
             SlideDirection::Right => Square::new(square.file() + 1, square.rank()),
-            SlideDirection::DownRight => Square::new(square.file() - 1, square.rank() + 1),
+            SlideDirection::DownRight => Square::new(square.file() + 1, square.rank() - 1),
             SlideDirection::Down => Square::new(square.file(), square.rank() - 1),
             SlideDirection::DownLeft => Square::new(square.file() - 1, square.rank() - 1),
             SlideDirection::Left => Square::new(square.file() - 1, square.rank()),
