@@ -1,7 +1,7 @@
 use crate::backend::movegen::compile_time::move_cache_non_sliders::{
     KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES,
 };
-use crate::backend::movegen::move_gen_sliders::calculate_move_bitboard;
+use crate::backend::movegen::move_gen_sliders::calculate_slider_move_bitboard;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::game_state::GameState;
 use crate::backend::state::piece::PieceType::{Bishop, Queen, Rook};
@@ -90,8 +90,8 @@ fn get_attack_bitboard_for_piece_and_square(
         PieceType::King => KING_MOVES[square.square_to_index()],
         PieceType::Knight => KNIGHT_MOVES[square.square_to_index()],
         PieceType::Pawn => PAWN_CAPTURE_MOVES[piece_color as usize][square.square_to_index()],
-        Rook => calculate_move_bitboard(Rook, square, friendly_bb, enemy_bb),
-        Bishop => calculate_move_bitboard(Bishop, square, friendly_bb, enemy_bb),
-        Queen => calculate_move_bitboard(Queen, square, friendly_bb, enemy_bb),
+        Rook => calculate_slider_move_bitboard(Rook, square, friendly_bb, enemy_bb),
+        Bishop => calculate_slider_move_bitboard(Bishop, square, friendly_bb, enemy_bb),
+        Queen => calculate_slider_move_bitboard(Queen, square, friendly_bb, enemy_bb),
     }
 }

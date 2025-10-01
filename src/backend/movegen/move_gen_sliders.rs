@@ -17,17 +17,6 @@ enum SlideDirection {
     UpLeft,
 }
 
-const ALL_SLIDE_DIRECTIONS: [SlideDirection; 8] = [
-    SlideDirection::Up,
-    SlideDirection::UpRight,
-    SlideDirection::Right,
-    SlideDirection::DownRight,
-    SlideDirection::Down,
-    SlideDirection::DownLeft,
-    SlideDirection::Left,
-    SlideDirection::UpLeft,
-];
-
 impl SlideDirection {
     fn next(&self, square: Square) -> Square {
         match self {
@@ -67,7 +56,7 @@ pub fn get_moves_for_non_slider_piece(
     let mut moves: Vec<Moove> = Vec::new();
     for square in piece_bb.get_all_true_squares() {
         let moves_for_piece_bb =
-            calculate_move_bitboard(piece_type, square, friendly_pieces_bb, enemy_pieces_bb);
+            calculate_slider_move_bitboard(piece_type, square, friendly_pieces_bb, enemy_pieces_bb);
 
         // Now take the resulting bitboard and convert all true squares to a list of squares.
         let squares_we_can_move_to = moves_for_piece_bb.get_all_true_squares();
@@ -80,7 +69,7 @@ pub fn get_moves_for_non_slider_piece(
     moves
 }
 
-pub fn calculate_move_bitboard(
+pub fn calculate_slider_move_bitboard(
     piece_type: PieceType,
     square: Square,
     friendly_pieces_bitboard: BitBoard,

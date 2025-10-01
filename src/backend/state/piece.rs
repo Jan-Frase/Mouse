@@ -33,6 +33,14 @@ impl PieceType {
             PieceType::Queen,
         ]
     }
+
+    pub fn get_slider_types() -> [PieceType; 3] {
+        [PieceType::Rook, PieceType::Bishop, PieceType::Queen]
+    }
+
+    pub fn get_trivial_types() -> [PieceType; 2] {
+        [PieceType::Knight, PieceType::King]
+    }
 }
 
 /// Represents the color of a piece.
