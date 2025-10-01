@@ -1,3 +1,4 @@
+use crate::backend::state::piece::PieceColor;
 use getset::Setters;
 use std::fmt::{Display, Formatter};
 
@@ -7,7 +8,7 @@ use std::fmt::{Display, Formatter};
 ///
 /// To make it easier to memorize: file => the letter part, rank => the number part
 /// or put differently: file => vertical / x part, rank => horizontal / y part
-#[derive(Copy, Clone, Debug, Setters)]
+#[derive(Copy, Clone, Debug, Setters, Ord, Eq, PartialEq, PartialOrd)]
 pub struct Square {
     #[getset(set = "pub")]
     file: i8,
@@ -19,6 +20,24 @@ impl Square {
     /// Creates a new 'Square' instance.
     pub const fn new(file: i8, rank: i8) -> Self {
         Self { file, rank }
+    }
+
+    pub fn new_from_uci_notation(uci_notation: &str) -> Self {
+        let mut file = 0;
+        let mut rank = 0;
+
+        for char in uci_notation.chars() {
+            match char {
+                'a'..='h' => file = char.to_digit(36).unwrap() - 10,
+                '1'..='8' => rank = char.to_digit(10).unwrap() - 1,
+                _ => panic!("Invalid uci notation"),
+            }
+        }
+
+        Square {
+            file: file as i8,
+            rank: rank as i8,
+        }
     }
 
     /// Converts a given index (i8) to a `Square` object.
@@ -83,6 +102,37 @@ impl Square {
     /// * `i8` - The value of the `file` field.
     pub const fn rank(&self) -> i8 {
         self.rank
+    }
+
+    pub fn is_on_promotion_rank(&self) -> bool {
+        self.rank == 0 || self.rank == 7
+    }
+
+    pub const fn is_pawn_start(&self, color: PieceColor) -> bool {
+        match color {
+            PieceColor::White => self.rank == 1,
+            PieceColor::Black => self.rank == 6,
+        }
+    }
+
+    // forward means the direction that the pawns travel in for that side
+    pub const fn forward_by_one(&self, color: PieceColor) -> Square {
+        match color {
+            PieceColor::White => Square::new(self.file, self.rank + 1),
+            PieceColor::Black => Square::new(self.file, self.rank - 1),
+        }
+    }
+
+    pub const fn back_by_one(&self, color: PieceColor) -> Square {
+        self.forward_by_one(color.opposite())
+    }
+
+    pub const fn right_by_one(&self) -> Square {
+        Square::new(self.file + 1, self.rank)
+    }
+
+    pub const fn left_by_one(&self) -> Square {
+        Square::new(self.file - 1, self.rank)
     }
 }
 

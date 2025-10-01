@@ -1,7 +1,7 @@
-use crate::backend::square::Square;
+use crate::backend::state::square::Square;
 use crate::constants::{FILES_AMOUNT, SQUARES_AMOUNT};
 use std::fmt::{Display, Formatter};
-use std::ops::{BitAnd, BitOr, BitOrAssign, BitXor, Not};
+use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, Not};
 
 /// A struct that represents a BitBoard.
 /// Each bit in the `u64` value represents a specific position on the board.
@@ -15,8 +15,22 @@ pub struct BitBoard {
 
 impl BitBoard {
     /// Creates a new `BitBoard` instance with an initial value of 0.
+    /// This cant be converted to a default variant cause i need it to be const.
+    #[allow(clippy::new_without_default)]
     pub const fn new() -> Self {
         BitBoard { value: 0 }
+    }
+
+    pub const fn new_from_rank(rank: i8) -> Self {
+        let mut bitboard = BitBoard::new();
+
+        let mut file = 0;
+        while file < FILES_AMOUNT {
+            bitboard.fill_square(Square::new(file as i8, rank));
+            file += 1;
+        }
+
+        bitboard
     }
 
     /// Checks if the value of the current instance is empty or zero.
@@ -129,6 +143,12 @@ impl BitAnd for BitBoard {
     }
 }
 
+impl BitAndAssign for BitBoard {
+    fn bitand_assign(&mut self, rhs: Self) {
+        self.value &= rhs.value;
+    }
+}
+
 impl BitOr for BitBoard {
     type Output = Self;
 
@@ -136,6 +156,12 @@ impl BitOr for BitBoard {
         BitBoard {
             value: self.value | rhs.value,
         }
+    }
+}
+
+impl BitOrAssign<BitBoard> for &mut BitBoard {
+    fn bitor_assign(&mut self, rhs: BitBoard) {
+        self.value |= rhs.value;
     }
 }
 
