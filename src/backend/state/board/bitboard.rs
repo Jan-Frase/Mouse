@@ -3,10 +3,6 @@ use crate::constants::{FILES_AMOUNT, SQUARES_AMOUNT};
 use std::fmt::{Display, Formatter};
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, Not};
 
-/// Used as a mask for double pawn push.
-const third_rank: BitBoard = BitBoard::new_from_rank(2);
-const six_rank: BitBoard = BitBoard::new_from_rank(5);
-
 /// A struct that represents a BitBoard.
 /// Each bit in the `u64` value represents a specific position on the board.
 ///

@@ -1,6 +1,6 @@
 use crate::backend::movegen::check_decider::is_in_check;
 use crate::backend::movegen::moove::Moove;
-use crate::backend::movegen::move_gen::get_moves;
+use crate::backend::movegen::move_gen::get_pseudo_legal_moves;
 use crate::backend::state::game::game_state::GameState;
 use std::env::Args;
 
@@ -14,7 +14,7 @@ pub fn perft(game_state: &mut GameState, depth: u8) -> u64 {
         return 1;
     }
 
-    let moves = get_moves(game_state);
+    let moves = get_pseudo_legal_moves(game_state);
     let mut nodes = 0;
     for chess_move in moves {
         game_state.make_move(chess_move);
@@ -64,7 +64,7 @@ fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
     let mut nodes = 0;
 
     // Generate all root moves.
-    let mut moves = get_moves(game_state);
+    let mut moves = get_pseudo_legal_moves(game_state);
     // Sort them in the same way as perftree does
     moves.sort();
     for chess_move in moves {
@@ -186,5 +186,13 @@ mod tests {
 
         let nodes = root_debug_perft(&mut game_state, 2);
         assert_eq!(nodes, 117);
+    }
+
+    #[test]
+    fn test_perft_09() {
+        let mut game_state = GameState::new_parse_fen("7k/P7/8/8/8/8/8/7K w - - 0 1");
+
+        let nodes = root_debug_perft(&mut game_state, 1);
+        assert_eq!(nodes, 7);
     }
 }
