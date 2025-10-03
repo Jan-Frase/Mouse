@@ -1,8 +1,9 @@
 use crate::backend::movegen::compile_time::move_cache_non_sliders::{KING_MOVES, KNIGHT_MOVES};
 use crate::backend::movegen::moove::Moove;
+use crate::backend::movegen::move_gen_king_util::gen_castles;
 use crate::backend::movegen::move_gen_pawn_util::gen_pawn_moves;
 use crate::backend::movegen::move_gen_sliders::get_moves_for_non_slider_piece;
-use crate::backend::state::board::bitboard::BitBoard;
+use crate::backend::state::board::bitboard::Bitboard;
 use crate::backend::state::game::game_state::GameState;
 use crate::backend::state::piece::PieceType::{King, Knight};
 use crate::backend::state::piece::{Piece, PieceType};
@@ -22,7 +23,7 @@ use crate::constants::SQUARES_AMOUNT;
 /// * A `Vec<Moove>` containing all the computed pseudo legal moves for the current player's
 ///   pieces.
 pub fn get_pseudo_legal_moves(game_state: &GameState) -> Vec<Moove> {
-    let bitboard_manager = game_state.bit_board_manager();
+    let bitboard_manager = game_state.bb_manager();
     // Bitboard containing all pieces of the active color. These block moves.
     let friendly_pieces_bb = bitboard_manager.get_all_pieces_off(game_state.active_color());
     // Bitboard containing all pieces of the opponent color. These are relevant for sliders and pawn captures.
@@ -45,6 +46,12 @@ pub fn get_pseudo_legal_moves(game_state: &GameState) -> Vec<Moove> {
         );
         all_pseudo_legal_moves.append(&mut moves);
     }
+
+    gen_castles(
+        &mut all_pseudo_legal_moves,
+        game_state,
+        friendly_pieces_bb | enemy_pieces_bb,
+    );
 
     // Gen pawn moves, quiet, captures, double pushes
     gen_pawn_moves(
@@ -75,9 +82,9 @@ pub fn get_pseudo_legal_moves(game_state: &GameState) -> Vec<Moove> {
 // ------------------------------------
 
 pub(crate) fn iterate_over_bitboard_for_non_slider(
-    moves_cache: [BitBoard; SQUARES_AMOUNT],
-    piece_bitboard: BitBoard,
-    mask_bitboard: BitBoard,
+    moves_cache: [Bitboard; SQUARES_AMOUNT],
+    piece_bitboard: Bitboard,
+    mask_bitboard: Bitboard,
 ) -> Vec<Moove> {
     // PERF: Instead of creating a new vector for each piece, we could reuse the same vector and append to it.
     let mut moves: Vec<Moove> = Vec::new();
@@ -105,7 +112,7 @@ pub(crate) fn iterate_over_bitboard_for_non_slider(
     moves
 }
 
-fn convert_bitboard_to_moves(square: Square, moves_bitboard: BitBoard) -> Vec<Moove> {
+fn convert_bitboard_to_moves(square: Square, moves_bitboard: Bitboard) -> Vec<Moove> {
     // Now take the resulting bitboard and convert all true squares to a list of squares.
     let squares_we_can_move_to = moves_bitboard.get_all_true_squares();
 

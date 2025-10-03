@@ -15,6 +15,9 @@ use std::fmt::{Display, Formatter};
 ///    Sure, the move would be smaller, but accessing a variable would be slower, since it requires bit shifting etc.
 ///    In the end it comes down to a trade-off between cache locality and number of instructions per read.
 /// 2. It would certainly make the code less readable.
+///
+/// Alternatively, each Move could store a bitboard, with one bit set where we currently are and one where we are going to.
+/// To "make" this move we then would only need to xor it with the bitboard for the piece.
 #[derive(Copy, Clone, Debug, CloneGetters, Setters, Ord, Eq, PartialEq, PartialOrd)]
 pub struct Moove {
     #[getset(get_clone = "pub", set = "pub")]
@@ -27,7 +30,7 @@ pub struct Moove {
 
 impl Moove {
     /// Creates a new `Move` instance with 'promotion_type' set to 0.
-    pub fn new(from: Square, to: Square) -> Moove {
+    pub const fn new(from: Square, to: Square) -> Moove {
         Moove {
             from,
             to,

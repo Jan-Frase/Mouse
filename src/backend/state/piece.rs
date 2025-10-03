@@ -58,6 +58,10 @@ impl PieceColor {
             PieceColor::Black => PieceColor::White,
         }
     }
+
+    pub fn get_all_colors() -> [PieceColor; 2] {
+        [PieceColor::White, PieceColor::Black]
+    }
 }
 
 /// The `Piece` struct stores the type and color of a chess piece.
