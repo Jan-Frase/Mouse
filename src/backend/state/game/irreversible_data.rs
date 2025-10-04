@@ -1,4 +1,4 @@
-use crate::backend::state::piece::PieceType;
+use crate::backend::state::piece::{PieceColor, PieceType};
 use crate::backend::state::square::Square;
 use getset::{CloneGetters, Setters};
 
@@ -32,6 +32,20 @@ impl IrreversibleData {
             white_short_castle_rights: true,
             black_long_castle_rights: true,
             black_short_castle_rights: true,
+        }
+    }
+
+    pub fn get_long_castle_rights(&self, color: PieceColor) -> bool {
+        match color {
+            PieceColor::White => self.white_long_castle_rights,
+            PieceColor::Black => self.black_long_castle_rights,
+        }
+    }
+
+    pub fn get_short_castle_rights(&self, color: PieceColor) -> bool {
+        match color {
+            PieceColor::White => self.white_short_castle_rights,
+            PieceColor::Black => self.black_short_castle_rights,
         }
     }
 }

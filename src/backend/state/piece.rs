@@ -12,9 +12,16 @@ pub enum PieceType {
 }
 
 impl PieceType {
-    /// Returns an array containing all piece types. For now, it's just Knight and King.
-    pub fn get_all_types() -> [PieceType; 3] {
-        [PieceType::Knight, PieceType::King, PieceType::Pawn]
+    /// Returns an array containing all piece types.
+    pub fn get_all_types() -> [PieceType; 6] {
+        [
+            PieceType::Knight,
+            PieceType::King,
+            PieceType::Pawn,
+            PieceType::Bishop,
+            PieceType::Rook,
+            PieceType::Queen,
+        ]
     }
 
     /// Returns an array containing all piece types that a pawn can promote to.
@@ -25,6 +32,14 @@ impl PieceType {
             PieceType::Bishop,
             PieceType::Queen,
         ]
+    }
+
+    pub fn get_slider_types() -> [PieceType; 3] {
+        [PieceType::Rook, PieceType::Bishop, PieceType::Queen]
+    }
+
+    pub fn get_trivial_types() -> [PieceType; 2] {
+        [PieceType::Knight, PieceType::King]
     }
 }
 
@@ -42,6 +57,10 @@ impl PieceColor {
             PieceColor::White => PieceColor::Black,
             PieceColor::Black => PieceColor::White,
         }
+    }
+
+    pub fn get_all_colors() -> [PieceColor; 2] {
+        [PieceColor::White, PieceColor::Black]
     }
 }
 

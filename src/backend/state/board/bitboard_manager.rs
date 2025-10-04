@@ -1,4 +1,4 @@
-use crate::backend::state::board::bitboard::BitBoard;
+use crate::backend::state::board::bitboard::Bitboard;
 use crate::backend::state::piece::{Piece, PieceColor, PieceType};
 use crate::backend::state::square::Square;
 use crate::constants::{PIECE_TYPE_COUNT, SIDES};
@@ -15,16 +15,16 @@ const BLACK_END_INDEX: usize = 11;
 /// - `bitboard_index_to_piece`: An array that maps each index in the `bitboards` array
 ///   back to its corresponding `Piece`.
 #[derive(Debug)]
-pub struct BitBoardManager {
-    bitboards: [BitBoard; PIECE_TYPE_COUNT * SIDES],
+pub struct BitboardManager {
+    bitboards: [Bitboard; PIECE_TYPE_COUNT * SIDES],
     bitboard_index_to_piece: [Piece; PIECE_TYPE_COUNT * SIDES],
 }
 
-impl BitBoardManager {
+impl BitboardManager {
     /// Generates a new BitBoardManager with all bitboards set to empty.
-    pub fn new() -> BitBoardManager {
+    pub fn new() -> BitboardManager {
         // This contains all the bitboards.
-        let bitboards = [BitBoard::new(); PIECE_TYPE_COUNT * SIDES];
+        let bitboards = [Bitboard::new(); PIECE_TYPE_COUNT * SIDES];
 
         // This maps each index in the bitboard array back to its corresponding piece.
         // I'm sure there is a better way to do this, but I'm not sure how.
@@ -47,7 +47,7 @@ impl BitBoardManager {
         bitboard_index_to_piece[10] = Piece::new(PieceType::Queen, PieceColor::Black);
         bitboard_index_to_piece[11] = Piece::new(PieceType::King, PieceColor::Black);
 
-        BitBoardManager {
+        BitboardManager {
             bitboards,
             bitboard_index_to_piece,
         }
@@ -61,7 +61,7 @@ impl BitBoardManager {
     /// # Returns
     ///
     /// A mutable reference to the `BitBoard` corresponding to the given `piece`.
-    pub fn get_bitboard_mut(&mut self, piece: Piece) -> &mut BitBoard {
+    pub fn get_bitboard_mut(&mut self, piece: Piece) -> &mut Bitboard {
         let index = self.piece_to_bitboards_index(piece);
         &mut self.bitboards[index]
     }
@@ -74,7 +74,7 @@ impl BitBoardManager {
     ///
     /// # Returns:
     /// - A reference to the `BitBoard` corresponding to the given `Piece`.
-    pub fn get_bitboard(&self, piece: Piece) -> &BitBoard {
+    pub fn get_bitboard(&self, piece: Piece) -> &Bitboard {
         let index = self.piece_to_bitboards_index(piece);
         &self.bitboards[index]
     }
@@ -105,7 +105,7 @@ impl BitBoardManager {
     pub fn get_bitboard_for_piece_at_square_mut(
         &mut self,
         square: Square,
-    ) -> Option<&mut BitBoard> {
+    ) -> Option<&mut Bitboard> {
         let index = self.get_index_for_piece_at_square(square)?;
         Some(&mut self.bitboards[index])
     }
@@ -119,7 +119,7 @@ impl BitBoardManager {
     /// # Returns
     ///
     /// * `Option<BitBoard>` - Returns `Some(BitBoard)` if a piece is present at the specified square, otherwise returns `None`.
-    pub fn get_bitboard_for_piece_at_square(&self, square: Square) -> Option<BitBoard> {
+    pub fn get_bitboard_for_piece_at_square(&self, square: Square) -> Option<Bitboard> {
         let index = self.get_index_for_piece_at_square(square)?;
         Some(self.bitboards[index])
     }
@@ -135,8 +135,8 @@ impl BitBoardManager {
     /// # Returns
     ///
     /// A `BitBoard` that aggregates all the positions of the specified color's pieces.
-    pub fn get_all_pieces_off(&self, color: PieceColor) -> BitBoard {
-        let mut resulting_bitboard = BitBoard::new();
+    pub fn get_all_pieces_off(&self, color: PieceColor) -> Bitboard {
+        let mut resulting_bitboard = Bitboard::new();
 
         // This is quite ugly...
         let start_index = match color {
