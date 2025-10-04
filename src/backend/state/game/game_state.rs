@@ -3,7 +3,8 @@ use crate::backend::state::board::bitboard_manager::BitboardManager;
 use crate::backend::state::game::fen_parser::parse_fen;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
 use crate::backend::state::piece::PieceType::Pawn;
-use crate::backend::state::piece::{Piece, PieceColor};
+use crate::backend::state::piece::{Piece, PieceColor, PieceType};
+use crate::backend::state::square::Square;
 use getset::{CloneGetters, Getters, MutGetters};
 
 #[derive(Debug, Getters, MutGetters, CloneGetters)]
@@ -66,44 +67,13 @@ impl GameState {
 
         // Usually the square something was captured on (if something was captured at all) is the square we moved to...
         let mut capture_square = moove.to();
-
-        // ... unless this is an en passant capture ...
-        let ep_square = self
-            .irreversible_data_stack
-            .last()
-            .unwrap()
-            .en_passant_square();
-
-        // if an en passant square exists
-        if let Some(ep_square) = ep_square
-            // and we moved a pawn
-            && moved_piece.piece_type() == Pawn
-            // and if we moved to the ep_square
-            && ep_square == moove.to()
-        {
-            // update the captured square to the ep_square - offset
-            capture_square = moove.to().back_by_one(self.active_color);
-        }
-
-        // Get the type of the captured piece if it exists.
-        let captured_piece = self.bb_manager.get_piece_at_square(capture_square);
-
-        // Clear the square on the captured piece's bitboard if it exists.
-        if let Some(captured_piece) = captured_piece {
-            // Store the captured piece type in the irreversible data.
-            irreversible_data.set_captured_piece(Some(captured_piece.piece_type()));
-            // Remove the captured piece from its bitboard.
-            let captured_piece_bitboard = self.bb_manager.get_bitboard_mut(captured_piece);
-            captured_piece_bitboard.clear_square(capture_square);
-        }
-
+        // ... unless this is an en passant capture, we then need to update the capture square.
+        self.make_move_ep_capture(moove, moved_piece.piece_type(), &mut capture_square);
         // Check if a double pawn push was played and store the en passant file
-        if moved_piece.piece_type() == Pawn && moove.is_double_pawn_push() {
-            // the pawn starting square and one forward
-            let ep_square = moove.to().back_by_one(self.active_color);
+        self.make_move_double_pawn_push(moove, &mut irreversible_data, moved_piece);
 
-            irreversible_data.set_en_passant_square(Some(ep_square));
-        }
+        // If something was captured, remove the piece and update irreversible data.
+        self.make_move_capture(&mut irreversible_data, capture_square);
 
         // Get the bitboard for the piece that was moved.
         let mut moved_piece_bitboard = self.bb_manager.get_bitboard_mut(moved_piece);
@@ -126,6 +96,64 @@ impl GameState {
         // Take care of some basics.
         self.active_color = self.active_color.opposite();
         self.irreversible_data_stack.push(irreversible_data);
+    }
+
+    fn make_move_ep_capture(
+        &mut self,
+        moove: Moove,
+        piece_type: PieceType,
+        capture_square: &mut Square,
+    ) {
+        // if we did not move a pawn -> return
+        if piece_type != Pawn {
+            return;
+        }
+
+        let ep_square = self
+            .irreversible_data_stack
+            .last()
+            .unwrap()
+            .en_passant_square();
+
+        // if an en passant square exists
+        if let Some(ep_square) = ep_square
+            // and if we moved to the ep_square
+            && ep_square == moove.to()
+        {
+            // update the captured square to the ep_square - offset
+            *capture_square = moove.to().back_by_one(self.active_color);
+        }
+    }
+
+    fn make_move_capture(
+        &mut self,
+        irreversible_data: &mut IrreversibleData,
+        mut capture_square: Square,
+    ) {
+        // Get the type of the captured piece if it exists.
+        let captured_piece = self.bb_manager.get_piece_at_square(capture_square);
+        // Clear the square on the captured piece's bitboard if it exists.
+        if let Some(captured_piece) = captured_piece {
+            // Store the captured piece type in the irreversible data.
+            irreversible_data.set_captured_piece(Some(captured_piece.piece_type()));
+            // Remove the captured piece from its bitboard.
+            let captured_piece_bitboard = self.bb_manager.get_bitboard_mut(captured_piece);
+            captured_piece_bitboard.clear_square(capture_square);
+        }
+    }
+
+    fn make_move_double_pawn_push(
+        &mut self,
+        moove: Moove,
+        irreversible_data: &mut IrreversibleData,
+        moved_piece: Piece,
+    ) {
+        if moved_piece.piece_type() == Pawn && moove.is_double_pawn_push() {
+            // the pawn starting square and one forward
+            let ep_square = moove.to().back_by_one(self.active_color);
+
+            irreversible_data.set_en_passant_square(Some(ep_square));
+        }
     }
 
     /// Reverts the last move made, restoring the board state to what it was
