@@ -21,10 +21,6 @@ impl Bitboard {
         Bitboard { value: 0 }
     }
 
-    pub const fn new_from_value(value: u64) -> Self {
-        Bitboard { value }
-    }
-
     pub const fn new_from_squares(squares: &[Square]) -> Self {
         let mut bitboard = Bitboard::new();
 
