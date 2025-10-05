@@ -72,9 +72,9 @@ pub fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
     nodes
 }
 
-///
-///
-///
+// --------------------------------------------- //
+// PERFT with nps
+// --------------------------------------------- //
 
 fn run_nps_perft() {
     let mut game_state =
