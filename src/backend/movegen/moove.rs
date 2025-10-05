@@ -4,6 +4,7 @@ use crate::backend::state::square::Square;
 use getset::{CloneGetters, Setters};
 use std::fmt::{Display, Formatter};
 
+#[derive(Copy, Clone)]
 pub enum CastleType {
     Long,
     Short,

@@ -3,9 +3,9 @@ use crate::backend::state::board::bitboard::Bitboard;
 use crate::backend::state::board::bitboard_manager::BitboardManager;
 use crate::backend::state::game::fen_parser::parse_fen;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
-use crate::backend::state::piece::PieceType::{Pawn, Rook};
+use crate::backend::state::piece::PieceType::{King, Pawn, Rook};
 use crate::backend::state::piece::{Piece, PieceColor, PieceType};
-use crate::backend::state::square::Square;
+use crate::backend::state::square::{A1, A8, H1, H8, Square};
 use getset::{CloneGetters, Getters, MutGetters};
 
 #[derive(Debug, Getters, MutGetters, CloneGetters)]
@@ -98,21 +98,16 @@ impl GameState {
         moved_piece_bitboard.fill_square(moove.to());
 
         // Some special king handling
-        if moved_piece.piece_type() == PieceType::King {
-            // If the king moved we can't castle anymore
-            irreversible_data.remove_long_castle_rights(self.active_color);
-            irreversible_data.remove_short_castle_rights(self.active_color);
-
-            // If we castled, we need to move the rook
-            if moove.is_castle() {
-                let mut rook_bb = self
-                    .bb_manager
-                    .get_bitboard_mut(Piece::new(Rook, self.active_color));
-                let rook_swap_bb =
-                    Self::get_rook_swap_bb(moove.get_castle_type(), self.active_color);
-                rook_bb ^= rook_swap_bb;
-            }
+        if moved_piece.piece_type() == King {
+            self.make_move_king(moove, &mut irreversible_data);
         }
+
+        self.make_move_castling_rights_on_rook_move_or_capture(
+            &mut irreversible_data,
+            moved_piece.piece_type(),
+            moove.from(),
+            self.active_color,
+        );
 
         // Take care of some basics.
         self.active_color = self.active_color.opposite();
@@ -150,6 +145,14 @@ impl GameState {
             // Remove the captured piece from its bitboard.
             let captured_piece_bitboard = self.bb_manager.get_bitboard_mut(captured_piece);
             captured_piece_bitboard.clear_square(capture_square);
+
+            // Remove castling rights if the captured piece was a rook on its starting square
+            self.make_move_castling_rights_on_rook_move_or_capture(
+                irreversible_data,
+                captured_piece.piece_type(),
+                capture_square,
+                self.active_color.opposite(),
+            )
         }
     }
 
@@ -166,15 +169,26 @@ impl GameState {
         }
     }
 
+    fn make_move_king(&mut self, moove: Moove, irreversible_data: &mut IrreversibleData) {
+        // If the king moved we can't castle anymore
+        irreversible_data.remove_long_castle_rights(self.active_color);
+        irreversible_data.remove_short_castle_rights(self.active_color);
+
+        // If we castled, we need to move the rook
+        if moove.is_castle() {
+            let mut rook_bb = self
+                .bb_manager
+                .get_bitboard_mut(Piece::new(Rook, self.active_color));
+            let rook_swap_bb = Self::get_rook_swap_bb(moove.get_castle_type(), self.active_color);
+            rook_bb ^= rook_swap_bb;
+        }
+    }
+
     fn get_rook_swap_bb(castle_type: CastleType, active_color: PieceColor) -> Bitboard {
         match castle_type {
             CastleType::Long => match active_color {
-                PieceColor::White => {
-                    Bitboard::new_from_squares(vec![Square::new(0, 0), Square::new(3, 0)])
-                }
-                PieceColor::Black => {
-                    Bitboard::new_from_squares(vec![Square::new(0, 7), Square::new(3, 7)])
-                }
+                PieceColor::White => Bitboard::new_from_squares(vec![A1, Square::new(3, 0)]),
+                PieceColor::Black => Bitboard::new_from_squares(vec![H1, Square::new(3, 7)]),
             },
             CastleType::Short => match active_color {
                 PieceColor::White => {
@@ -183,6 +197,36 @@ impl GameState {
                 PieceColor::Black => {
                     Bitboard::new_from_squares(vec![Square::new(7, 7), Square::new(5, 7)])
                 }
+            },
+        }
+    }
+
+    fn make_move_castling_rights_on_rook_move_or_capture(
+        &mut self,
+        irreversible_data: &mut IrreversibleData,
+        piece_type: PieceType,
+        relevant_square: Square,
+        relevant_side: PieceColor,
+    ) {
+        if piece_type == Rook {
+            for castling_type in CastleType::get_all_types() {
+                let starting_square = Self::get_rook_starting_square(castling_type, relevant_side);
+                if relevant_square == starting_square {
+                    irreversible_data.remove_castle_rights(relevant_side, castling_type);
+                }
+            }
+        }
+    }
+
+    fn get_rook_starting_square(castle_type: CastleType, color: PieceColor) -> Square {
+        match castle_type {
+            CastleType::Long => match color {
+                PieceColor::White => A1,
+                PieceColor::Black => A8,
+            },
+            CastleType::Short => match color {
+                PieceColor::White => H1,
+                PieceColor::Black => H8,
             },
         }
     }

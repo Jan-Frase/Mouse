@@ -1,3 +1,4 @@
+use crate::backend::movegen::moove::CastleType;
 use crate::backend::state::piece::{PieceColor, PieceType};
 use crate::backend::state::square::Square;
 use getset::{CloneGetters, Setters};
@@ -84,6 +85,13 @@ impl IrreversibleData {
         match color {
             PieceColor::White => self.white_short_castle_rights = false,
             PieceColor::Black => self.black_short_castle_rights = false,
+        }
+    }
+
+    pub fn remove_castle_rights(&mut self, color: PieceColor, castle_type: CastleType) {
+        match castle_type {
+            CastleType::Long => self.remove_long_castle_rights(color),
+            CastleType::Short => self.remove_short_castle_rights(color),
         }
     }
 }
