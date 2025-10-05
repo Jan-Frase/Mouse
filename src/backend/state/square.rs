@@ -2,6 +2,23 @@ use crate::backend::state::piece::PieceColor;
 use getset::Setters;
 use std::fmt::{Display, Formatter};
 
+pub const A1: Square = Square::new(0, 0);
+pub const B1: Square = Square::new(1, 0);
+pub const C1: Square = Square::new(2, 0);
+pub const D1: Square = Square::new(3, 0);
+pub const E1: Square = Square::new(4, 0);
+pub const F1: Square = Square::new(5, 0);
+pub const G1: Square = Square::new(6, 0);
+pub const H1: Square = Square::new(7, 0);
+pub const A8: Square = Square::new(0, 7);
+pub const B8: Square = Square::new(1, 7);
+pub const C8: Square = Square::new(2, 7);
+pub const D8: Square = Square::new(3, 7);
+pub const E8: Square = Square::new(4, 7);
+pub const F8: Square = Square::new(5, 7);
+pub const G8: Square = Square::new(6, 7);
+pub const H8: Square = Square::new(7, 7);
+
 /// This represents a square on the chess board.
 /// The square A1 is at file == 0 and rank == 0.
 /// The square H1 is at file == 7 and rank == 0.

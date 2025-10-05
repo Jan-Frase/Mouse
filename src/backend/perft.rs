@@ -193,4 +193,73 @@ mod tests {
         let nodes = root_debug_perft(&mut game_state, 1);
         assert_eq!(nodes, 7);
     }
+
+    #[test]
+    fn test_perft_10() {
+        let mut game_state = GameState::new_from_fen("6k1/8/8/8/8/8/8/Q1R1B2K b - - 0 1");
+
+        let nodes = root_debug_perft(&mut game_state, 4);
+        assert_eq!(nodes, 15773);
+    }
+
+    #[test]
+    fn test_perft_11() {
+        let mut game_state = GameState::new_from_fen("6k1/6Q1/8/8/8/8/8/2R1B2K b - - 0 1");
+
+        let nodes = root_debug_perft(&mut game_state, 1);
+        assert_eq!(nodes, 1);
+    }
+
+    #[test]
+    fn test_perft_12() {
+        let mut game_state =
+            GameState::new_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+
+        let nodes = root_debug_perft(&mut game_state, 5);
+        assert_eq!(nodes, 4865609);
+    }
+
+    #[test]
+    fn test_perft_13() {
+        // test if basic castling moves get generated
+        let mut game_state = GameState::new_from_fen("6k1/8/8/8/8/8/8/R3K2R w KQ - 0 1");
+
+        let nodes = root_debug_perft(&mut game_state, 1);
+        assert_eq!(nodes, 26);
+    }
+
+    #[test]
+    fn test_perft_14() {
+        // test if basic castling moves get generated - with checker
+        let mut game_state = GameState::new_from_fen("2r2rk1/8/8/8/8/8/8/R3K2R w KQ - 0 1");
+
+        let nodes = root_debug_perft(&mut game_state, 1);
+        assert_eq!(nodes, 22);
+    }
+
+    #[test]
+    fn test_perft_15() {
+        // test if basic castling moves get generated - with blockers
+        let mut game_state = GameState::new_from_fen("2r2rk1/8/8/8/8/8/8/R1B1K1NR w KQ - 0 1");
+
+        let nodes = root_debug_perft(&mut game_state, 1);
+        assert_eq!(nodes, 28);
+    }
+
+    #[test]
+    fn test_perft_16() {
+        // test if basic castling moves get made and unmade correctly
+        let mut game_state = GameState::new_from_fen("6k1/8/8/8/8/8/8/R3K2R w KQ - 0 1");
+
+        let nodes = root_debug_perft(&mut game_state, 4);
+        assert_eq!(nodes, 10438);
+    }
+    #[test]
+    fn test_perft_17() {
+        // test if basic castling moves get made and unmade correctly
+        let mut game_state = GameState::new_from_fen("r5k1/8/8/8/8/8/8/R3K2R w KQ - 0 1");
+
+        let nodes = root_debug_perft(&mut game_state, 4);
+        assert_eq!(nodes, 112371);
+    }
 }

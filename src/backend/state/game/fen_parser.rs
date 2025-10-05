@@ -1,4 +1,4 @@
-use crate::backend::state::board::bitboard_manager::BitBoardManager;
+use crate::backend::state::board::bitboard_manager::BitboardManager;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
 use crate::backend::state::piece::{Piece, PieceColor, PieceType};
 use crate::backend::state::square::Square;
@@ -15,7 +15,7 @@ use crate::backend::state::square::Square;
 /// * `half_move_clock` - A mutable reference to a `u16` to update the current half-move clock count.
 pub fn parse_fen(
     fen_string: &str,
-    bit_board_manager: &mut BitBoardManager,
+    bit_board_manager: &mut BitboardManager,
     active_color: &mut PieceColor,
     irreversible_data: &mut IrreversibleData,
     half_move_clock: &mut u16,
@@ -66,19 +66,22 @@ fn parse_castling_rights(irreversible_data: &mut IrreversibleData, castling_righ
     for char in castling_rights_string.chars() {
         match char {
             '-' => {
-                // Do nothing.
+                irreversible_data.set_white_long_castle_rights(false);
+                irreversible_data.set_white_short_castle_rights(false);
+                irreversible_data.set_black_long_castle_rights(false);
+                irreversible_data.set_black_short_castle_rights(false);
             }
             'K' => {
-                irreversible_data.set_white_long_castle_rights(true);
-            }
-            'k' => {
                 irreversible_data.set_white_short_castle_rights(true);
             }
+            'k' => {
+                irreversible_data.set_black_short_castle_rights(true);
+            }
             'Q' => {
-                irreversible_data.set_black_long_castle_rights(true);
+                irreversible_data.set_white_long_castle_rights(true);
             }
             'q' => {
-                irreversible_data.set_black_short_castle_rights(true);
+                irreversible_data.set_black_long_castle_rights(true);
             }
             _ => panic!("Invalid character in FEN string"),
         }
@@ -95,7 +98,7 @@ fn parse_active_color(active_color: &mut PieceColor, active_color_string: &str) 
     }
 }
 
-fn parse_position(bit_board_manager: &mut BitBoardManager, positions_string: &str) {
+fn parse_position(bit_board_manager: &mut BitboardManager, positions_string: &str) {
     let mut file = 0;
     let mut rank = 7;
     for char in positions_string.chars() {
