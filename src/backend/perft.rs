@@ -252,6 +252,6 @@ mod tests {
         let mut game_state = GameState::new_from_fen("6k1/8/8/8/8/8/8/R3K2R w KQ - 0 1");
 
         let nodes = root_debug_perft(&mut game_state, 2);
-        assert_eq!(nodes, 28);
+        assert_eq!(nodes, 75);
     }
 }
