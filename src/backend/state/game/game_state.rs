@@ -5,8 +5,13 @@ use crate::backend::state::game::fen_parser::parse_fen;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
 use crate::backend::state::piece::PieceType::{King, Pawn, Rook};
 use crate::backend::state::piece::{Piece, PieceColor, PieceType};
-use crate::backend::state::square::{A1, A8, H1, H8, Square};
+use crate::backend::state::square::{A1, A8, D1, F1, F8, H1, H8, Square};
 use getset::{CloneGetters, Getters, MutGetters};
+
+const ROOK_SWAP_WHITE_LONG_CASTLE_BB: Bitboard = Bitboard::new_from_squares(&[A1, D1]);
+const ROOK_SWAP_WHITE_SHORT_CASTLE_BB: Bitboard = Bitboard::new_from_squares(&[H1, F1]);
+const ROOK_SWAP_BLACK_LONG_CASTLE_BB: Bitboard = Bitboard::new_from_squares(&[A8, D1]);
+const ROOK_SWAP_BLACK_SHORT_CASTLE_BB: Bitboard = Bitboard::new_from_squares(&[H8, F8]);
 
 #[derive(Debug, Getters, MutGetters, CloneGetters)]
 pub struct GameState {
@@ -187,16 +192,12 @@ impl GameState {
     fn get_rook_swap_bb(castle_type: CastleType, active_color: PieceColor) -> Bitboard {
         match castle_type {
             CastleType::Long => match active_color {
-                PieceColor::White => Bitboard::new_from_squares(vec![A1, Square::new(3, 0)]),
-                PieceColor::Black => Bitboard::new_from_squares(vec![H1, Square::new(3, 7)]),
+                PieceColor::White => ROOK_SWAP_WHITE_LONG_CASTLE_BB,
+                PieceColor::Black => ROOK_SWAP_BLACK_LONG_CASTLE_BB,
             },
             CastleType::Short => match active_color {
-                PieceColor::White => {
-                    Bitboard::new_from_squares(vec![Square::new(7, 0), Square::new(5, 0)])
-                }
-                PieceColor::Black => {
-                    Bitboard::new_from_squares(vec![Square::new(7, 7), Square::new(5, 7)])
-                }
+                PieceColor::White => ROOK_SWAP_WHITE_SHORT_CASTLE_BB,
+                PieceColor::Black => ROOK_SWAP_BLACK_SHORT_CASTLE_BB,
             },
         }
     }

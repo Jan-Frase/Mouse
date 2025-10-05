@@ -25,11 +25,13 @@ impl Bitboard {
         Bitboard { value }
     }
 
-    pub fn new_from_squares(squares: Vec<Square>) -> Self {
+    pub const fn new_from_squares(squares: &[Square]) -> Self {
         let mut bitboard = Bitboard::new();
 
-        for square in squares {
-            bitboard.fill_square(square);
+        let mut index = 0;
+        while index < squares.len() {
+            bitboard.fill_square(squares[index]);
+            index += 1;
         }
 
         bitboard

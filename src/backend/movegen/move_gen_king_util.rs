@@ -4,14 +4,13 @@ use crate::backend::state::board::bitboard::Bitboard;
 use crate::backend::state::game::game_state::GameState;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
 use crate::backend::state::piece::PieceColor;
-use crate::backend::state::square::{C1, C8, D1, D8, E1, E8, F1, F8, G1, G8, Square};
+use crate::backend::state::square::{B1, B8, C1, C8, D1, D8, E1, E8, F1, F8, G1, G8, Square};
 
 // Made these values with: https://tearth.dev/bitboard-viewer/
-// TODO: Use Bitboard::new_from_squares() instead of these values.
-const WHITE_LONG_CASTLE_MASK: Bitboard = Bitboard::new_from_value(14);
-const WHITE_SHORT_CASTLE_MASK: Bitboard = Bitboard::new_from_value(96);
-const BLACK_LONG_CASTLE_MASK: Bitboard = Bitboard::new_from_value(1008806316530991104);
-const BLACK_SHORT_CASTLE_MASK: Bitboard = Bitboard::new_from_value(6917529027641081856);
+const WHITE_LONG_CASTLE_MASK: Bitboard = Bitboard::new_from_squares(&[B1, C1, D1]);
+const WHITE_SHORT_CASTLE_MASK: Bitboard = Bitboard::new_from_squares(&[F1, G1]);
+const BLACK_LONG_CASTLE_MASK: Bitboard = Bitboard::new_from_squares(&[B8, C8, D8]);
+const BLACK_SHORT_CASTLE_MASK: Bitboard = Bitboard::new_from_squares(&[F8, G8]);
 
 const WHITE_LONG_CASTLE_MOVE: Moove = Moove::new(E1, C1);
 const WHITE_SHORT_CASTLE_MOVE: Moove = Moove::new(E1, G1);
