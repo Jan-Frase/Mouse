@@ -60,7 +60,8 @@ impl GameState {
     /// * `chess_move` - A `Moove` object representing the move to be made.
     pub fn make_move(&mut self, moove: Moove) {
         // The new irreversible data.
-        let mut irreversible_data = IrreversibleData::new();
+        let mut irreversible_data =
+            IrreversibleData::new_from_previous_state(self.irreversible_data_stack.last().unwrap());
 
         // Get the type of moved piece.
         let moved_piece = self.bb_manager.get_piece_at_square(moove.from()).unwrap();

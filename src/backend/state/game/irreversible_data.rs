@@ -35,6 +35,18 @@ impl IrreversibleData {
         }
     }
 
+    pub fn new_from_previous_state(previous_state: &IrreversibleData) -> IrreversibleData {
+        IrreversibleData {
+            half_move_clock: previous_state.half_move_clock + 1,
+            captured_piece: None,
+            en_passant_square: None,
+            white_long_castle_rights: previous_state.white_long_castle_rights,
+            white_short_castle_rights: previous_state.white_short_castle_rights,
+            black_long_castle_rights: previous_state.black_long_castle_rights,
+            black_short_castle_rights: previous_state.black_short_castle_rights,
+        }
+    }
+
     pub fn get_long_castle_rights(&self, color: PieceColor) -> bool {
         match color {
             PieceColor::White => self.white_long_castle_rights,

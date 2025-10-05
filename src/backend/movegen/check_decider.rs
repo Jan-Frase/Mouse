@@ -16,7 +16,6 @@ pub fn is_in_check_on_square(
     let friendly_bb = game_state.bb_manager().get_all_pieces_off(color);
     let enemy_bb = game_state.bb_manager().get_all_pieces_off(color.opposite());
 
-    // SLIDER: I think this needs to be changed for sliders.
     // Iterate over all pieces. Let`s assume we are checking for knights.
     for piece_type in PieceType::get_all_types() {
         // Get the bitboard that represents all possible attacks.

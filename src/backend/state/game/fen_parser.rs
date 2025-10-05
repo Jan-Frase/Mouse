@@ -66,7 +66,10 @@ fn parse_castling_rights(irreversible_data: &mut IrreversibleData, castling_righ
     for char in castling_rights_string.chars() {
         match char {
             '-' => {
-                // Do nothing.
+                irreversible_data.set_white_long_castle_rights(false);
+                irreversible_data.set_white_short_castle_rights(false);
+                irreversible_data.set_black_long_castle_rights(false);
+                irreversible_data.set_black_short_castle_rights(false);
             }
             'K' => {
                 irreversible_data.set_white_long_castle_rights(true);
