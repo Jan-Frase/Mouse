@@ -1,7 +1,7 @@
+use crate::backend::constants::{SIDES, SQUARES_AMOUNT};
 use crate::backend::state::board::bitboard::Bitboard;
 use crate::backend::state::piece::{PieceColor, PieceType};
 use crate::backend::state::square::Square;
-use crate::constants::{SIDES, SQUARES_AMOUNT};
 
 /// All of this gets generated at compile time, in the functions below.
 /// At runtime, we only have to read the values.

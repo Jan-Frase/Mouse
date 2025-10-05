@@ -1,3 +1,4 @@
+use crate::backend::constants::SQUARES_AMOUNT;
 use crate::backend::movegen::compile_time::move_cache_non_sliders::{KING_MOVES, KNIGHT_MOVES};
 use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen_king_util::gen_castles;
@@ -8,7 +9,6 @@ use crate::backend::state::game::game_state::GameState;
 use crate::backend::state::piece::PieceType::{King, Knight};
 use crate::backend::state::piece::{Piece, PieceType};
 use crate::backend::state::square::Square;
-use crate::constants::SQUARES_AMOUNT;
 
 /// Generates and returns all the pseudo legal moves for the current player's pieces
 /// based on the provided game state. This is the entry point for the move generation.
