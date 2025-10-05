@@ -9,3 +9,9 @@ name = "mouse"
 [dependencies]
 getset = "0.1.6"
 
+[dev-dependencies]
+criterion = "0.7.0"
+
+[[bench]]
+name = "criterion_perft"
+harness = false
