@@ -193,3 +193,9 @@ impl BitboardManager {
         index
     }
 }
+
+impl Default for BitboardManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
