@@ -1,7 +1,7 @@
 use crate::backend::state::square::Square;
 use crate::constants::{FILES_AMOUNT, SQUARES_AMOUNT};
 use std::fmt::{Display, Formatter};
-use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, Not};
+use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not};
 
 /// A struct that represents a BitBoard.
 /// Each bit in the `u64` value represents a specific position on the board.
@@ -23,6 +23,16 @@ impl Bitboard {
 
     pub const fn new_from_value(value: u64) -> Self {
         Bitboard { value }
+    }
+
+    pub fn new_from_squares(squares: Vec<Square>) -> Self {
+        let mut bitboard = Bitboard::new();
+
+        for square in squares {
+            bitboard.fill_square(square);
+        }
+
+        bitboard
     }
 
     pub const fn new_from_rank(rank: i8) -> Self {
@@ -182,6 +192,12 @@ impl BitXor for Bitboard {
         Bitboard {
             value: self.value ^ rhs.value,
         }
+    }
+}
+
+impl BitXorAssign<Bitboard> for &mut Bitboard {
+    fn bitxor_assign(&mut self, rhs: Bitboard) {
+        self.value ^= rhs.value;
     }
 }
 

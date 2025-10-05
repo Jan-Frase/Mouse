@@ -72,16 +72,16 @@ fn parse_castling_rights(irreversible_data: &mut IrreversibleData, castling_righ
                 irreversible_data.set_black_short_castle_rights(false);
             }
             'K' => {
-                irreversible_data.set_white_long_castle_rights(true);
-            }
-            'k' => {
                 irreversible_data.set_white_short_castle_rights(true);
             }
+            'k' => {
+                irreversible_data.set_black_short_castle_rights(true);
+            }
             'Q' => {
-                irreversible_data.set_black_long_castle_rights(true);
+                irreversible_data.set_white_long_castle_rights(true);
             }
             'q' => {
-                irreversible_data.set_black_short_castle_rights(true);
+                irreversible_data.set_black_long_castle_rights(true);
             }
             _ => panic!("Invalid character in FEN string"),
         }

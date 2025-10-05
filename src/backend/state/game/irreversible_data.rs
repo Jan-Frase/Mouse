@@ -28,6 +28,18 @@ impl IrreversibleData {
             half_move_clock: 0,
             captured_piece: None,
             en_passant_square: None,
+            white_long_castle_rights: false,
+            white_short_castle_rights: false,
+            black_long_castle_rights: false,
+            black_short_castle_rights: false,
+        }
+    }
+
+    pub fn new_with_castling_true() -> IrreversibleData {
+        IrreversibleData {
+            half_move_clock: 0,
+            captured_piece: None,
+            en_passant_square: None,
             white_long_castle_rights: true,
             white_short_castle_rights: true,
             black_long_castle_rights: true,
@@ -58,6 +70,20 @@ impl IrreversibleData {
         match color {
             PieceColor::White => self.white_short_castle_rights,
             PieceColor::Black => self.black_short_castle_rights,
+        }
+    }
+
+    pub fn remove_long_castle_rights(&mut self, color: PieceColor) {
+        match color {
+            PieceColor::White => self.white_long_castle_rights = false,
+            PieceColor::Black => self.black_long_castle_rights = false,
+        }
+    }
+
+    pub fn remove_short_castle_rights(&mut self, color: PieceColor) {
+        match color {
+            PieceColor::White => self.white_short_castle_rights = false,
+            PieceColor::Black => self.black_short_castle_rights = false,
         }
     }
 }

@@ -4,11 +4,22 @@ use crate::backend::state::square::Square;
 use getset::{CloneGetters, Setters};
 use std::fmt::{Display, Formatter};
 
+pub enum CastleType {
+    Long,
+    Short,
+}
+
+impl CastleType {
+    pub fn get_all_types() -> [CastleType; 2] {
+        [CastleType::Long, CastleType::Short]
+    }
+}
+
 /// This encodes a single move. Sidenote: This is called Moove, since Move is a keyword in Rust...
 /// It knows where a piece moved from and where it moved to.
 /// Also stores to which piece a pawn promoted if one did at all.
 ///
-/// PERF: This could be squeezed into a bitfield like, for example, stockfish does;
+/// PERF: This could be squeezed into a bitfield like, for example, stockfish does:
 /// Around line 370: https://github.com/official-stockfish/Stockfish/blob/master/src/types.h
 /// I have not done this yet for two reasons:
 /// 1. I'm not sure, without any benchmarks if it gains any performance.
@@ -41,6 +52,29 @@ impl Moove {
     /// This assumes that the moved piece is a pawn and only checks if the rank changed by 2.
     pub fn is_double_pawn_push(&self) -> bool {
         (self.from.rank() - self.to.rank()).abs() == 2
+    }
+
+    /// This assumes that the moved piece is a king and only checks if the file changed by 2.
+    pub fn is_castle(&self) -> bool {
+        (self.from.file() - self.to.file()).abs() == 2
+    }
+
+    /// This assumes that the moved piece is a king and only checks if the target file is 6.
+    fn is_short_castle(&self) -> bool {
+        self.to.file() == 6
+    }
+
+    /// This assumes that the moved piece is a king and only checks if the target file is 2.
+    fn is_long_castle(&self) -> bool {
+        self.to.file() == 2
+    }
+
+    pub fn get_castle_type(&self) -> CastleType {
+        if self.is_short_castle() {
+            CastleType::Short
+        } else {
+            CastleType::Long
+        }
     }
 
     pub fn new_from_uci_notation(uci_notation: &str) -> Moove {
