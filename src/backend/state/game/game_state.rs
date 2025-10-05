@@ -128,7 +128,7 @@ impl GameState {
     fn make_move_capture(
         &mut self,
         irreversible_data: &mut IrreversibleData,
-        mut capture_square: Square,
+        capture_square: Square,
     ) {
         // Get the type of the captured piece if it exists.
         let captured_piece = self.bb_manager.get_piece_at_square(capture_square);

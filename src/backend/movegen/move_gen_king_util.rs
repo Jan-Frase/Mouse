@@ -22,14 +22,14 @@ const WHITE_SHORT_CASTLE_CHECK_SQUARES: [Square; 2] = [Square::new(5, 0), Square
 const BLACK_LONG_CASTLE_CHECK_SQUARES: [Square; 2] = [Square::new(3, 7), Square::new(2, 7)];
 const BLACK_SHORT_CASTLE_CHECK_SQUARES: [Square; 2] = [Square::new(5, 7), Square::new(6, 7)];
 
-enum CASTLE_TYPES {
+enum CastleTypes {
     Long,
     Short,
 }
 
-impl CASTLE_TYPES {
-    pub fn get_all_types() -> [CASTLE_TYPES; 2] {
-        [CASTLE_TYPES::Long, CASTLE_TYPES::Short]
+impl CastleTypes {
+    pub fn get_all_types() -> [CastleTypes; 2] {
+        [CastleTypes::Long, CastleTypes::Short]
     }
 }
 
@@ -40,7 +40,7 @@ pub fn gen_castles(
 ) {
     let irreversible_data = game_state.irreversible_data_stack().last().unwrap();
 
-    for castle_type in CASTLE_TYPES::get_all_types() {
+    for castle_type in CastleTypes::get_all_types() {
         let (castling_rights, squares_the_king_moves_through, between_king_rook_bb, moove) =
             get_needed_constants(irreversible_data, &castle_type, game_state.active_color());
 
@@ -91,11 +91,11 @@ fn gen_castle(
 
 fn get_needed_constants(
     irreversible_data: &IrreversibleData,
-    castle_types: &CASTLE_TYPES,
+    castle_types: &CastleTypes,
     piece_color: PieceColor,
 ) -> (bool, [Square; 2], Bitboard, Moove) {
     match castle_types {
-        CASTLE_TYPES::Long => match piece_color {
+        CastleTypes::Long => match piece_color {
             PieceColor::White => (
                 irreversible_data.get_long_castle_rights(piece_color),
                 WHITE_LONG_CASTLE_CHECK_SQUARES,
@@ -109,7 +109,7 @@ fn get_needed_constants(
                 BLACK_LONG_CASTLE_MOVE,
             ),
         },
-        CASTLE_TYPES::Short => match piece_color {
+        CastleTypes::Short => match piece_color {
             PieceColor::White => (
                 irreversible_data.get_long_castle_rights(piece_color),
                 WHITE_SHORT_CASTLE_CHECK_SQUARES,
