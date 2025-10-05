@@ -1,8 +1,6 @@
 use crate::backend::movegen::check_decider::is_in_check;
-use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen::get_pseudo_legal_moves;
 use crate::backend::state::game::game_state::GameState;
-use std::env::Args;
 
 pub fn perft(game_state: &mut GameState, depth: u8) -> u64 {
     // PERFT: I would love to make this work, but it does not atm.
@@ -31,63 +29,6 @@ pub fn perft(game_state: &mut GameState, depth: u8) -> u64 {
     nodes
 }
 
-// --------------------------------------------- //
-// PERFTREE DEBUGGING
-// https://github.com/agausmann/perftree
-// --------------------------------------------- //
-
-pub fn run_perftree_debug(mut input: Args) {
-    // Remove the first useless input.
-    input.next();
-
-    let depth = input.next().unwrap();
-    let depth = depth.parse::<i32>().unwrap();
-
-    let fen = &input.next().unwrap();
-    let mut game_state = GameState::new_from_fen(fen);
-
-    for mooves in input {
-        // Code golfing
-        mooves
-            .split_whitespace()
-            .map(Moove::new_from_uci_notation)
-            .for_each(|moove| {
-                game_state.make_move(moove);
-            });
-    }
-
-    root_debug_perft(&mut game_state, depth as u8);
-}
-
-pub fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
-    // Total nodes searched.
-    let mut nodes = 0;
-
-    // Generate all root moves.
-    let mut moves = get_pseudo_legal_moves(game_state);
-    // Sort them in the same way as perftree does
-    moves.sort();
-    for chess_move in moves {
-        game_state.make_move(chess_move);
-        // If we are in check after making the move -> skip.
-        if is_in_check(game_state, game_state.active_color().opposite()) {
-            game_state.unmake_move(chess_move);
-            continue;
-        }
-
-        // Recursively calculate nodes for this position.
-        let nodes_for_this_position = perft(game_state, depth - 1);
-        nodes += nodes_for_this_position;
-        // print info for https://github.com/agausmann/perftree
-        println!("{} {:?}", chess_move, nodes_for_this_position);
-
-        game_state.unmake_move(chess_move);
-    }
-
-    println!();
-    println!("{:?}", nodes);
-    nodes
-}
 // --------------------------------------------- //
 // TESTING
 // --------------------------------------------- //
@@ -135,10 +76,10 @@ mod tests {
     fn test_perft_05() {
         let mut game_state = GameState::new_from_fen("7k/3p4/8/2P5/8/8/8/7K b - - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 4);
+        let nodes = perft(&mut game_state, 4);
         assert_eq!(nodes, 896);
 
-        let nodes = root_debug_perft(&mut game_state, 5);
+        let nodes = perft(&mut game_state, 5);
         assert_eq!(nodes, 6583);
     }
 
@@ -146,7 +87,7 @@ mod tests {
     fn test_perft_06() {
         let mut game_state = GameState::new_from_fen("7k/8/8/8/8/2K5/2P5/8 w - - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 1);
+        let nodes = perft(&mut game_state, 1);
         assert_eq!(nodes, 7);
     }
 
@@ -154,14 +95,14 @@ mod tests {
     fn test_perft_07() {
         let mut game_state = GameState::new_from_fen("8/3P1k2/8/8/8/8/8/7K b - - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 1);
+        let nodes = perft(&mut game_state, 1);
         assert_eq!(nodes, 7);
 
-        let nodes = root_debug_perft(&mut game_state, 2);
+        let nodes = perft(&mut game_state, 2);
         assert_eq!(nodes, 49);
 
         // Missing slider logic atm
-        // let nodes = root_debug_perft(&mut game_state, 3);
+        // let nodes = perft(&mut game_state, 3);
         // assert_eq!(nodes, 289);
     }
 
@@ -169,7 +110,7 @@ mod tests {
     fn test_perft_08() {
         let mut game_state = GameState::new_from_fen("8/1ppP1k2/1n6/3P2P1/8/8/8/7K b - - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 2);
+        let nodes = perft(&mut game_state, 2);
         assert_eq!(nodes, 117);
     }
 
@@ -177,7 +118,7 @@ mod tests {
     fn test_perft_09() {
         let mut game_state = GameState::new_from_fen("7k/P7/8/8/8/8/8/7K w - - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 1);
+        let nodes = perft(&mut game_state, 1);
         assert_eq!(nodes, 7);
     }
 
@@ -185,7 +126,7 @@ mod tests {
     fn test_perft_10() {
         let mut game_state = GameState::new_from_fen("6k1/8/8/8/8/8/8/Q1R1B2K b - - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 4);
+        let nodes = perft(&mut game_state, 4);
         assert_eq!(nodes, 15773);
     }
 
@@ -193,7 +134,7 @@ mod tests {
     fn test_perft_11() {
         let mut game_state = GameState::new_from_fen("6k1/6Q1/8/8/8/8/8/2R1B2K b - - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 1);
+        let nodes = perft(&mut game_state, 1);
         assert_eq!(nodes, 1);
     }
 
@@ -202,7 +143,7 @@ mod tests {
         let mut game_state =
             GameState::new_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 5);
+        let nodes = perft(&mut game_state, 5);
         assert_eq!(nodes, 4865609);
     }
 
@@ -211,7 +152,7 @@ mod tests {
         // test if basic castling moves get generated
         let mut game_state = GameState::new_from_fen("6k1/8/8/8/8/8/8/R3K2R w KQ - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 1);
+        let nodes = perft(&mut game_state, 1);
         assert_eq!(nodes, 26);
     }
 
@@ -220,7 +161,7 @@ mod tests {
         // test if basic castling moves get generated - with checker
         let mut game_state = GameState::new_from_fen("2r2rk1/8/8/8/8/8/8/R3K2R w KQ - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 1);
+        let nodes = perft(&mut game_state, 1);
         assert_eq!(nodes, 22);
     }
 
@@ -229,7 +170,7 @@ mod tests {
         // test if basic castling moves get generated - with blockers
         let mut game_state = GameState::new_from_fen("2r2rk1/8/8/8/8/8/8/R1B1K1NR w KQ - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 1);
+        let nodes = perft(&mut game_state, 1);
         assert_eq!(nodes, 28);
     }
 
@@ -238,7 +179,7 @@ mod tests {
         // test if basic castling moves get made and unmade correctly
         let mut game_state = GameState::new_from_fen("6k1/8/8/8/8/8/8/R3K2R w KQ - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 4);
+        let nodes = perft(&mut game_state, 4);
         assert_eq!(nodes, 10438);
     }
     #[test]
@@ -246,7 +187,7 @@ mod tests {
         // test if basic castling moves get made and unmade correctly
         let mut game_state = GameState::new_from_fen("r5k1/8/8/8/8/8/8/R3K2R w KQ - 0 1");
 
-        let nodes = root_debug_perft(&mut game_state, 4);
+        let nodes = perft(&mut game_state, 4);
         assert_eq!(nodes, 112371);
     }
 }

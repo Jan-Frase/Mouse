@@ -1,1 +1,1 @@
-UCI Chess Engine built by Jan Frase in Rust :)
+Chess move generator built by Jan Frase in Rust :)

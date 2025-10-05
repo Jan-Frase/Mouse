@@ -95,3 +95,9 @@ impl IrreversibleData {
         }
     }
 }
+
+impl Default for IrreversibleData {
+    fn default() -> Self {
+        Self::new()
+    }
+}

@@ -1,7 +1,7 @@
+use crate::backend::constants::{PIECE_TYPE_COUNT, SIDES};
 use crate::backend::state::board::bitboard::Bitboard;
 use crate::backend::state::piece::{Piece, PieceColor, PieceType};
 use crate::backend::state::square::Square;
-use crate::constants::{PIECE_TYPE_COUNT, SIDES};
 
 const WHITE_START_INDEX: usize = 0;
 const WHITE_END_INDEX: usize = 5;
@@ -191,5 +191,11 @@ impl BitboardManager {
         // white: pawn: 0, rook: 1, knight: 2, bishop: 3, queen: 4, king: 5
         // black: pawn: 6, rook: 7, knight: 8, bishop: 9, queen: 10, king: 11
         index
+    }
+}
+
+impl Default for BitboardManager {
+    fn default() -> Self {
+        Self::new()
     }
 }
