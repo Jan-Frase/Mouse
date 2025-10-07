@@ -1,6 +1,6 @@
 use mouse::GameState;
 use mouse::backend::perft::perft;
-use mouse::perft_fixture::{NORMAL_PERFT, PerftFixture};
+use perft_fixtures::perft_fixtures::{NORMAL_PERFT, PerftFixture};
 use std::time::Instant;
 
 pub fn manual_perft() {
@@ -17,7 +17,7 @@ pub fn manual_perft() {
 
     println!();
     println!("Total nodes: {:?}", total_nodes);
-    println!("Total time: {:.1}", elapsed.as_secs_f64());
+    println!("Total time: {:.1}s", elapsed.as_secs_f64());
     println!("Total nodes per second: {:.0}", total_nodes_per_second);
 }
 
@@ -26,20 +26,19 @@ pub fn manual_perft() {
 // --------------------------------------------- //
 
 fn run_nps_perft(perft_fixture: PerftFixture) -> u64 {
-    let fen = perft_fixture.perft_setup().fen();
+    let fen = perft_fixture.perft_setup.fen;
     let mut game_state = GameState::new_from_fen(fen);
 
     // Start timer to calculate nodes per second.
     let now = Instant::now();
 
-    let nodes = perft(&mut game_state, perft_fixture.depth());
+    let nodes = perft(&mut game_state, perft_fixture.depth);
 
     let elapsed = now.elapsed();
     let nodes_per_second = nodes as f64 / elapsed.as_secs_f64();
     println!(
         "Name: {:?}, Nps: {:.0}.",
-        perft_fixture.perft_setup().name(),
-        nodes_per_second
+        perft_fixture.perft_setup.name, nodes_per_second
     );
 
     nodes

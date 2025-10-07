@@ -1,15 +1,15 @@
 use iai::black_box;
 use mouse::GameState;
 use mouse::backend::perft::perft;
-use mouse::perft_fixture::{NORMAL_PERFT, PerftFixture};
+use perft_fixtures::perft_fixtures::{NORMAL_PERFT, PerftFixture};
 
 pub fn iai_perft(perft_fixture: &PerftFixture) {
-    let fen_string = perft_fixture.perft_setup().fen();
-    let _ = perft_fixture.perft_setup().name().to_owned()
+    let fen_string = perft_fixture.perft_setup.fen;
+    let _ = perft_fixture.perft_setup.name.to_owned()
         + ", depth: "
-        + perft_fixture.depth().to_string().as_str();
-    let depth = perft_fixture.depth();
-    let _ = perft_fixture.expected_nodes();
+        + perft_fixture.depth.to_string().as_str();
+    let depth = perft_fixture.depth;
+    let _ = perft_fixture.expected_nodes;
 
     let mut state = GameState::new_from_fen(fen_string);
 

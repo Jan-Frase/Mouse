@@ -5,14 +5,9 @@
 // FENs for perft tests
 // -----------------------------------------
 
-use getset::{CloneGetters, Getters};
-
-#[derive(Getters, CloneGetters)]
 pub struct PerftFen {
-    #[get_clone = "pub"]
-    fen: &'static str,
-    #[get_clone = "pub"]
-    name: &'static str,
+    pub fen: &'static str,
+    pub name: &'static str,
 }
 
 const STARTING_POS: PerftFen = PerftFen {
@@ -79,14 +74,10 @@ const KING_AND_QUEEN: PerftFen = PerftFen {
 // Depths and results for perft tests
 // -----------------------------------------
 
-#[derive(Getters, CloneGetters)]
 pub struct PerftFixture {
-    #[get = "pub"]
-    perft_setup: PerftFen,
-    #[get_clone = "pub"]
-    depth: u8,
-    #[get_clone = "pub"]
-    expected_nodes: u64,
+    pub perft_setup: PerftFen,
+    pub depth: u8,
+    pub expected_nodes: u64,
 }
 
 const STARTING_POS_FAST: PerftFixture = PerftFixture {

@@ -6,10 +6,3 @@ pub use backend::state::board::bitboard;
 pub use backend::state::game::game_state::GameState;
 pub use backend::state::piece;
 pub use backend::state::square;
-
-// Everything below is for testing and benchmarking purposes
-#[cfg(any(test, feature = "fixtures"))]
-pub mod perft_fixture;
-
-#[cfg(not(any(test, feature = "fixtures")))]
-mod perft_fixture;

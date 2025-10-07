@@ -1,16 +1,16 @@
 use criterion::{Criterion, Throughput, criterion_group, criterion_main};
 use mouse::GameState;
 use mouse::backend::perft::perft;
-use mouse::perft_fixture::FAST_PERFT;
+use perft_fixtures::perft_fixtures::FAST_PERFT;
 
 pub fn criterion_perft(c: &mut Criterion) {
     for perft_set_up in FAST_PERFT {
-        let fen_string = perft_set_up.perft_setup().fen();
-        let name = perft_set_up.perft_setup().name().to_owned()
+        let fen_string = perft_set_up.perft_setup.fen;
+        let name = perft_set_up.perft_setup.name.to_owned()
             + ", depth: "
-            + perft_set_up.depth().to_string().as_str();
-        let depth = perft_set_up.depth();
-        let expected_nodes = perft_set_up.expected_nodes();
+            + perft_set_up.depth.to_string().as_str();
+        let depth = perft_set_up.depth;
+        let expected_nodes = perft_set_up.expected_nodes;
 
         let mut state = GameState::new_from_fen(fen_string);
 
