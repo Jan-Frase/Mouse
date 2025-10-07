@@ -25,3 +25,8 @@ required-features = ["fixtures"]
 name = "iai_perft"
 harness = false
 required-features = ["fixtures"]
+
+[[bench]]
+name = "manual_perft"
+harness = false
+required-features = ["fixtures"]
