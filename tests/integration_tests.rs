@@ -1,6 +1,6 @@
 use mouse::GameState;
 use mouse::backend::perft::perft;
-use perft_fixtures::perft_fixtures::{FAST_PERFT, NORMAL_PERFT, PerftFixture};
+use perft_fixtures::perft_fixtures::{FAST_PERFT, LONG_PERFT, NORMAL_PERFT, PerftFixture};
 
 #[test]
 fn test_perft_fast() {
@@ -10,6 +10,11 @@ fn test_perft_fast() {
 #[test]
 fn test_perft_normal() {
     test_perft_fixtures(&NORMAL_PERFT);
+}
+
+#[test]
+fn test_perft_long() {
+    test_perft_fixtures(&LONG_PERFT);
 }
 
 fn test_perft_fixtures(perft_fixtures: &[PerftFixture]) {
@@ -23,6 +28,8 @@ fn test_single_perft_fixture(perft_fixture: &PerftFixture) {
     let depth = perft_fixture.depth;
     let expected_nodes = perft_fixture.expected_nodes;
     let name = perft_fixture.perft_setup.name.to_owned();
+
+    println!("Testing {:?} with {:?} nodes", name, expected_nodes);
 
     let mut state = GameState::new_from_fen(fen);
     let nodes = perft(&mut state, depth);
@@ -153,7 +160,7 @@ fn test_perft_13() {
 
 #[test]
 fn test_perft_14() {
-    // test if basic castling moves get generated - with checker
+    // test if basic castling moves get generated - with checkers
     let mut game_state = GameState::new_from_fen("2r2rk1/8/8/8/8/8/8/R3K2R w KQ - 0 1");
 
     let nodes = perft(&mut game_state, 1);
