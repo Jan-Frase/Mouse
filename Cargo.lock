@@ -9,7 +9,7 @@ dependencies = [
  "criterion",
  "getset",
  "iai",
-    "perft_fixtures",
+ "perft_fixtures",
 ]
 
 [[package]]
