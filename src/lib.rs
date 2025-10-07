@@ -11,5 +11,5 @@ pub use backend::state::square;
 #[cfg(any(test, feature = "fixtures"))]
 pub mod perft_fixture;
 
-#[cfg(all(not(test), not(feature = "fixtures")))]
+#[cfg(not(any(test, feature = "fixtures")))]
 mod perft_fixture;

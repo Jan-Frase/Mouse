@@ -50,6 +50,11 @@ const KING_ONLY: PerftFen = PerftFen {
     name: "king only",
 };
 
+const KING_AND_PAWN: PerftFen = PerftFen {
+    fen: "4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1",
+    name: "king and pawn",
+};
+
 const KING_AND_ROOK: PerftFen = PerftFen {
     fen: "1n2k1n1/8/8/8/8/8/8/1N2K1N1 w - - 0 1",
     name: "king and rook",
