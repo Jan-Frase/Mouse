@@ -8,8 +8,8 @@ pub use backend::state::piece;
 pub use backend::state::square;
 
 // Everything below is for testing and benchmarking purposes
-#[cfg(any(test, feature = "bench"))]
+#[cfg(any(test, feature = "fixtures"))]
 pub mod perft_fixture;
 
-#[cfg(all(not(test), not(feature = "bench")))]
+#[cfg(all(not(test), not(feature = "fixtures")))]
 mod perft_fixture;

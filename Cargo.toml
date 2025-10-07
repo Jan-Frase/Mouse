@@ -10,12 +10,18 @@ name = "mouse"
 getset = "0.1.6"
 
 [features]
-bench = []
+fixtures = []
 
 [dev-dependencies]
 criterion = "0.7.0"
+iai = "0.1"
 
 [[bench]]
 name = "criterion_perft"
 harness = false
-required-features = ["bench"]
+required-features = ["fixtures"]
+
+[[bench]]
+name = "iai_perft"
+harness = false
+required-features = ["fixtures"]
