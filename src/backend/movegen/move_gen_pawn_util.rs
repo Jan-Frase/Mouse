@@ -58,7 +58,7 @@ pub fn get_double_pawn_push_moves(
 
     pawn_bitboard &= starting_bitboard;
 
-    for square in pawn_bitboard.get_all_true_squares() {
+    for square in pawn_bitboard {
         let mut single_push_bb = PAWN_QUIET_MOVES[active_color as usize][square.square_to_index()];
         single_push_bb &= all_pieces_bb;
         if !single_push_bb.is_empty() {

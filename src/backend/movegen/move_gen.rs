@@ -93,9 +93,8 @@ pub(crate) fn iterate_over_bitboard_for_non_slider(
     // The `moves_cache` array would for each square contain all viable moves for a knight.
 
     // Assuming we are in the starting position as white `squares_with_piece` would be [B1, G1].
-    let squares_with_piece = piece_bitboard.get_all_true_squares();
     // We then iterate over all these squares...
-    for square in squares_with_piece.iter() {
+    for square in piece_bitboard {
         // ... get the potential moves for the piece on that square...
         // SLIDER: (This only works this easily for non-sliders)
         let mut potential_moves_bitboard = moves_cache[square.square_to_index()];
@@ -104,7 +103,7 @@ pub(crate) fn iterate_over_bitboard_for_non_slider(
 
         //... and convert the resulting bitboard to a list of moves.
         moves.append(&mut convert_bitboard_to_moves(
-            *square,
+            square,
             potential_moves_bitboard,
         ));
     }
@@ -112,13 +111,10 @@ pub(crate) fn iterate_over_bitboard_for_non_slider(
     moves
 }
 
-fn convert_bitboard_to_moves(square: Square, moves_bitboard: Bitboard) -> Vec<Moove> {
-    // Now take the resulting bitboard and convert all true squares to a list of squares.
-    let squares_we_can_move_to = moves_bitboard.get_all_true_squares();
-
+pub fn convert_bitboard_to_moves(square: Square, moves_bitboard: Bitboard) -> Vec<Moove> {
     // generate all the moves
-    let mut moves: Vec<Moove> = Vec::with_capacity(squares_we_can_move_to.len());
-    for to_square in squares_we_can_move_to {
+    let mut moves: Vec<Moove> = Vec::new();
+    for to_square in moves_bitboard {
         moves.push(Moove::new(square, to_square))
     }
     moves
