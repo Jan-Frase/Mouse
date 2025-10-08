@@ -70,7 +70,7 @@ pub fn criterion_move_gen(c: &mut Criterion) {
     group.throughput(Throughput::Elements(expected_moves));
     group.bench_function("Move gen", |b| {
         b.iter(|| {
-            let moves = get_pseudo_legal_moves(std::hint::black_box(&state));
+            let _ = get_pseudo_legal_moves(std::hint::black_box(&state));
         })
     });
     group.finish();
