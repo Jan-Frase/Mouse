@@ -1,6 +1,6 @@
 use criterion::{Criterion, Throughput, criterion_group, criterion_main};
-use mouse::GameState;
 use mouse::backend::perft::perft;
+use mouse::{GameState, get_pseudo_legal_moves};
 use perft_fixtures::perft_fixtures::FAST_PERFT;
 
 pub fn criterion_perft(c: &mut Criterion) {
@@ -41,5 +41,45 @@ fn run_criterion_perft(
     group.finish();
 }
 
-criterion_group!(benches, criterion_perft);
+pub fn criterion_make_unmake_move(c: &mut Criterion) {
+    let mut state = GameState::new_from_fen(
+        "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQ - 0 1",
+    );
+    let moves = get_pseudo_legal_moves(&state);
+
+    let mut group = c.benchmark_group("General make unmake");
+    group.throughput(Throughput::Elements(moves.len() as u64));
+    group.bench_function("General make unmake", |b| {
+        b.iter(|| {
+            for moove in &moves[0..moves.len()] {
+                state.make_move(*moove);
+                state.unmake_move(*moove);
+            }
+        })
+    });
+    group.finish();
+}
+
+pub fn criterion_move_gen(c: &mut Criterion) {
+    let state = GameState::new_from_fen(
+        "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+    );
+    let expected_moves = 48;
+
+    let mut group = c.benchmark_group("Move gen");
+    group.throughput(Throughput::Elements(expected_moves));
+    group.bench_function("Move gen", |b| {
+        b.iter(|| {
+            let moves = get_pseudo_legal_moves(std::hint::black_box(&state));
+        })
+    });
+    group.finish();
+}
+
+criterion_group!(
+    benches,
+    criterion_perft,
+    criterion_make_unmake_move,
+    criterion_move_gen
+);
 criterion_main!(benches);
