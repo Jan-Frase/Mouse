@@ -5,12 +5,12 @@ use crate::backend::state::game::fen_parser::parse_fen;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
 use crate::backend::state::piece::PieceType::{King, Pawn, Rook};
 use crate::backend::state::piece::{Piece, PieceColor, PieceType};
-use crate::backend::state::square::{A1, A8, D1, F1, F8, H1, H8, Square};
+use crate::backend::state::square::{A1, A8, D1, D8, F1, F8, H1, H8, Square};
 use getset::{CloneGetters, Getters, MutGetters};
 
 const ROOK_SWAP_WHITE_LONG_CASTLE_BB: Bitboard = Bitboard::new_from_squares(&[A1, D1]);
 const ROOK_SWAP_WHITE_SHORT_CASTLE_BB: Bitboard = Bitboard::new_from_squares(&[H1, F1]);
-const ROOK_SWAP_BLACK_LONG_CASTLE_BB: Bitboard = Bitboard::new_from_squares(&[A8, D1]);
+const ROOK_SWAP_BLACK_LONG_CASTLE_BB: Bitboard = Bitboard::new_from_squares(&[A8, D8]);
 const ROOK_SWAP_BLACK_SHORT_CASTLE_BB: Bitboard = Bitboard::new_from_squares(&[H8, F8]);
 
 #[derive(Debug, Getters, MutGetters, CloneGetters)]

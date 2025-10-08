@@ -9,3 +9,19 @@ name = "mouse"
 [dependencies]
 getset = "0.1.6"
 
+[dev-dependencies]
+criterion = "0.7.0"
+iai = "0.1"
+perft_fixtures = { path = "perft_fixtures" }
+
+[[bench]]
+name = "criterion_perft"
+harness = false
+
+# [[bench]]
+# name = "iai_perft"
+# harness = false
+
+[[bench]]
+name = "manual_perft"
+harness = false
