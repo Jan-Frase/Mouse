@@ -27,7 +27,7 @@ pub fn is_in_check_on_square(
             enemy_bb,
         );
 
-        // Get bitboard that marks where enemy knights are standing.
+        // Get the bitboard that marks where enemy knights are standing.
         let enemy_piece = Piece::new(piece_type, color.opposite());
         let enemy_piece_bitboard = game_state.bb_manager().get_bitboard(enemy_piece);
 
@@ -79,8 +79,7 @@ pub fn is_in_check(game_state: &GameState, color: PieceColor) -> bool {
 fn get_kings_square(game_state: &GameState, color: PieceColor) -> Square {
     let king = Piece::new(PieceType::King, color);
     let king_bitboard = game_state.bb_manager().get_bitboard(king);
-    let king_square = king_bitboard.get_all_true_squares();
-    king_square[0]
+    king_bitboard.clone().next().unwrap()
 }
 
 fn get_attack_bitboard_for_piece_and_square(

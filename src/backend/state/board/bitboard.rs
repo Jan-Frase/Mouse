@@ -1,4 +1,4 @@
-use crate::backend::constants::{FILES_AMOUNT, SQUARES_AMOUNT};
+use crate::backend::constants::FILES_AMOUNT;
 use crate::backend::state::square::Square;
 use std::fmt::{Display, Formatter};
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not};
@@ -15,7 +15,7 @@ pub struct Bitboard {
 
 impl Bitboard {
     /// Creates a new `BitBoard` instance with an initial value of 0.
-    /// This cant be converted to a default variant cause i need it to be const.
+    /// This can't be converted to a default variant because I need it to be const.
     #[allow(clippy::new_without_default)]
     pub const fn new() -> Self {
         Bitboard { value: 0 }
@@ -97,29 +97,6 @@ impl Bitboard {
         self.value ^= bit;
     }
 
-    /// Retrieves all `Square` instances that correspond to the true bits
-    /// in the bitboard.
-    /// PERF: Speeding this up would be very useful.
-    ///
-    /// # Returns
-    ///
-    /// A `Vec<Square>` containing all `Square` instances corresponding to active bits
-    /// in the bitboard.
-    pub fn get_all_true_squares(&self) -> Vec<Square> {
-        // Init the vec with enough capacity for all pawns.
-        let mut squares = Vec::with_capacity(FILES_AMOUNT);
-        // Loop over all squares and check if the bit is set.
-        let mut bit = 1;
-        for i in 0..SQUARES_AMOUNT {
-            if self.value & bit != 0 {
-                squares.push(Square::index_to_square(i as i8));
-            }
-            // Shift the mask bit one to the left.
-            bit <<= 1;
-        }
-        squares
-    }
-
     /// Converts a given `Square` into a corresponding 64-bit bitmask.
     ///
     /// # Parameters
@@ -133,6 +110,22 @@ impl Bitboard {
     const fn square_to_bitmask(square: Square) -> u64 {
         let index = square.square_to_index();
         1 << index
+    }
+}
+
+impl Iterator for Bitboard {
+    type Item = Square;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.value == 0 {
+            return None;
+        }
+
+        let index = self.value.trailing_zeros();
+        let square = Square::index_to_square(index as i8);
+        self.clear_square(square);
+
+        Some(square)
     }
 }
 

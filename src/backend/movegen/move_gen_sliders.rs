@@ -1,4 +1,5 @@
 use crate::backend::movegen::moove::Moove;
+use crate::backend::movegen::move_gen::convert_bitboard_to_moves;
 use crate::backend::movegen::move_gen_sliders::SlideDirection::{
     Down, DownLeft, DownRight, Left, Right, Up, UpLeft, UpRight,
 };
@@ -54,17 +55,12 @@ pub fn get_moves_for_non_slider_piece(
     enemy_pieces_bb: Bitboard,
 ) -> Vec<Moove> {
     let mut moves: Vec<Moove> = Vec::new();
-    for square in piece_bb.get_all_true_squares() {
+
+    for square in piece_bb {
         let moves_for_piece_bb =
             calculate_slider_move_bitboard(piece_type, square, friendly_pieces_bb, enemy_pieces_bb);
 
-        // Now take the resulting bitboard and convert all true squares to a list of squares.
-        let squares_we_can_move_to = moves_for_piece_bb.get_all_true_squares();
-
-        // generate all the moves
-        for to_square in squares_we_can_move_to {
-            moves.push(Moove::new(square, to_square))
-        }
+        moves.append(&mut convert_bitboard_to_moves(square, moves_for_piece_bb));
     }
     moves
 }
