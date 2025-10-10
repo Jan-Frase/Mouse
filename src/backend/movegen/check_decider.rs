@@ -79,8 +79,7 @@ pub fn is_in_check(game_state: &GameState, color: PieceColor) -> bool {
 fn get_kings_square(game_state: &GameState, color: PieceColor) -> Square {
     let king = Piece::new(PieceType::King, color);
     let king_bitboard = game_state.bb_manager().get_bitboard(king);
-    let king_square = king_bitboard.clone().next().unwrap();
-    king_square
+    king_bitboard.clone().next().unwrap()
 }
 
 fn get_attack_bitboard_for_piece_and_square(
