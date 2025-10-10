@@ -92,8 +92,7 @@ pub(crate) fn iterate_over_bitboard_for_non_slider(
     // Example: We are doing this for all knights.
     // The `moves_cache` array would for each square contain all viable moves for a knight.
 
-    // Assuming we are in the starting position as white `squares_with_piece` would be [B1, G1].
-    // We then iterate over all these squares...
+    // We iterate over all squares with a knight on it...
     for square in piece_bitboard {
         // ... get the potential moves for the piece on that square...
         // SLIDER: (This only works this easily for non-sliders)
