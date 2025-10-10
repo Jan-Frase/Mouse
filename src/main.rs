@@ -2,15 +2,14 @@ use crate::backend::movegen::check_decider::is_in_check;
 use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen::get_pseudo_legal_moves;
 use crate::backend::perft::perft;
-use crate::backend::state::game::game_state::GameState;
-use std::env;
+use crate::backend::state::game::state::State;
 use std::env::Args;
 
 mod backend;
 
 fn main() {
-    let args = env::args();
-    run_perftree_debug(args);
+    // let args = env::args();
+    // run_perftree_debug(args);
 }
 
 // --------------------------------------------- //
@@ -26,7 +25,7 @@ pub fn run_perftree_debug(mut input: Args) {
     let depth = depth.parse::<i32>().unwrap();
 
     let fen = &input.next().unwrap();
-    let mut game_state = GameState::new_from_fen(fen);
+    let mut game_state = State::new_from_fen(fen);
 
     for mooves in input {
         // Code golfing
@@ -41,7 +40,7 @@ pub fn run_perftree_debug(mut input: Args) {
     root_debug_perft(&mut game_state, depth as u8);
 }
 
-pub fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
+pub fn root_debug_perft(game_state: &mut State, depth: u8) -> u64 {
     // Total nodes searched.
     let mut nodes = 0;
 
@@ -53,7 +52,7 @@ pub fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
         game_state.make_move(chess_move);
         // If we are in check after making the move -> skip.
         if is_in_check(game_state, game_state.active_color().opposite()) {
-            game_state.unmake_move(chess_move);
+            // game_state.unmake_move(chess_move);
             continue;
         }
 
@@ -63,7 +62,7 @@ pub fn root_debug_perft(game_state: &mut GameState, depth: u8) -> u64 {
         // print info for https://github.com/agausmann/perftree
         println!("{} {:?}", chess_move, nodes_for_this_position);
 
-        game_state.unmake_move(chess_move);
+        // game_state.unmake_move(chess_move);
     }
 
     println!();

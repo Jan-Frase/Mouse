@@ -1,5 +1,5 @@
 use crate::backend::constants::{SIDES, SQUARES_AMOUNT};
-use crate::backend::state::board::bitboard::Bitboard;
+use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::piece::{PieceColor, PieceType};
 use crate::backend::state::square::Square;
 
@@ -19,10 +19,10 @@ use crate::backend::state::square::Square;
 /// At runtime we have to apply some further checks to this bitboard:
 /// 1. Are some of these squares blocked by friendly pieces?
 /// 2. Would this move put me in check etc...?
-pub const KING_MOVES: [Bitboard; SQUARES_AMOUNT] = calculate_potential_moves_cache(PieceType::King);
+pub const KING_MOVES: [BitBoard; SQUARES_AMOUNT] = calculate_potential_moves_cache(PieceType::King);
 
 /// The same as above, but for the knight.
-pub const KNIGHT_MOVES: [Bitboard; SQUARES_AMOUNT] =
+pub const KNIGHT_MOVES: [BitBoard; SQUARES_AMOUNT] =
     calculate_potential_moves_cache(PieceType::Knight);
 
 enum PawnMoveType {
@@ -32,15 +32,15 @@ enum PawnMoveType {
 }
 
 /// All quiet moves for pawns.
-pub const PAWN_QUIET_MOVES: [[Bitboard; SQUARES_AMOUNT]; SIDES] =
+pub const PAWN_QUIET_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
     generate_pawn_moves(PawnMoveType::Quiet);
 
 /// All capture moves for pawns.
-pub const PAWN_CAPTURE_MOVES: [[Bitboard; SQUARES_AMOUNT]; SIDES] =
+pub const PAWN_CAPTURE_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
     generate_pawn_moves(PawnMoveType::Capture);
 
 /// All capture moves for pawns.
-pub const PAWN_DOUBLE_PUSH_MOVES: [[Bitboard; SQUARES_AMOUNT]; SIDES] =
+pub const PAWN_DOUBLE_PUSH_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
     generate_pawn_moves(PawnMoveType::DoublePush);
 
 /// Initializes a collection of bitboards representing all possible moves for each square.
@@ -53,8 +53,8 @@ pub const PAWN_DOUBLE_PUSH_MOVES: [[Bitboard; SQUARES_AMOUNT]; SIDES] =
 /// # Returns
 /// An array of `BitBoard` of size `SQUARES_AMOUNT`, where each entry corresponds to the
 /// possible moves for the square at the same index.
-const fn calculate_potential_moves_cache(piece_type: PieceType) -> [Bitboard; SQUARES_AMOUNT] {
-    let mut potential_moves = [Bitboard::new(); SQUARES_AMOUNT];
+const fn calculate_potential_moves_cache(piece_type: PieceType) -> [BitBoard; SQUARES_AMOUNT] {
+    let mut potential_moves = [BitBoard::new(); SQUARES_AMOUNT];
 
     // iterate over all squares
     let mut square_index: usize = 0;
@@ -82,8 +82,8 @@ const fn calculate_potential_moves_cache(piece_type: PieceType) -> [Bitboard; SQ
 ///
 /// # Returns
 /// A `BitBoard` containing all valid surrounding squares a king can move to.
-const fn generate_king_moves(square: Square) -> Bitboard {
-    let mut bitboard = Bitboard::new();
+const fn generate_king_moves(square: Square) -> BitBoard {
+    let mut bitboard = BitBoard::new();
 
     // since this fn is const, we can't use a loop
     // instead we use a while loop
@@ -116,8 +116,8 @@ const fn generate_king_moves(square: Square) -> Bitboard {
 }
 
 /// Same as above but for the knight.
-const fn generate_knight_moves(square: Square) -> Bitboard {
-    let mut bitboard = Bitboard::new();
+const fn generate_knight_moves(square: Square) -> BitBoard {
+    let mut bitboard = BitBoard::new();
 
     // The offsets for the knight moves. Starting in the top left corner.
     // `_ _ _ _ _ _ _ _`
@@ -149,8 +149,8 @@ const fn generate_knight_moves(square: Square) -> Bitboard {
     bitboard
 }
 
-const fn generate_pawn_moves(pawn_move_type: PawnMoveType) -> [[Bitboard; SQUARES_AMOUNT]; SIDES] {
-    let mut quiet_moves = [[Bitboard::new(); SQUARES_AMOUNT]; SIDES];
+const fn generate_pawn_moves(pawn_move_type: PawnMoveType) -> [[BitBoard; SQUARES_AMOUNT]; SIDES] {
+    let mut quiet_moves = [[BitBoard::new(); SQUARES_AMOUNT]; SIDES];
 
     let mut side_index = 0;
     while side_index < 2 {
@@ -159,12 +159,12 @@ const fn generate_pawn_moves(pawn_move_type: PawnMoveType) -> [[Bitboard; SQUARE
             1 => PieceColor::Black,
             _ => panic!("Invalid side index"),
         };
-        let mut potential_moves = [Bitboard::new(); SQUARES_AMOUNT];
+        let mut potential_moves = [BitBoard::new(); SQUARES_AMOUNT];
 
         // iterate over all squares
         let mut square_index: usize = 0;
         while square_index < SQUARES_AMOUNT {
-            let mut bitboard = Bitboard::new();
+            let mut bitboard = BitBoard::new();
             // generate a square struct from the index
             let square = Square::index_to_square(square_index as i8);
 
@@ -196,7 +196,7 @@ const fn generate_pawn_moves(pawn_move_type: PawnMoveType) -> [[Bitboard; SQUARE
 
 const fn generate_pawn_quiet_moves(
     square: Square,
-    bitboard: &mut Bitboard,
+    bitboard: &mut BitBoard,
     active_color: PieceColor,
 ) {
     let forward_square = square.forward_by_one(active_color);
@@ -207,7 +207,7 @@ const fn generate_pawn_quiet_moves(
 
 const fn generate_pawn_attack_moves(
     square: Square,
-    bitboard: &mut Bitboard,
+    bitboard: &mut BitBoard,
     active_color: PieceColor,
 ) {
     let right_diagonal_square = square.right_by_one().forward_by_one(active_color);
@@ -223,7 +223,7 @@ const fn generate_pawn_attack_moves(
 
 const fn generate_pawn_double_push_moves(
     square: Square,
-    bitboard: &mut Bitboard,
+    bitboard: &mut BitBoard,
     active_color: PieceColor,
 ) {
     if !square.is_pawn_start(active_color) {

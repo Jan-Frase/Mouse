@@ -1,6 +1,6 @@
 use criterion::{Criterion, Throughput, criterion_group, criterion_main};
 use mouse::backend::perft::perft;
-use mouse::{GameState, get_pseudo_legal_moves};
+use mouse::{State, get_pseudo_legal_moves};
 use perft_fixtures::perft_fixtures::FAST_PERFT;
 
 pub fn criterion_perft(c: &mut Criterion) {
@@ -12,7 +12,7 @@ pub fn criterion_perft(c: &mut Criterion) {
         let depth = perft_set_up.depth;
         let expected_nodes = perft_set_up.expected_nodes;
 
-        let mut state = GameState::new_from_fen(fen_string);
+        let mut state = State::new_from_fen(fen_string);
 
         run_criterion_perft(c, name, depth, expected_nodes, &mut state);
     }
@@ -23,7 +23,7 @@ fn run_criterion_perft(
     name: String,
     depth: u8,
     expected_nodes: u64,
-    mut state: &mut GameState,
+    mut state: &mut State,
 ) {
     let mut group = c.benchmark_group(&*name);
     // group.sample_size(10);
@@ -42,9 +42,8 @@ fn run_criterion_perft(
 }
 
 pub fn criterion_make_unmake_move(c: &mut Criterion) {
-    let mut state = GameState::new_from_fen(
-        "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQ - 0 1",
-    );
+    let mut state =
+        State::new_from_fen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQ - 0 1");
     let moves = get_pseudo_legal_moves(&state);
 
     let mut group = c.benchmark_group("General make unmake");
@@ -52,8 +51,7 @@ pub fn criterion_make_unmake_move(c: &mut Criterion) {
     group.bench_function("General make unmake", |b| {
         b.iter(|| {
             for moove in &moves[0..moves.len()] {
-                state.make_move(*moove);
-                state.unmake_move(*moove);
+                let next_state = state.make_move(std::hint::black_box(*moove));
             }
         })
     });
@@ -61,9 +59,8 @@ pub fn criterion_make_unmake_move(c: &mut Criterion) {
 }
 
 pub fn criterion_move_gen(c: &mut Criterion) {
-    let state = GameState::new_from_fen(
-        "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
-    );
+    let state =
+        State::new_from_fen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
     let expected_moves = 48;
 
     let mut group = c.benchmark_group("Move gen");

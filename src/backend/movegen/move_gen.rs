@@ -4,8 +4,8 @@ use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen_king_util::gen_castles;
 use crate::backend::movegen::move_gen_pawn_util::gen_pawn_moves;
 use crate::backend::movegen::move_gen_sliders::get_moves_for_non_slider_piece;
-use crate::backend::state::board::bitboard::Bitboard;
-use crate::backend::state::game::game_state::GameState;
+use crate::backend::state::board::bitboard::BitBoard;
+use crate::backend::state::game::state::State;
 use crate::backend::state::piece::PieceType::{King, Knight};
 use crate::backend::state::piece::{Piece, PieceType};
 use crate::backend::state::square::Square;
@@ -22,7 +22,7 @@ use crate::backend::state::square::Square;
 ///
 /// * A `Vec<Moove>` containing all the computed pseudo legal moves for the current player's
 ///   pieces.
-pub fn get_pseudo_legal_moves(game_state: &GameState) -> Vec<Moove> {
+pub fn get_pseudo_legal_moves(game_state: &State) -> Vec<Moove> {
     let bitboard_manager = game_state.bb_manager();
     // Bitboard containing all pieces of the active color. These block moves.
     let friendly_pieces_bb = bitboard_manager.get_all_pieces_off(game_state.active_color());
@@ -82,9 +82,9 @@ pub fn get_pseudo_legal_moves(game_state: &GameState) -> Vec<Moove> {
 // ------------------------------------
 
 pub(crate) fn iterate_over_bitboard_for_non_slider(
-    moves_cache: [Bitboard; SQUARES_AMOUNT],
-    piece_bitboard: Bitboard,
-    mask_bitboard: Bitboard,
+    moves_cache: [BitBoard; SQUARES_AMOUNT],
+    piece_bitboard: BitBoard,
+    mask_bitboard: BitBoard,
 ) -> Vec<Moove> {
     // PERF: Instead of creating a new vector for each piece, we could reuse the same vector and append to it.
     let mut moves: Vec<Moove> = Vec::new();
@@ -110,7 +110,7 @@ pub(crate) fn iterate_over_bitboard_for_non_slider(
     moves
 }
 
-pub fn convert_bitboard_to_moves(square: Square, moves_bitboard: Bitboard) -> Vec<Moove> {
+pub fn convert_bitboard_to_moves(square: Square, moves_bitboard: BitBoard) -> Vec<Moove> {
     // generate all the moves
     let mut moves: Vec<Moove> = Vec::new();
     for to_square in moves_bitboard {

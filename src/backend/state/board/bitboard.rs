@@ -9,20 +9,20 @@ use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, N
 /// # Fields
 /// - `value` (`u64`): The underlying 64-bit integer used to store the board's state.
 #[derive(Copy, Clone, Debug)]
-pub struct Bitboard {
+pub struct BitBoard {
     value: u64,
 }
 
-impl Bitboard {
+impl BitBoard {
     /// Creates a new `BitBoard` instance with an initial value of 0.
     /// This can't be converted to a default variant because I need it to be const.
     #[allow(clippy::new_without_default)]
     pub const fn new() -> Self {
-        Bitboard { value: 0 }
+        BitBoard { value: 0 }
     }
 
     pub const fn new_from_squares(squares: &[Square]) -> Self {
-        let mut bitboard = Bitboard::new();
+        let mut bitboard = BitBoard::new();
 
         let mut index = 0;
         while index < squares.len() {
@@ -34,7 +34,7 @@ impl Bitboard {
     }
 
     pub const fn new_from_rank(rank: i8) -> Self {
-        let mut bitboard = Bitboard::new();
+        let mut bitboard = BitBoard::new();
 
         let mut file = 0;
         while file < FILES_AMOUNT {
@@ -113,7 +113,7 @@ impl Bitboard {
     }
 }
 
-impl Iterator for Bitboard {
+impl Iterator for BitBoard {
     type Item = Square;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -130,71 +130,71 @@ impl Iterator for Bitboard {
 }
 
 // Various bitwise operations on BitBoards.
-impl Not for Bitboard {
+impl Not for BitBoard {
     type Output = Self;
 
     fn not(self) -> Self::Output {
-        Bitboard { value: !self.value }
+        BitBoard { value: !self.value }
     }
 }
 
-impl BitAnd for Bitboard {
+impl BitAnd for BitBoard {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        Bitboard {
+        BitBoard {
             value: self.value & rhs.value,
         }
     }
 }
 
-impl BitAndAssign for Bitboard {
+impl BitAndAssign for BitBoard {
     fn bitand_assign(&mut self, rhs: Self) {
         self.value &= rhs.value;
     }
 }
 
-impl BitOr for Bitboard {
+impl BitOr for BitBoard {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        Bitboard {
+        BitBoard {
             value: self.value | rhs.value,
         }
     }
 }
 
-impl BitOrAssign<Bitboard> for &mut Bitboard {
-    fn bitor_assign(&mut self, rhs: Bitboard) {
+impl BitOrAssign<BitBoard> for &mut BitBoard {
+    fn bitor_assign(&mut self, rhs: BitBoard) {
         self.value |= rhs.value;
     }
 }
 
-impl BitOrAssign for Bitboard {
+impl BitOrAssign for BitBoard {
     fn bitor_assign(&mut self, rhs: Self) {
         self.value |= rhs.value;
     }
 }
 
-impl BitXor for Bitboard {
+impl BitXor for BitBoard {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        Bitboard {
+        BitBoard {
             value: self.value ^ rhs.value,
         }
     }
 }
 
-impl BitXorAssign<Bitboard> for &mut Bitboard {
-    fn bitxor_assign(&mut self, rhs: Bitboard) {
+impl BitXorAssign<BitBoard> for &mut BitBoard {
+    fn bitxor_assign(&mut self, rhs: BitBoard) {
         self.value ^= rhs.value;
     }
 }
 
 // Display implementation for BitBoards - useful for debugging.
 // Sadly, RustRover does not display them when debugging.
-impl Display for Bitboard {
+impl Display for BitBoard {
     /// Formats the bitboard (`self`) into a string representation,
     /// can be used for debugging purposes.
     ///

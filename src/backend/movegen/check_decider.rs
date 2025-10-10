@@ -2,17 +2,13 @@ use crate::backend::movegen::compile_time::move_cache_non_sliders::{
     KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES,
 };
 use crate::backend::movegen::move_gen_sliders::calculate_slider_move_bitboard;
-use crate::backend::state::board::bitboard::Bitboard;
-use crate::backend::state::game::game_state::GameState;
+use crate::backend::state::board::bitboard::BitBoard;
+use crate::backend::state::game::state::State;
 use crate::backend::state::piece::PieceType::{Bishop, Queen, Rook};
 use crate::backend::state::piece::{Piece, PieceColor, PieceType};
 use crate::backend::state::square::Square;
 
-pub fn is_in_check_on_square(
-    game_state: &GameState,
-    color: PieceColor,
-    king_square: Square,
-) -> bool {
+pub fn is_in_check_on_square(game_state: &State, color: PieceColor, king_square: Square) -> bool {
     let friendly_bb = game_state.bb_manager().get_all_pieces_off(color);
     let enemy_bb = game_state.bb_manager().get_all_pieces_off(color.opposite());
 
@@ -60,7 +56,7 @@ pub fn is_in_check_on_square(
 /// - A boolean value:
 ///   - `true` if the king of the specified color is in check.
 ///   - `false` otherwise.
-pub fn is_in_check(game_state: &GameState, color: PieceColor) -> bool {
+pub fn is_in_check(game_state: &State, color: PieceColor) -> bool {
     // Idea:
     // If, for example, color == white, we want to figure out if white is currently in check.
     // We then pretend that the white king is one after the other replaced by: pawn, rook, bishop, queen, king.
@@ -76,7 +72,7 @@ pub fn is_in_check(game_state: &GameState, color: PieceColor) -> bool {
 }
 
 /// Returns the square where the king of the respective side is located.
-fn get_kings_square(game_state: &GameState, color: PieceColor) -> Square {
+fn get_kings_square(game_state: &State, color: PieceColor) -> Square {
     let king = Piece::new(PieceType::King, color);
     let king_bitboard = game_state.bb_manager().get_bitboard(king);
     king_bitboard.clone().next().unwrap()
@@ -86,9 +82,9 @@ fn get_attack_bitboard_for_piece_and_square(
     piece_type: PieceType,
     piece_color: PieceColor,
     square: Square,
-    friendly_bb: Bitboard,
-    enemy_bb: Bitboard,
-) -> Bitboard {
+    friendly_bb: BitBoard,
+    enemy_bb: BitBoard,
+) -> BitBoard {
     match piece_type {
         PieceType::King => KING_MOVES[square.square_to_index()],
         PieceType::Knight => KNIGHT_MOVES[square.square_to_index()],

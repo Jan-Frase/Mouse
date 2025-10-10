@@ -5,10 +5,8 @@ use getset::{CloneGetters, Setters};
 
 /// The `IrreversibleData` struct stores data that is irreversible.
 /// For example, this remembers what kind of piece was captured for `unmake_move()`.
-#[derive(CloneGetters, Setters, Debug)]
+#[derive(CloneGetters, Setters, Debug, Clone)]
 pub struct IrreversibleData {
-    #[getset(get_clone = "pub", set = "pub")]
-    half_move_clock: u8,
     #[getset(get_clone = "pub", set = "pub")]
     captured_piece: Option<PieceType>,
     #[getset(get_clone = "pub", set = "pub")]
@@ -26,7 +24,6 @@ pub struct IrreversibleData {
 impl IrreversibleData {
     pub fn new() -> IrreversibleData {
         IrreversibleData {
-            half_move_clock: 0,
             captured_piece: None,
             en_passant_square: None,
             white_long_castle_rights: false,
@@ -38,7 +35,6 @@ impl IrreversibleData {
 
     pub fn new_with_castling_true() -> IrreversibleData {
         IrreversibleData {
-            half_move_clock: 0,
             captured_piece: None,
             en_passant_square: None,
             white_long_castle_rights: true,
@@ -50,7 +46,6 @@ impl IrreversibleData {
 
     pub fn new_from_previous_state(previous_state: &IrreversibleData) -> IrreversibleData {
         IrreversibleData {
-            half_move_clock: previous_state.half_move_clock + 1,
             captured_piece: None,
             en_passant_square: None,
             white_long_castle_rights: previous_state.white_long_castle_rights,
