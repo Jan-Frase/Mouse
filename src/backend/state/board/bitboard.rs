@@ -117,12 +117,11 @@ impl Iterator for Bitboard {
     type Item = Square;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let index = self.value.trailing_zeros();
-        // if there are 64 trailing zeros, we are done.
-        if index == 64 {
+        if self.value == 0 {
             return None;
         }
 
+        let index = self.value.trailing_zeros();
         let square = Square::index_to_square(index as i8);
         self.clear_square(square);
 
