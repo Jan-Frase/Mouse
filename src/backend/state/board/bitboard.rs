@@ -21,6 +21,12 @@ impl BitBoard {
         BitBoard { value: 0 }
     }
 
+    /// Converts a given `Square` into a corresponding bitboard.
+    const fn new_from_square(square: Square) -> BitBoard {
+        let index = square.square_to_index();
+        BitBoard { value: 1 << index }
+    }
+
     pub const fn new_from_squares(squares: &[Square]) -> Self {
         let mut bitboard = BitBoard::new();
 
@@ -72,8 +78,8 @@ impl BitBoard {
     /// * `true` if the square is occupied.
     /// * `false` if the square is unoccupied.
     pub fn get_square(&self, square: Square) -> bool {
-        let index = Self::square_to_bitmask(square);
-        let bitboard_after_mask = self.value & index;
+        let index = Self::new_from_square(square);
+        let bitboard_after_mask = self.value & index.value;
         bitboard_after_mask != 0
     }
 
@@ -83,8 +89,8 @@ impl BitBoard {
     ///
     /// * `square` - A `Square` instance representing the square to be marked as filled.
     pub const fn fill_square(&mut self, square: Square) {
-        let bit = Self::square_to_bitmask(square);
-        self.value |= bit;
+        let bit = Self::new_from_square(square);
+        self.value |= bit.value;
     }
 
     /// Marks a square on a board as empty by setting the corresponding bit in the `value` field.
@@ -93,23 +99,8 @@ impl BitBoard {
     ///
     /// * `square` - A `Square` instance representing the square to be marked as filled.
     pub fn clear_square(&mut self, square: Square) {
-        let bit = Self::square_to_bitmask(square);
-        self.value ^= bit;
-    }
-
-    /// Converts a given `Square` into a corresponding 64-bit bitmask.
-    ///
-    /// # Parameters
-    /// - `square`: A `Square` object that represents a position or coordinate
-    ///   which can be converted into a bitmask.
-    ///
-    /// # Returns
-    /// - A `u64` value representing the bitmask corresponding to the input `Square`.
-    ///   The bitmask will have exactly one bit set, corresponding to the index
-    ///   value of the `Square`.
-    const fn square_to_bitmask(square: Square) -> u64 {
-        let index = square.square_to_index();
-        1 << index
+        let bit = Self::new_from_square(square);
+        self.value ^= bit.value;
     }
 }
 
