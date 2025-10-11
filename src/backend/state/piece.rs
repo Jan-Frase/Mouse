@@ -18,38 +18,16 @@ pub const ALL_PIECES: [PieceType; 6] = [
     PieceType::King,
 ];
 
-impl PieceType {
-    /// Returns an array containing all piece types.
-    #[inline(always)]
-    pub fn get_all_types() -> [PieceType; 6] {
-        [
-            PieceType::Pawn,
-            PieceType::Rook,
-            PieceType::Knight,
-            PieceType::Bishop,
-            PieceType::Queen,
-            PieceType::King,
-        ]
-    }
+pub const PROMOTABLE_PIECES: [PieceType; 4] = [
+    PieceType::Rook,
+    PieceType::Knight,
+    PieceType::Bishop,
+    PieceType::Queen,
+];
 
-    /// Returns an array containing all piece types that a pawn can promote to.
-    pub fn get_promotable_types() -> [PieceType; 4] {
-        [
-            PieceType::Rook,
-            PieceType::Knight,
-            PieceType::Bishop,
-            PieceType::Queen,
-        ]
-    }
+pub const SLIDER_PIECES: [PieceType; 3] = [PieceType::Rook, PieceType::Bishop, PieceType::Queen];
 
-    pub fn get_slider_types() -> [PieceType; 3] {
-        [PieceType::Rook, PieceType::Bishop, PieceType::Queen]
-    }
-
-    pub fn get_trivial_types() -> [PieceType; 2] {
-        [PieceType::Knight, PieceType::King]
-    }
-}
+pub const TRIVIAL_PIECES: [PieceType; 2] = [PieceType::Knight, PieceType::King];
 
 /// Represents the color of a piece.
 #[derive(Copy, Clone, Debug)]

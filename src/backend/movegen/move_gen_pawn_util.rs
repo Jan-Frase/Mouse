@@ -6,7 +6,7 @@ use crate::backend::state::board::bb_manager::BBManager;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
 use crate::backend::state::piece::PieceType::{Pawn, Queen};
-use crate::backend::state::piece::{PieceColor, PieceType};
+use crate::backend::state::piece::{PROMOTABLE_PIECES, PieceColor};
 
 pub fn gen_pawn_moves(
     game_state: &State,
@@ -104,7 +104,7 @@ pub fn promotion_logic(moves: &mut Vec<Moove>) {
     for index in (0..moves.len()).rev() {
         let moove = moves[index];
         if moove.to().is_on_promotion_rank() {
-            for piece_type in PieceType::get_promotable_types() {
+            for piece_type in PROMOTABLE_PIECES {
                 if piece_type == Queen {
                     moves[index].set_promotion_type(Some(Queen));
                     continue;

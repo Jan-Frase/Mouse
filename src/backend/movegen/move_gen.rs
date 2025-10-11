@@ -6,8 +6,8 @@ use crate::backend::movegen::move_gen_pawn_util::gen_pawn_moves;
 use crate::backend::movegen::move_gen_sliders::get_moves_for_non_slider_piece;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
-use crate::backend::state::piece::PieceType;
 use crate::backend::state::piece::PieceType::{King, Knight};
+use crate::backend::state::piece::{SLIDER_PIECES, TRIVIAL_PIECES};
 use crate::backend::state::square::Square;
 
 /// Generates and returns all the pseudo legal moves for the current player's pieces
@@ -34,7 +34,7 @@ pub fn get_pseudo_legal_moves(game_state: &State) -> Vec<Moove> {
     let active_color = game_state.active_color();
 
     // Move gen for king and knight (excluding castles)
-    for trivial_type in PieceType::get_trivial_types() {
+    for trivial_type in TRIVIAL_PIECES {
         let moves_cache = match trivial_type {
             Knight => KNIGHT_MOVES,
             King => KING_MOVES,
@@ -65,7 +65,7 @@ pub fn get_pseudo_legal_moves(game_state: &State) -> Vec<Moove> {
     );
 
     // Gen queen, bishop and rook moves
-    for slider_type in PieceType::get_slider_types() {
+    for slider_type in SLIDER_PIECES {
         let mut moves = get_moves_for_non_slider_piece(
             slider_type,
             bitboard_manager.get_colored_piece_bb(slider_type, active_color),

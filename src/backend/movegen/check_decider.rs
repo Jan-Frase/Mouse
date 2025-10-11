@@ -5,7 +5,7 @@ use crate::backend::movegen::move_gen_sliders::calculate_slider_move_bitboard;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
 use crate::backend::state::piece::PieceType::{Bishop, Queen, Rook};
-use crate::backend::state::piece::{PieceColor, PieceType};
+use crate::backend::state::piece::{ALL_PIECES, PieceColor, PieceType};
 use crate::backend::state::square::Square;
 
 pub fn is_in_check_on_square(game_state: &State, color: PieceColor, king_square: Square) -> bool {
@@ -15,7 +15,7 @@ pub fn is_in_check_on_square(game_state: &State, color: PieceColor, king_square:
         .get_all_pieces_bb_off(color.opposite());
 
     // Iterate over all pieces. Let`s assume we are checking for knights.
-    for piece_type in PieceType::get_all_types() {
+    for piece_type in ALL_PIECES {
         // Get the bitboard that represents all possible attacks.
         let attack_bitboard = get_attack_bitboard_for_piece_and_square(
             piece_type,
