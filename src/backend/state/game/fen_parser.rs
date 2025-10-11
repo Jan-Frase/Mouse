@@ -1,8 +1,8 @@
 use crate::backend::state::board::bb_manager::BBManager;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
-use crate::backend::state::piece::PieceColor::{Black, White};
-use crate::backend::state::piece::PieceType::{Bishop, King, Knight, Pawn, Queen, Rook};
-use crate::backend::state::piece::{PieceColor, PieceType};
+use crate::backend::state::piece::Piece::{Bishop, King, Knight, Pawn, Queen, Rook};
+use crate::backend::state::piece::Side::{Black, White};
+use crate::backend::state::piece::{Piece, Side};
 use crate::backend::state::square::Square;
 
 /// Parses a FEN (Forsyth-Edwards Notation) string and updates the corresponding game state.
@@ -18,7 +18,7 @@ use crate::backend::state::square::Square;
 pub fn parse_fen(
     fen_string: &str,
     bit_board_manager: &mut BBManager,
-    active_color: &mut PieceColor,
+    active_color: &mut Side,
     irreversible_data: &mut IrreversibleData,
     half_move_clock: &mut u16,
 ) {
@@ -90,10 +90,10 @@ fn parse_castling_rights(irreversible_data: &mut IrreversibleData, castling_righ
     }
 }
 
-fn parse_active_color(active_color: &mut PieceColor, active_color_string: &str) {
+fn parse_active_color(active_color: &mut Side, active_color_string: &str) {
     match active_color_string {
-        "w" => *active_color = PieceColor::White,
-        "b" => *active_color = PieceColor::Black,
+        "w" => *active_color = Side::White,
+        "b" => *active_color = Side::Black,
         _ => {
             panic!("Invalid character in FEN string");
         }
@@ -168,8 +168,8 @@ fn parse_position(bit_board_manager: &mut BBManager, positions_string: &str) {
 
     fn fill_square(
         bb_manager: &mut BBManager,
-        piece_type: PieceType,
-        piece_color: PieceColor,
+        piece_type: Piece,
+        piece_color: Side,
         square: Square,
     ) {
         bb_manager.get_piece_bb_mut(piece_type).fill_square(square);

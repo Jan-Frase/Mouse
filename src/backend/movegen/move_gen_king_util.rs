@@ -3,7 +3,7 @@ use crate::backend::movegen::moove::{CastleType, Moove};
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
 use crate::backend::state::game::state::State;
-use crate::backend::state::piece::PieceColor;
+use crate::backend::state::piece::Side;
 use crate::backend::state::square::{B1, B8, C1, C8, D1, D8, E1, E8, F1, F8, G1, G8, Square};
 
 // Made these values with: https://tearth.dev/bitboard-viewer/
@@ -81,17 +81,17 @@ fn gen_castle(
 fn get_needed_constants(
     irreversible_data: &IrreversibleData,
     castle_types: &CastleType,
-    piece_color: PieceColor,
+    piece_color: Side,
 ) -> (bool, [Square; 3], BitBoard, Moove) {
     match castle_types {
         CastleType::Long => match piece_color {
-            PieceColor::White => (
+            Side::White => (
                 irreversible_data.get_long_castle_rights(piece_color),
                 WHITE_LONG_CASTLE_CHECK_SQUARES,
                 WHITE_LONG_CASTLE_MASK,
                 WHITE_LONG_CASTLE_MOVE,
             ),
-            PieceColor::Black => (
+            Side::Black => (
                 irreversible_data.get_long_castle_rights(piece_color),
                 BLACK_LONG_CASTLE_CHECK_SQUARES,
                 BLACK_LONG_CASTLE_MASK,
@@ -99,13 +99,13 @@ fn get_needed_constants(
             ),
         },
         CastleType::Short => match piece_color {
-            PieceColor::White => (
+            Side::White => (
                 irreversible_data.get_short_castle_rights(piece_color),
                 WHITE_SHORT_CASTLE_CHECK_SQUARES,
                 WHITE_SHORT_CASTLE_MASK,
                 WHITE_SHORT_CASTLE_MOVE,
             ),
-            PieceColor::Black => (
+            Side::Black => (
                 irreversible_data.get_short_castle_rights(piece_color),
                 BLACK_SHORT_CASTLE_CHECK_SQUARES,
                 BLACK_SHORT_CASTLE_MASK,

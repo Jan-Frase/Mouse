@@ -3,8 +3,8 @@ use crate::backend::state::board::bb_manager::BBManager;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::fen_parser::parse_fen;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
-use crate::backend::state::piece::PieceType::{King, Pawn, Rook};
-use crate::backend::state::piece::{PieceColor, PieceType};
+use crate::backend::state::piece::Piece::{King, Pawn, Rook};
+use crate::backend::state::piece::{Piece, Side};
 use crate::backend::state::square::{A1, A8, D1, D8, F1, F8, H1, H8, Square};
 use getset::{CloneGetters, Getters, MutGetters};
 
@@ -20,7 +20,7 @@ pub struct State {
     #[getset(get = "pub")]
     irreversible_data: IrreversibleData,
     #[getset(get_clone = "pub")]
-    active_color: PieceColor,
+    active_color: Side,
     #[getset(get = "pub")]
     half_move_clock: u16,
 }
@@ -30,7 +30,7 @@ impl State {
     pub fn new() -> State {
         State {
             bb_manager: BBManager::new(),
-            active_color: PieceColor::White,
+            active_color: Side::White,
             irreversible_data: IrreversibleData::new_with_castling_true(),
             half_move_clock: 0,
         }
@@ -39,7 +39,7 @@ impl State {
     /// Creates a new `GameState` instance based on the fen string.
     pub fn new_from_fen(fen_string: &str) -> State {
         let mut bb_manager = BBManager::new();
-        let mut active_color = PieceColor::White;
+        let mut active_color = Side::White;
         let mut irreversible_data = IrreversibleData::new();
         let mut half_move_clock = 0;
 
@@ -195,15 +195,15 @@ impl State {
         }
     }
 
-    fn get_rook_swap_bb(castle_type: CastleType, active_color: PieceColor) -> BitBoard {
+    fn get_rook_swap_bb(castle_type: CastleType, active_color: Side) -> BitBoard {
         match castle_type {
             CastleType::Long => match active_color {
-                PieceColor::White => ROOK_SWAP_WHITE_LONG_CASTLE_BB,
-                PieceColor::Black => ROOK_SWAP_BLACK_LONG_CASTLE_BB,
+                Side::White => ROOK_SWAP_WHITE_LONG_CASTLE_BB,
+                Side::Black => ROOK_SWAP_BLACK_LONG_CASTLE_BB,
             },
             CastleType::Short => match active_color {
-                PieceColor::White => ROOK_SWAP_WHITE_SHORT_CASTLE_BB,
-                PieceColor::Black => ROOK_SWAP_BLACK_SHORT_CASTLE_BB,
+                Side::White => ROOK_SWAP_WHITE_SHORT_CASTLE_BB,
+                Side::Black => ROOK_SWAP_BLACK_SHORT_CASTLE_BB,
             },
         }
     }
@@ -211,9 +211,9 @@ impl State {
     fn make_move_castling_rights_on_rook_move_or_capture(
         &mut self,
         irreversible_data: &mut IrreversibleData,
-        piece_type: PieceType,
+        piece_type: Piece,
         relevant_square: Square,
-        relevant_side: PieceColor,
+        relevant_side: Side,
     ) {
         if piece_type == Rook {
             for castling_type in CastleType::get_all_types() {
@@ -225,15 +225,15 @@ impl State {
         }
     }
 
-    fn get_rook_starting_square(castle_type: CastleType, color: PieceColor) -> Square {
+    fn get_rook_starting_square(castle_type: CastleType, color: Side) -> Square {
         match castle_type {
             CastleType::Long => match color {
-                PieceColor::White => A1,
-                PieceColor::Black => A8,
+                Side::White => A1,
+                Side::Black => A8,
             },
             CastleType::Short => match color {
-                PieceColor::White => H1,
-                PieceColor::Black => H8,
+                Side::White => H1,
+                Side::Black => H8,
             },
         }
     }

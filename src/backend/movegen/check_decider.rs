@@ -4,11 +4,11 @@ use crate::backend::movegen::compile_time::move_cache_non_sliders::{
 use crate::backend::movegen::move_gen_sliders::calculate_slider_move_bitboard;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
-use crate::backend::state::piece::PieceType::{Bishop, Queen, Rook};
-use crate::backend::state::piece::{ALL_PIECES, PieceColor, PieceType};
+use crate::backend::state::piece::Piece::{Bishop, Queen, Rook};
+use crate::backend::state::piece::{ALL_PIECES, Piece, Side};
 use crate::backend::state::square::Square;
 
-pub fn is_in_check_on_square(game_state: &State, color: PieceColor, king_square: Square) -> bool {
+pub fn is_in_check_on_square(game_state: &State, color: Side, king_square: Square) -> bool {
     let friendly_bb = game_state.bb_manager().get_all_pieces_bb_off(color);
     let enemy_bb = game_state
         .bb_manager()
@@ -57,7 +57,7 @@ pub fn is_in_check_on_square(game_state: &State, color: PieceColor, king_square:
 /// - A boolean value:
 ///   - `true` if the king of the specified color is in check.
 ///   - `false` otherwise.
-pub fn is_in_check(game_state: &State, color: PieceColor) -> bool {
+pub fn is_in_check(game_state: &State, color: Side) -> bool {
     // Idea:
     // If, for example, color == white, we want to figure out if white is currently in check.
     // We then pretend that the white king is one after the other replaced by: pawn, rook, bishop, queen, king.
@@ -73,24 +73,24 @@ pub fn is_in_check(game_state: &State, color: PieceColor) -> bool {
 }
 
 /// Returns the square where the king of the respective side is located.
-fn get_kings_square(game_state: &State, color: PieceColor) -> Square {
-    let king_bitboard = game_state.bb_manager().get_piece_bb(PieceType::King);
+fn get_kings_square(game_state: &State, color: Side) -> Square {
+    let king_bitboard = game_state.bb_manager().get_piece_bb(Piece::King);
     let side_bb = game_state.bb_manager().get_all_pieces_bb_off(color);
     let mut bb = king_bitboard & side_bb;
     bb.next().unwrap()
 }
 
 fn get_attack_bitboard_for_piece_and_square(
-    piece_type: PieceType,
-    piece_color: PieceColor,
+    piece_type: Piece,
+    piece_color: Side,
     square: Square,
     friendly_bb: BitBoard,
     enemy_bb: BitBoard,
 ) -> BitBoard {
     match piece_type {
-        PieceType::King => KING_MOVES[square.square_to_index()],
-        PieceType::Knight => KNIGHT_MOVES[square.square_to_index()],
-        PieceType::Pawn => PAWN_CAPTURE_MOVES[piece_color as usize][square.square_to_index()],
+        Piece::King => KING_MOVES[square.square_to_index()],
+        Piece::Knight => KNIGHT_MOVES[square.square_to_index()],
+        Piece::Pawn => PAWN_CAPTURE_MOVES[piece_color as usize][square.square_to_index()],
         Rook => calculate_slider_move_bitboard(Rook, square, friendly_bb, enemy_bb),
         Bishop => calculate_slider_move_bitboard(Bishop, square, friendly_bb, enemy_bb),
         Queen => calculate_slider_move_bitboard(Queen, square, friendly_bb, enemy_bb),

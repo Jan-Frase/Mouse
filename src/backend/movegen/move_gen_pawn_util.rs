@@ -5,8 +5,8 @@ use crate::backend::movegen::moove::Moove;
 use crate::backend::state::board::bb_manager::BBManager;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
-use crate::backend::state::piece::PieceType::{Pawn, Queen};
-use crate::backend::state::piece::{PROMOTABLE_PIECES, PieceColor};
+use crate::backend::state::piece::Piece::{Pawn, Queen};
+use crate::backend::state::piece::{PROMOTABLE_PIECES, Side};
 
 pub fn gen_pawn_moves(
     game_state: &State,
@@ -14,7 +14,7 @@ pub fn gen_pawn_moves(
     friendly_pieces_bb: BitBoard,
     enemy_pieces_bb: BitBoard,
     all_pseudo_legal_moves: &mut Vec<Moove>,
-    active_color: PieceColor,
+    active_color: Side,
 ) {
     // Quiet pawn moves
     let mut moves = crate::backend::movegen::move_gen::iterate_over_bitboard_for_non_slider(
@@ -44,7 +44,7 @@ pub fn gen_pawn_moves(
 }
 pub fn get_double_pawn_push_moves(
     bitboard_manager: &BBManager,
-    active_color: PieceColor,
+    active_color: Side,
     all_pieces_bb: BitBoard,
 ) -> Vec<Moove> {
     let mut moves: Vec<Moove> = Vec::new();
@@ -52,8 +52,8 @@ pub fn get_double_pawn_push_moves(
     let mut pawn_bitboard = bitboard_manager.get_colored_piece_bb(Pawn, active_color);
 
     let starting_bitboard = match active_color {
-        PieceColor::White => BitBoard::new_from_rank(1),
-        PieceColor::Black => BitBoard::new_from_rank(6),
+        Side::White => BitBoard::new_from_rank(1),
+        Side::Black => BitBoard::new_from_rank(6),
     };
 
     pawn_bitboard &= starting_bitboard;

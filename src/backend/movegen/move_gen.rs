@@ -6,7 +6,7 @@ use crate::backend::movegen::move_gen_pawn_util::gen_pawn_moves;
 use crate::backend::movegen::move_gen_sliders::get_moves_for_non_slider_piece;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
-use crate::backend::state::piece::PieceType::{King, Knight};
+use crate::backend::state::piece::Piece::{King, Knight};
 use crate::backend::state::piece::{SLIDER_PIECES, TRIVIAL_PIECES};
 use crate::backend::state::square::Square;
 
