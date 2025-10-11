@@ -1,16 +1,16 @@
 use crate::backend::movegen::check_decider::is_in_check_on_square;
 use crate::backend::movegen::moove::{CastleType, Moove};
-use crate::backend::state::board::bitboard::Bitboard;
-use crate::backend::state::game::game_state::GameState;
+use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
-use crate::backend::state::piece::PieceColor;
+use crate::backend::state::game::state::State;
+use crate::backend::state::piece::Side;
 use crate::backend::state::square::{B1, B8, C1, C8, D1, D8, E1, E8, F1, F8, G1, G8, Square};
 
 // Made these values with: https://tearth.dev/bitboard-viewer/
-const WHITE_LONG_CASTLE_MASK: Bitboard = Bitboard::new_from_squares(&[B1, C1, D1]);
-const WHITE_SHORT_CASTLE_MASK: Bitboard = Bitboard::new_from_squares(&[F1, G1]);
-const BLACK_LONG_CASTLE_MASK: Bitboard = Bitboard::new_from_squares(&[B8, C8, D8]);
-const BLACK_SHORT_CASTLE_MASK: Bitboard = Bitboard::new_from_squares(&[F8, G8]);
+const WHITE_LONG_CASTLE_MASK: BitBoard = BitBoard::new_from_squares(&[B1, C1, D1]);
+const WHITE_SHORT_CASTLE_MASK: BitBoard = BitBoard::new_from_squares(&[F1, G1]);
+const BLACK_LONG_CASTLE_MASK: BitBoard = BitBoard::new_from_squares(&[B8, C8, D8]);
+const BLACK_SHORT_CASTLE_MASK: BitBoard = BitBoard::new_from_squares(&[F8, G8]);
 
 const WHITE_LONG_CASTLE_MOVE: Moove = Moove::new(E1, C1);
 const WHITE_SHORT_CASTLE_MOVE: Moove = Moove::new(E1, G1);
@@ -24,10 +24,10 @@ const BLACK_SHORT_CASTLE_CHECK_SQUARES: [Square; 3] = [E8, F8, G8];
 
 pub fn gen_castles(
     all_pseudo_legal_moves: &mut Vec<Moove>,
-    game_state: &GameState,
-    combined_bb: Bitboard,
+    game_state: &State,
+    combined_bb: BitBoard,
 ) {
-    let irreversible_data = game_state.irreversible_data_stack().last().unwrap();
+    let irreversible_data = game_state.irreversible_data();
 
     for castle_type in CastleType::get_all_types() {
         let (castling_rights, squares_the_king_moves_through, between_king_rook_bb, moove) =
@@ -47,11 +47,11 @@ pub fn gen_castles(
 
 fn gen_castle(
     all_pseudo_legal_moves: &mut Vec<Moove>,
-    game_state: &GameState,
-    combined_bb: Bitboard,
+    game_state: &State,
+    combined_bb: BitBoard,
     castling_rights: bool,
     squares_the_king_moves_through: [Square; 3],
-    between_king_rook_bb: Bitboard,
+    between_king_rook_bb: BitBoard,
     moove: Moove,
 ) {
     // do we have castling rights for this type of castle?
@@ -81,17 +81,17 @@ fn gen_castle(
 fn get_needed_constants(
     irreversible_data: &IrreversibleData,
     castle_types: &CastleType,
-    piece_color: PieceColor,
-) -> (bool, [Square; 3], Bitboard, Moove) {
+    piece_color: Side,
+) -> (bool, [Square; 3], BitBoard, Moove) {
     match castle_types {
         CastleType::Long => match piece_color {
-            PieceColor::White => (
+            Side::White => (
                 irreversible_data.get_long_castle_rights(piece_color),
                 WHITE_LONG_CASTLE_CHECK_SQUARES,
                 WHITE_LONG_CASTLE_MASK,
                 WHITE_LONG_CASTLE_MOVE,
             ),
-            PieceColor::Black => (
+            Side::Black => (
                 irreversible_data.get_long_castle_rights(piece_color),
                 BLACK_LONG_CASTLE_CHECK_SQUARES,
                 BLACK_LONG_CASTLE_MASK,
@@ -99,13 +99,13 @@ fn get_needed_constants(
             ),
         },
         CastleType::Short => match piece_color {
-            PieceColor::White => (
+            Side::White => (
                 irreversible_data.get_short_castle_rights(piece_color),
                 WHITE_SHORT_CASTLE_CHECK_SQUARES,
                 WHITE_SHORT_CASTLE_MASK,
                 WHITE_SHORT_CASTLE_MOVE,
             ),
-            PieceColor::Black => (
+            Side::Black => (
                 irreversible_data.get_short_castle_rights(piece_color),
                 BLACK_SHORT_CASTLE_CHECK_SQUARES,
                 BLACK_SHORT_CASTLE_MASK,

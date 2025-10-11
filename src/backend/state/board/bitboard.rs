@@ -9,20 +9,26 @@ use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, N
 /// # Fields
 /// - `value` (`u64`): The underlying 64-bit integer used to store the board's state.
 #[derive(Copy, Clone, Debug)]
-pub struct Bitboard {
+pub struct BitBoard {
     value: u64,
 }
 
-impl Bitboard {
+impl BitBoard {
     /// Creates a new `BitBoard` instance with an initial value of 0.
     /// This can't be converted to a default variant because I need it to be const.
     #[allow(clippy::new_without_default)]
     pub const fn new() -> Self {
-        Bitboard { value: 0 }
+        BitBoard { value: 0 }
+    }
+
+    /// Converts a given `Square` into a corresponding bitboard.
+    const fn new_from_square(square: Square) -> BitBoard {
+        let index = square.square_to_index();
+        BitBoard { value: 1 << index }
     }
 
     pub const fn new_from_squares(squares: &[Square]) -> Self {
-        let mut bitboard = Bitboard::new();
+        let mut bitboard = BitBoard::new();
 
         let mut index = 0;
         while index < squares.len() {
@@ -34,7 +40,7 @@ impl Bitboard {
     }
 
     pub const fn new_from_rank(rank: i8) -> Self {
-        let mut bitboard = Bitboard::new();
+        let mut bitboard = BitBoard::new();
 
         let mut file = 0;
         while file < FILES_AMOUNT {
@@ -72,8 +78,8 @@ impl Bitboard {
     /// * `true` if the square is occupied.
     /// * `false` if the square is unoccupied.
     pub fn get_square(&self, square: Square) -> bool {
-        let index = Self::square_to_bitmask(square);
-        let bitboard_after_mask = self.value & index;
+        let index = Self::new_from_square(square);
+        let bitboard_after_mask = self.value & index.value;
         bitboard_after_mask != 0
     }
 
@@ -83,8 +89,8 @@ impl Bitboard {
     ///
     /// * `square` - A `Square` instance representing the square to be marked as filled.
     pub const fn fill_square(&mut self, square: Square) {
-        let bit = Self::square_to_bitmask(square);
-        self.value |= bit;
+        let bit = Self::new_from_square(square);
+        self.value |= bit.value;
     }
 
     /// Marks a square on a board as empty by setting the corresponding bit in the `value` field.
@@ -93,27 +99,12 @@ impl Bitboard {
     ///
     /// * `square` - A `Square` instance representing the square to be marked as filled.
     pub fn clear_square(&mut self, square: Square) {
-        let bit = Self::square_to_bitmask(square);
-        self.value ^= bit;
-    }
-
-    /// Converts a given `Square` into a corresponding 64-bit bitmask.
-    ///
-    /// # Parameters
-    /// - `square`: A `Square` object that represents a position or coordinate
-    ///   which can be converted into a bitmask.
-    ///
-    /// # Returns
-    /// - A `u64` value representing the bitmask corresponding to the input `Square`.
-    ///   The bitmask will have exactly one bit set, corresponding to the index
-    ///   value of the `Square`.
-    const fn square_to_bitmask(square: Square) -> u64 {
-        let index = square.square_to_index();
-        1 << index
+        let bit = Self::new_from_square(square);
+        self.value ^= bit.value;
     }
 }
 
-impl Iterator for Bitboard {
+impl Iterator for BitBoard {
     type Item = Square;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -130,71 +121,65 @@ impl Iterator for Bitboard {
 }
 
 // Various bitwise operations on BitBoards.
-impl Not for Bitboard {
+impl Not for BitBoard {
     type Output = Self;
 
     fn not(self) -> Self::Output {
-        Bitboard { value: !self.value }
+        BitBoard { value: !self.value }
     }
 }
 
-impl BitAnd for Bitboard {
+impl BitAnd for BitBoard {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        Bitboard {
+        BitBoard {
             value: self.value & rhs.value,
         }
     }
 }
 
-impl BitAndAssign for Bitboard {
+impl BitAndAssign for BitBoard {
     fn bitand_assign(&mut self, rhs: Self) {
         self.value &= rhs.value;
     }
 }
 
-impl BitOr for Bitboard {
+impl BitOr for BitBoard {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        Bitboard {
+        BitBoard {
             value: self.value | rhs.value,
         }
     }
 }
 
-impl BitOrAssign<Bitboard> for &mut Bitboard {
-    fn bitor_assign(&mut self, rhs: Bitboard) {
-        self.value |= rhs.value;
-    }
-}
-
-impl BitOrAssign for Bitboard {
+impl BitOrAssign for BitBoard {
     fn bitor_assign(&mut self, rhs: Self) {
         self.value |= rhs.value;
     }
 }
 
-impl BitXor for Bitboard {
+impl BitXor for BitBoard {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        Bitboard {
+        BitBoard {
             value: self.value ^ rhs.value,
         }
     }
 }
 
-impl BitXorAssign<Bitboard> for &mut Bitboard {
-    fn bitxor_assign(&mut self, rhs: Bitboard) {
+impl BitXorAssign<BitBoard> for BitBoard {
+    fn bitxor_assign(&mut self, rhs: BitBoard) {
         self.value ^= rhs.value;
     }
 }
 
 // Display implementation for BitBoards - useful for debugging.
 // Sadly, RustRover does not display them when debugging.
-impl Display for Bitboard {
+impl Display for BitBoard {
     /// Formats the bitboard (`self`) into a string representation,
     /// can be used for debugging purposes.
     ///
