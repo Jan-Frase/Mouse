@@ -187,7 +187,7 @@ impl State {
 
         // If we castled, we need to move the rook
         if moove.is_castle() {
-            let mut rook_bb = self.bb_manager.get_piece_bb_mut(Rook);
+            let rook_bb = self.bb_manager.get_piece_bb_mut(Rook);
             let rook_swap_bb = Self::get_rook_swap_bb(moove.get_castle_type(), self.active_color);
             *rook_bb ^= rook_swap_bb;
             let friendly_bb = self.bb_manager.get_all_pieces_bb_off_mut(self.active_color);
