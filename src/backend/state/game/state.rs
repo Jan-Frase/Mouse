@@ -4,7 +4,7 @@ use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::fen_parser::parse_fen;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
 use crate::backend::state::piece::PieceType::{King, Pawn, Rook};
-use crate::backend::state::piece::{Piece, PieceColor, PieceType};
+use crate::backend::state::piece::{PieceColor, PieceType};
 use crate::backend::state::square::{A1, A8, D1, D8, F1, F8, H1, H8, Square};
 use getset::{CloneGetters, Getters, MutGetters};
 
@@ -74,7 +74,7 @@ impl State {
 
         // Usually the square something was captured on (if something was captured at all) is the square we moved to...
         let mut capture_square = moove.to();
-        if moved_piece.piece_type() == Pawn {
+        if moved_piece == Pawn {
             // ... unless this is an en passant capture, we then need to update the capture square.
             next_state.make_move_ep_capture(moove, &mut capture_square);
             // Check if a double pawn push was played and store the en passant file
@@ -85,31 +85,37 @@ impl State {
         next_state.make_move_capture(&mut next_ir_data, capture_square);
 
         // Get the bitboard for the piece that was moved.
-        let mut moved_piece_bitboard = next_state.bb_manager.get_bitboard_mut(moved_piece);
-
-        // Clear the square that the piece was moved from.
-        moved_piece_bitboard.clear_square(moove.from());
+        let mut moved_piece_bitboard = next_state.bb_manager.get_piece_bb_mut(moved_piece);
 
         // Update the moved piece bb if it was a pawn promotion
         match moove.promotion_type() {
             None => {}
             Some(promotion_type) => {
-                moved_piece_bitboard = next_state
-                    .bb_manager
-                    .get_bitboard_mut(Piece::new(promotion_type, self.active_color));
+                moved_piece_bitboard = next_state.bb_manager.get_piece_bb_mut(promotion_type);
             }
         }
         // Fill the square it moved to.
         moved_piece_bitboard.fill_square(moove.to());
+        // Clear the square that the piece was moved from.
+        moved_piece_bitboard.clear_square(moove.from());
+
+        next_state
+            .bb_manager
+            .get_all_pieces_bb_off_mut(self.active_color)
+            .fill_square(moove.to());
+        next_state
+            .bb_manager
+            .get_all_pieces_bb_off_mut(self.active_color)
+            .clear_square(moove.from());
 
         // Some special king handling
-        if moved_piece.piece_type() == King {
+        if moved_piece == King {
             next_state.make_move_king(moove, &mut next_ir_data);
         }
 
         next_state.make_move_castling_rights_on_rook_move_or_capture(
             &mut next_ir_data,
-            moved_piece.piece_type(),
+            moved_piece,
             moove.from(),
             self.active_color,
         );
@@ -143,15 +149,18 @@ impl State {
         // Clear the square on the captured piece's bitboard if it exists.
         if let Some(captured_piece) = captured_piece {
             // Store the captured piece type in the irreversible data.
-            irreversible_data.set_captured_piece(Some(captured_piece.piece_type()));
+            irreversible_data.set_captured_piece(Some(captured_piece));
             // Remove the captured piece from its bitboard.
-            let captured_piece_bitboard = self.bb_manager.get_bitboard_mut(captured_piece);
+            let captured_piece_bitboard = self.bb_manager.get_piece_bb_mut(captured_piece);
             captured_piece_bitboard.clear_square(capture_square);
+            self.bb_manager
+                .get_all_pieces_bb_off_mut(self.active_color.opposite())
+                .clear_square(capture_square);
 
             // Remove castling rights if the captured piece was a rook on its starting square
             self.make_move_castling_rights_on_rook_move_or_capture(
                 irreversible_data,
-                captured_piece.piece_type(),
+                captured_piece,
                 capture_square,
                 self.active_color.opposite(),
             )
@@ -178,11 +187,11 @@ impl State {
 
         // If we castled, we need to move the rook
         if moove.is_castle() {
-            let mut rook_bb = self
-                .bb_manager
-                .get_bitboard_mut(Piece::new(Rook, self.active_color));
+            let mut rook_bb = self.bb_manager.get_piece_bb_mut(Rook);
             let rook_swap_bb = Self::get_rook_swap_bb(moove.get_castle_type(), self.active_color);
-            rook_bb ^= rook_swap_bb;
+            *rook_bb ^= rook_swap_bb;
+            let friendly_bb = self.bb_manager.get_all_pieces_bb_off_mut(self.active_color);
+            *friendly_bb ^= rook_swap_bb;
         }
     }
 

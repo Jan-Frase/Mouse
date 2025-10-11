@@ -164,12 +164,6 @@ impl BitOr for BitBoard {
     }
 }
 
-impl BitOrAssign<BitBoard> for &mut BitBoard {
-    fn bitor_assign(&mut self, rhs: BitBoard) {
-        self.value |= rhs.value;
-    }
-}
-
 impl BitOrAssign for BitBoard {
     fn bitor_assign(&mut self, rhs: Self) {
         self.value |= rhs.value;
@@ -186,7 +180,7 @@ impl BitXor for BitBoard {
     }
 }
 
-impl BitXorAssign<BitBoard> for &mut BitBoard {
+impl BitXorAssign<BitBoard> for BitBoard {
     fn bitxor_assign(&mut self, rhs: BitBoard) {
         self.value ^= rhs.value;
     }

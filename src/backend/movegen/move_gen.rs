@@ -6,8 +6,8 @@ use crate::backend::movegen::move_gen_pawn_util::gen_pawn_moves;
 use crate::backend::movegen::move_gen_sliders::get_moves_for_non_slider_piece;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
+use crate::backend::state::piece::PieceType;
 use crate::backend::state::piece::PieceType::{King, Knight};
-use crate::backend::state::piece::{Piece, PieceType};
 use crate::backend::state::square::Square;
 
 /// Generates and returns all the pseudo legal moves for the current player's pieces
@@ -25,9 +25,10 @@ use crate::backend::state::square::Square;
 pub fn get_pseudo_legal_moves(game_state: &State) -> Vec<Moove> {
     let bitboard_manager = game_state.bb_manager();
     // Bitboard containing all pieces of the active color. These block moves.
-    let friendly_pieces_bb = bitboard_manager.get_all_pieces_off(game_state.active_color());
+    let friendly_pieces_bb = bitboard_manager.get_all_pieces_bb_off(game_state.active_color());
     // Bitboard containing all pieces of the opponent color. These are relevant for sliders and pawn captures.
-    let enemy_pieces_bb = bitboard_manager.get_all_pieces_off(game_state.active_color().opposite());
+    let enemy_pieces_bb =
+        bitboard_manager.get_all_pieces_bb_off(game_state.active_color().opposite());
 
     let mut all_pseudo_legal_moves = Vec::new();
     let active_color = game_state.active_color();
@@ -41,7 +42,7 @@ pub fn get_pseudo_legal_moves(game_state: &State) -> Vec<Moove> {
         };
         let mut moves = iterate_over_bitboard_for_non_slider(
             moves_cache,
-            *bitboard_manager.get_bitboard(Piece::new(trivial_type, active_color)),
+            bitboard_manager.get_colored_piece_bb(trivial_type, active_color),
             friendly_pieces_bb,
         );
         all_pseudo_legal_moves.append(&mut moves);
@@ -67,7 +68,7 @@ pub fn get_pseudo_legal_moves(game_state: &State) -> Vec<Moove> {
     for slider_type in PieceType::get_slider_types() {
         let mut moves = get_moves_for_non_slider_piece(
             slider_type,
-            *bitboard_manager.get_bitboard(Piece::new(slider_type, active_color)),
+            bitboard_manager.get_colored_piece_bb(slider_type, active_color),
             friendly_pieces_bb,
             enemy_pieces_bb,
         );

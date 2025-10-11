@@ -15,12 +15,12 @@ impl PieceType {
     /// Returns an array containing all piece types.
     pub fn get_all_types() -> [PieceType; 6] {
         [
-            PieceType::Knight,
-            PieceType::King,
             PieceType::Pawn,
-            PieceType::Bishop,
             PieceType::Rook,
+            PieceType::Knight,
+            PieceType::Bishop,
             PieceType::Queen,
+            PieceType::King,
         ]
     }
 
