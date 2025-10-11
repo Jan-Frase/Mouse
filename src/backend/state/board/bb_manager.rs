@@ -63,10 +63,10 @@ impl BBManager {
 
     /// Retrieves the piece located at a specific square on the chessboard.
     pub fn get_piece_at_square(&self, square: Square) -> Option<PieceType> {
-        for index in 0..self.piece_bbs.len() {
+        for (index, piece) in ALL_PIECES.iter().enumerate().take(self.piece_bbs.len()) {
             let bitboard = self.piece_bbs[index];
             if bitboard.get_square(square) {
-                return Some(ALL_PIECES[index]);
+                return Some(*piece);
             }
         }
         None
