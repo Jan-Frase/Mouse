@@ -9,6 +9,15 @@ pub enum PieceType {
     King,
 }
 
+pub const ALL_PIECES: [PieceType; 6] = [
+    PieceType::Pawn,
+    PieceType::Rook,
+    PieceType::Knight,
+    PieceType::Bishop,
+    PieceType::Queen,
+    PieceType::King,
+];
+
 impl PieceType {
     /// Returns an array containing all piece types.
     #[inline(always)]

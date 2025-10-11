@@ -1,5 +1,6 @@
 use crate::backend::constants::PIECE_TYPE_COUNT;
 use crate::backend::state::board::bitboard::BitBoard;
+use crate::backend::state::piece::ALL_PIECES;
 use crate::backend::state::piece::{PieceColor, PieceType};
 use crate::backend::state::square::Square;
 
@@ -65,7 +66,7 @@ impl BBManager {
         for index in 0..self.piece_bbs.len() {
             let bitboard = self.piece_bbs[index];
             if bitboard.get_square(square) {
-                return Some(PieceType::get_all_types()[index]);
+                return Some(ALL_PIECES[index]);
             }
         }
         None
