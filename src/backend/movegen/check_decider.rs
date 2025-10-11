@@ -1,3 +1,4 @@
+use crate::backend::state::piece::PieceType::King;
 use crate::backend::movegen::compile_time::move_cache_non_sliders::{
     KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES,
 };
@@ -5,7 +6,7 @@ use crate::backend::movegen::move_gen_sliders::calculate_slider_move_bitboard;
 use crate::backend::state::board::bitboard::Bitboard;
 use crate::backend::state::game::game_state::GameState;
 use crate::backend::state::piece::PieceType::{Bishop, Queen, Rook};
-use crate::backend::state::piece::{Piece, PieceColor, PieceType};
+use crate::backend::state::piece::{PieceColor, PieceType};
 use crate::backend::state::square::Square;
 
 pub fn is_in_check_on_square(
@@ -28,8 +29,7 @@ pub fn is_in_check_on_square(
         );
 
         // Get the bitboard that marks where enemy knights are standing.
-        let enemy_piece = Piece::new(piece_type, color.opposite());
-        let enemy_piece_bitboard = game_state.bb_manager().get_bitboard(enemy_piece);
+        let enemy_piece_bitboard = game_state.bb_manager().get_bitboard(piece_type, color.opposite());
 
         // Check if at least one of the places we could move to contains an enemy knight.
         let resulting_bitboard = attack_bitboard & *enemy_piece_bitboard;
@@ -77,8 +77,7 @@ pub fn is_in_check(game_state: &GameState, color: PieceColor) -> bool {
 
 /// Returns the square where the king of the respective side is located.
 fn get_kings_square(game_state: &GameState, color: PieceColor) -> Square {
-    let king = Piece::new(PieceType::King, color);
-    let king_bitboard = game_state.bb_manager().get_bitboard(king);
+    let king_bitboard = game_state.bb_manager().get_bitboard(King, color);
     king_bitboard.clone().next().unwrap()
 }
 

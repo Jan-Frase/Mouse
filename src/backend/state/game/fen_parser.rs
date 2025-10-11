@@ -1,6 +1,6 @@
 use crate::backend::state::board::bitboard_manager::BitboardManager;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
-use crate::backend::state::piece::{Piece, PieceColor, PieceType};
+use crate::backend::state::piece::{PieceColor, PieceType};
 use crate::backend::state::square::Square;
 
 /// Parses a FEN (Forsyth-Edwards Notation) string and updates the corresponding game state.
@@ -112,73 +112,73 @@ fn parse_position(bit_board_manager: &mut BitboardManager, positions_string: &st
             }
             'P' => {
                 bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Pawn, PieceColor::White))
+                    .get_bitboard_mut(PieceType::Pawn, PieceColor::White)
                     .fill_square(Square::new(file, rank));
                 file += 1;
             }
             'p' => {
                 bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Pawn, PieceColor::Black))
+                    .get_bitboard_mut(PieceType::Pawn, PieceColor::Black)
                     .fill_square(Square::new(file, rank));
                 file += 1;
             }
             'R' => {
                 bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Rook, PieceColor::White))
+                    .get_bitboard_mut(PieceType::Rook, PieceColor::White)
                     .fill_square(Square::new(file, rank));
                 file += 1;
             }
             'r' => {
                 bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Rook, PieceColor::Black))
+                    .get_bitboard_mut(PieceType::Rook, PieceColor::Black)
                     .fill_square(Square::new(file, rank));
                 file += 1;
             }
             'N' => {
                 bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Knight, PieceColor::White))
+                    .get_bitboard_mut(PieceType::Knight, PieceColor::White)
                     .fill_square(Square::new(file, rank));
                 file += 1;
             }
             'n' => {
                 bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Knight, PieceColor::Black))
+                    .get_bitboard_mut(PieceType::Knight, PieceColor::Black)
                     .fill_square(Square::new(file, rank));
                 file += 1;
             }
             'B' => {
                 bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Bishop, PieceColor::White))
+                    .get_bitboard_mut(PieceType::Bishop, PieceColor::White)
                     .fill_square(Square::new(file, rank));
                 file += 1;
             }
             'b' => {
                 bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Bishop, PieceColor::Black))
+                    .get_bitboard_mut(PieceType::Bishop, PieceColor::Black)
                     .fill_square(Square::new(file, rank));
                 file += 1;
             }
             'Q' => {
                 bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Queen, PieceColor::White))
+                    .get_bitboard_mut(PieceType::Queen, PieceColor::White)
                     .fill_square(Square::new(file, rank));
                 file += 1;
             }
             'q' => {
                 bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Queen, PieceColor::Black))
+                    .get_bitboard_mut(PieceType::Queen, PieceColor::Black)
                     .fill_square(Square::new(file, rank));
                 file += 1;
             }
             'K' => {
                 bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::King, PieceColor::White))
+                    .get_bitboard_mut(PieceType::King, PieceColor::White)
                     .fill_square(Square::new(file, rank));
                 file += 1;
             }
             'k' => {
                 bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::King, PieceColor::Black))
+                    .get_bitboard_mut(PieceType::King, PieceColor::Black)
                     .fill_square(Square::new(file, rank));
                 file += 1;
             }

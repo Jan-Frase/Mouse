@@ -1,6 +1,6 @@
 use crate::backend::constants::{PIECE_TYPE_COUNT, SIDES};
 use crate::backend::state::board::bitboard::Bitboard;
-use crate::backend::state::piece::{Piece, PieceColor, PieceType};
+use crate::backend::state::piece::{PieceColor, PieceType};
 use crate::backend::state::square::Square;
 
 const WHITE_START_INDEX: usize = 0;
@@ -17,7 +17,7 @@ const BLACK_END_INDEX: usize = 11;
 #[derive(Debug)]
 pub struct BitboardManager {
     bitboards: [Bitboard; PIECE_TYPE_COUNT * SIDES],
-    bitboard_index_to_piece: [Piece; PIECE_TYPE_COUNT * SIDES],
+    bitboard_index_to_piece: [PieceType; PIECE_TYPE_COUNT],
 }
 
 impl BitboardManager {
@@ -29,23 +29,12 @@ impl BitboardManager {
         // This maps each index in the bitboard array back to its corresponding piece.
         // I'm sure there is a better way to do this, but I'm not sure how.
         let mut bitboard_index_to_piece =
-            [Piece::new(PieceType::Pawn, PieceColor::White); PIECE_TYPE_COUNT * SIDES];
+            [PieceType::Pawn; PIECE_TYPE_COUNT];
 
-        // insert all the white pieces
-        bitboard_index_to_piece[0] = Piece::new(PieceType::Pawn, PieceColor::White);
-        bitboard_index_to_piece[1] = Piece::new(PieceType::Rook, PieceColor::White);
-        bitboard_index_to_piece[2] = Piece::new(PieceType::Knight, PieceColor::White);
-        bitboard_index_to_piece[3] = Piece::new(PieceType::Bishop, PieceColor::White);
-        bitboard_index_to_piece[4] = Piece::new(PieceType::Queen, PieceColor::White);
-        bitboard_index_to_piece[5] = Piece::new(PieceType::King, PieceColor::White);
-
-        // insert all the black pieces
-        bitboard_index_to_piece[6] = Piece::new(PieceType::Pawn, PieceColor::Black);
-        bitboard_index_to_piece[7] = Piece::new(PieceType::Rook, PieceColor::Black);
-        bitboard_index_to_piece[8] = Piece::new(PieceType::Knight, PieceColor::Black);
-        bitboard_index_to_piece[9] = Piece::new(PieceType::Bishop, PieceColor::Black);
-        bitboard_index_to_piece[10] = Piece::new(PieceType::Queen, PieceColor::Black);
-        bitboard_index_to_piece[11] = Piece::new(PieceType::King, PieceColor::Black);
+        // insert all the pieces
+        for piece_type in PieceType::get_all_types() {
+            bitboard_index_to_piece[piece_type as usize] = piece_type;
+        }
 
         BitboardManager {
             bitboards,
@@ -61,8 +50,8 @@ impl BitboardManager {
     /// # Returns
     ///
     /// A mutable reference to the `BitBoard` corresponding to the given `piece`.
-    pub fn get_bitboard_mut(&mut self, piece: Piece) -> &mut Bitboard {
-        let index = self.piece_to_bitboards_index(piece);
+    pub fn get_bitboard_mut(&mut self, piece_type: PieceType, piece_color: PieceColor) -> &mut Bitboard {
+        let index = self.piece_to_bitboards_index(piece_type, piece_color);
         &mut self.bitboards[index]
     }
 
@@ -74,8 +63,8 @@ impl BitboardManager {
     ///
     /// # Returns:
     /// - A reference to the `BitBoard` corresponding to the given `Piece`.
-    pub fn get_bitboard(&self, piece: Piece) -> &Bitboard {
-        let index = self.piece_to_bitboards_index(piece);
+    pub fn get_bitboard(&self, piece_type: PieceType, piece_color: PieceColor) -> &Bitboard {
+        let index = self.piece_to_bitboards_index(piece_type, piece_color);
         &self.bitboards[index]
     }
 
@@ -87,8 +76,9 @@ impl BitboardManager {
     /// # Returns
     /// - `Some(Piece)` if there is a piece located at the given square.
     /// - `None` if the square is empty.
-    pub fn get_piece_at_square(&self, square: Square) -> Option<Piece> {
+    pub fn get_piece_at_square(&self, square: Square) -> Option<PieceType> {
         let index = self.get_index_for_piece_at_square(square)?;
+        let index = index % PIECE_TYPE_COUNT;
         Some(self.bitboard_index_to_piece[index])
     }
 
@@ -179,14 +169,14 @@ impl BitboardManager {
     ///
     /// # Returns
     /// - `usize`: The index corresponding to the given `piece` in the bitboard.
-    fn piece_to_bitboards_index(&self, piece: Piece) -> usize {
+    fn piece_to_bitboards_index(&self, piece_type: PieceType, piece_color: PieceColor) -> usize {
         let mut index = 0;
 
         // this causes the index to be at 0 for white and 6 for black
         // it works because white as usize == 0 and black as usize == 1
-        index += piece.piece_color() as usize * PIECE_TYPE_COUNT;
+        index += piece_color as usize * PIECE_TYPE_COUNT;
         // this adds 0 for a pawn, 1 for a rook, etc.
-        index += piece.piece_type() as usize;
+        index += piece_type as usize;
         // the indices are
         // white: pawn: 0, rook: 1, knight: 2, bishop: 3, queen: 4, king: 5
         // black: pawn: 6, rook: 7, knight: 8, bishop: 9, queen: 10, king: 11
