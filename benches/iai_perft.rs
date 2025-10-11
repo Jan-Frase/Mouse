@@ -11,13 +11,13 @@ pub fn iai_perft(perft_fixture: &PerftFixture) {
     let depth = perft_fixture.depth;
     let _ = perft_fixture.expected_nodes;
 
-    let mut state = State::new_from_fen(fen_string);
+    let state = State::new_from_fen(fen_string);
 
-    perft(black_box(&mut state), black_box(depth));
+    let _ = perft(black_box(&state), black_box(depth));
 }
 
 pub fn starting_perft() {
-    iai_perft(&NORMAL_PERFT[0]);
+    iai_perft(&NORMAL_PERFT[1]);
 }
 
 iai::main!(starting_perft);
