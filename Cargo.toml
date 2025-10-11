@@ -9,6 +9,13 @@ name = "mouse"
 [dependencies]
 getset = "0.1.6"
 
+[build]
+rustflags = ["-C", "target-cpu=native"]
+
+[profile.release]
+codegen-units = 1
+lto = true
+
 [dev-dependencies]
 criterion = "0.7.0"
 iai = "0.1"
