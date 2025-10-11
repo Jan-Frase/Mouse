@@ -11,6 +11,7 @@ pub enum PieceType {
 
 impl PieceType {
     /// Returns an array containing all piece types.
+    #[inline(always)]
     pub fn get_all_types() -> [PieceType; 6] {
         [
             PieceType::Pawn,

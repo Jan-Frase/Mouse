@@ -14,25 +14,15 @@ pub struct BBManager {
     white_bb: BitBoard,
     black_bb: BitBoard,
     piece_bbs: [BitBoard; PIECE_TYPE_COUNT],
-    piece_type_to_bb_index: [PieceType; PIECE_TYPE_COUNT],
 }
 
 impl BBManager {
     /// Generates a new BitBoardManager with all bitboards set to empty.
     pub fn new() -> BBManager {
-        // This maps each index in the bitboard array back to its corresponding piece.
-        // I'm sure there is a better way to do this, but I'm not sure how.
-        let mut bitboard_index_to_piece = [PieceType::Pawn; PIECE_TYPE_COUNT];
-
-        for i in 0..PIECE_TYPE_COUNT {
-            bitboard_index_to_piece[i] = PieceType::get_all_types()[i];
-        }
-
         BBManager {
             white_bb: BitBoard::new(),
             black_bb: BitBoard::new(),
             piece_bbs: [BitBoard::new(); PIECE_TYPE_COUNT],
-            piece_type_to_bb_index: bitboard_index_to_piece,
         }
     }
 
@@ -75,7 +65,7 @@ impl BBManager {
         for index in 0..self.piece_bbs.len() {
             let bitboard = self.piece_bbs[index];
             if bitboard.get_square(square) {
-                return Some(self.piece_type_to_bb_index[index]);
+                return Some(PieceType::get_all_types()[index]);
             }
         }
         None
