@@ -42,7 +42,7 @@ fn run_criterion_perft(
 }
 
 pub fn criterion_make_unmake_move(c: &mut Criterion) {
-    let mut state =
+    let state =
         State::new_from_fen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQ - 0 1");
     let moves = get_pseudo_legal_moves(&state);
 

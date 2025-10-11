@@ -1,5 +1,5 @@
 use iai::black_box;
-use mouse::GameState;
+use mouse::State;
 use mouse::backend::perft::perft;
 use perft_fixtures::perft_fixtures::{NORMAL_PERFT, PerftFixture};
 
@@ -11,7 +11,7 @@ pub fn iai_perft(perft_fixture: &PerftFixture) {
     let depth = perft_fixture.depth;
     let _ = perft_fixture.expected_nodes;
 
-    let mut state = GameState::new_from_fen(fen_string);
+    let mut state = State::new_from_fen(fen_string);
 
     perft(black_box(&mut state), black_box(depth));
 }
