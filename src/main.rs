@@ -1,17 +1,17 @@
-use crate::backend::compile_time::gen_caches::write_caches;
 use crate::backend::movegen::check_decider::is_in_check;
 use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen::get_pseudo_legal_moves;
 use crate::backend::perft::perft;
 use crate::backend::state::game::state::State;
+use std::env;
 use std::env::Args;
 
 mod backend;
 
 fn main() {
-    write_caches();
-    // let args = env::args();
-    // run_perftree_debug(args);
+    // write_caches();
+    let args = env::args();
+    run_perftree_debug(args);
 }
 
 // --------------------------------------------- //
