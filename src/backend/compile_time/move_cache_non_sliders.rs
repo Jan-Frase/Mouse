@@ -1,3 +1,4 @@
+use crate::backend::compile_time::generated::cache_king::CACHE_KING;
 use crate::backend::constants::{SIDES, SQUARES_AMOUNT};
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::piece::{Piece, Side};
@@ -19,7 +20,7 @@ use crate::backend::state::square::Square;
 /// At runtime we have to apply some further checks to this bitboard:
 /// 1. Are some of these squares blocked by friendly pieces?
 /// 2. Would this move put me in check etc...?
-pub const KING_MOVES: [BitBoard; SQUARES_AMOUNT] = calculate_potential_moves_cache(Piece::King);
+pub const KING_MOVES: [BitBoard; SQUARES_AMOUNT] = parse_generated();
 
 /// The same as above, but for the knight.
 pub const KNIGHT_MOVES: [BitBoard; SQUARES_AMOUNT] = calculate_potential_moves_cache(Piece::Knight);
@@ -41,6 +42,21 @@ pub const PAWN_CAPTURE_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
 /// All capture moves for pawns.
 pub const PAWN_DOUBLE_PUSH_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
     generate_pawn_moves(PawnMoveType::DoublePush);
+
+const fn parse_generated() -> [BitBoard; SQUARES_AMOUNT] {
+    let mut potential_moves = [BitBoard::new(); SQUARES_AMOUNT];
+
+    let mut square_index: usize = 0;
+    while square_index < SQUARES_AMOUNT {
+        let value = CACHE_KING[square_index];
+        let bb = BitBoard { value };
+        potential_moves[square_index] = bb;
+
+        square_index += 1;
+    }
+
+    potential_moves
+}
 
 /// Initializes a collection of bitboards representing all possible moves for each square.
 ///

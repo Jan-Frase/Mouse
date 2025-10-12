@@ -3,14 +3,15 @@ use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen::get_pseudo_legal_moves;
 use crate::backend::perft::perft;
 use crate::backend::state::game::state::State;
-use std::env;
+use backend::compile_time::gen_cache_king::gen_cache_king;
 use std::env::Args;
 
 mod backend;
 
 fn main() {
-    let args = env::args();
-    run_perftree_debug(args);
+    gen_cache_king();
+    // let args = env::args();
+    // run_perftree_debug(args);
 }
 
 // --------------------------------------------- //

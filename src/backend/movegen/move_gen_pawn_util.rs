@@ -1,4 +1,4 @@
-use crate::backend::movegen::compile_time::move_cache_non_sliders::{
+use crate::backend::compile_time::move_cache_non_sliders::{
     PAWN_CAPTURE_MOVES, PAWN_DOUBLE_PUSH_MOVES, PAWN_QUIET_MOVES,
 };
 use crate::backend::movegen::moove::Moove;
