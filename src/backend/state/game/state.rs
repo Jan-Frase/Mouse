@@ -87,6 +87,9 @@ impl State {
         // Get the bitboard for the piece that was moved.
         let mut moved_piece_bitboard = next_state.bb_manager.get_piece_bb_mut(moved_piece);
 
+        // Clear the square that the piece was moved from.
+        moved_piece_bitboard.clear_square(moove.from());
+
         // Update the moved piece bb if it was a pawn promotion
         match moove.promotion_type() {
             None => {}
@@ -96,8 +99,6 @@ impl State {
         }
         // Fill the square it moved to.
         moved_piece_bitboard.fill_square(moove.to());
-        // Clear the square that the piece was moved from.
-        moved_piece_bitboard.clear_square(moove.from());
 
         next_state
             .bb_manager
