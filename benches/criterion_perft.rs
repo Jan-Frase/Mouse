@@ -23,7 +23,7 @@ fn run_criterion_perft(
     name: String,
     depth: u8,
     expected_nodes: u64,
-    mut state: &mut State,
+    state: &mut State,
 ) {
     let mut group = c.benchmark_group(&*name);
     // group.sample_size(10);
@@ -31,12 +31,7 @@ fn run_criterion_perft(
     // group.warm_up_time(std::time::Duration::from_millis(1000));
     group.throughput(Throughput::Elements(expected_nodes));
     group.bench_function(&*name, |b| {
-        b.iter(|| {
-            perft(
-                std::hint::black_box(&mut state),
-                std::hint::black_box(depth),
-            )
-        })
+        b.iter(|| perft(std::hint::black_box(state), std::hint::black_box(depth)))
     });
     group.finish();
 }
@@ -51,7 +46,7 @@ pub fn criterion_make_unmake_move(c: &mut Criterion) {
     group.bench_function("General make unmake", |b| {
         b.iter(|| {
             for moove in &moves[0..moves.len()] {
-                let next_state = state.make_move(std::hint::black_box(*moove));
+                let _ = state.make_move(std::hint::black_box(*moove));
             }
         })
     });
