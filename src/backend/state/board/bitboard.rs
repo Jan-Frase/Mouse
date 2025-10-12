@@ -23,7 +23,7 @@ impl BitBoard {
 
     /// Converts a given `Square` into a corresponding bitboard.
     const fn new_from_square(square: Square) -> BitBoard {
-        let index = square.square_to_index();
+        let index = square.to_index();
         BitBoard { value: 1 << index }
     }
 

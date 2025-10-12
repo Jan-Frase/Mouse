@@ -1,54 +1,14 @@
+use crate::backend::compile_time::gen_caches::{
+    BISHOP_PEXT_INDEX, BISHOP_PEXT_MASK, PEXT_TABLE, ROOK_PEXT_INDEX, ROOK_PEXT_MASK,
+};
 use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen::convert_bitboard_to_moves;
-use crate::backend::movegen::move_gen_sliders::SlideDirection::{
-    Down, DownLeft, DownRight, Left, Right, Up, UpLeft, UpRight,
-};
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::piece::Piece;
 use crate::backend::state::square::Square;
+use std::arch::x86_64::_pext_u64;
 
-enum SlideDirection {
-    Up,
-    UpRight,
-    Right,
-    DownRight,
-    Down,
-    DownLeft,
-    Left,
-    UpLeft,
-}
-
-impl SlideDirection {
-    fn next(&self, square: Square) -> Square {
-        match self {
-            SlideDirection::Up => Square::new(square.file(), square.rank() + 1),
-            SlideDirection::UpRight => Square::new(square.file() + 1, square.rank() + 1),
-            SlideDirection::Right => Square::new(square.file() + 1, square.rank()),
-            SlideDirection::DownRight => Square::new(square.file() + 1, square.rank() - 1),
-            SlideDirection::Down => Square::new(square.file(), square.rank() - 1),
-            SlideDirection::DownLeft => Square::new(square.file() - 1, square.rank() - 1),
-            SlideDirection::Left => Square::new(square.file() - 1, square.rank()),
-            SlideDirection::UpLeft => Square::new(square.file() - 1, square.rank() + 1),
-        }
-    }
-
-    fn directions_for_piece_type(piece_type: Piece) -> Vec<SlideDirection> {
-        match piece_type {
-            Piece::Rook => {
-                vec![Up, Down, Left, Right]
-            }
-            Piece::Bishop => {
-                vec![UpRight, DownRight, DownLeft, UpLeft]
-            }
-            Piece::Queen => {
-                vec![Up, Down, Left, Right, UpRight, DownRight, DownLeft, UpLeft]
-            }
-            _ => panic!("Piece type is not a slider"),
-        }
-    }
-}
-
-pub fn get_moves_for_non_slider_piece(
+pub fn get_slider_moves(
     piece_type: Piece,
     piece_bb: BitBoard,
     friendly_pieces_bb: BitBoard,
@@ -58,47 +18,54 @@ pub fn get_moves_for_non_slider_piece(
 
     for square in piece_bb {
         let moves_for_piece_bb =
-            calculate_slider_move_bitboard(piece_type, square, friendly_pieces_bb, enemy_pieces_bb);
+            get_slider_moves_at_square(piece_type, square, friendly_pieces_bb, enemy_pieces_bb);
 
         moves.append(&mut convert_bitboard_to_moves(square, moves_for_piece_bb));
     }
     moves
 }
 
-pub fn calculate_slider_move_bitboard(
-    piece_type: Piece,
+pub fn get_slider_moves_at_square(
+    piece: Piece,
     square: Square,
-    friendly_pieces_bitboard: BitBoard,
-    enemy_pieces_bitboard: BitBoard,
+    friendly_bb: BitBoard,
+    enemy_bb: BitBoard,
 ) -> BitBoard {
-    let mut move_bitboard: BitBoard = BitBoard::new();
-    for direction in SlideDirection::directions_for_piece_type(piece_type) {
-        move_bitboard |= calculate_max_slide_range(
-            square,
-            direction,
-            friendly_pieces_bitboard,
-            enemy_pieces_bitboard,
-        );
+    match piece {
+        Piece::Rook => get_rook_moves_at_square(square, friendly_bb, enemy_bb),
+        Piece::Bishop => get_bishop_moves_at_square(square, friendly_bb, enemy_bb),
+        Piece::Queen => {
+            get_rook_moves_at_square(square, friendly_bb, enemy_bb)
+                | get_bishop_moves_at_square(square, friendly_bb, enemy_bb)
+        }
+        _ => panic!("Piece type is not a slider"),
     }
-    move_bitboard
 }
 
-/// Computes a bitboard containing all squares
-/// that the piece on the given square can slide to in the given direction
-fn calculate_max_slide_range(
+fn get_rook_moves_at_square(square: Square, friendly_bb: BitBoard, enemy_bb: BitBoard) -> BitBoard {
+    let pext_mask = ROOK_PEXT_MASK[square.to_index()];
+    let pext_index = ROOK_PEXT_INDEX[square.to_index()];
+
+    let occ_bb = friendly_bb | enemy_bb;
+
+    let blockers_index: usize = unsafe { _pext_u64(occ_bb.value, pext_mask.value) as usize };
+
+    let moves = PEXT_TABLE[pext_index + blockers_index];
+    moves & !friendly_bb
+}
+
+fn get_bishop_moves_at_square(
     square: Square,
-    direction: SlideDirection,
-    friendly_pieces_bitboard: BitBoard,
-    enemy_pieces_bitboard: BitBoard,
+    friendly_bb: BitBoard,
+    enemy_bb: BitBoard,
 ) -> BitBoard {
-    let mut result = BitBoard::new();
-    let mut next = direction.next(square);
-    while next.is_valid() && !friendly_pieces_bitboard.get_square(next) {
-        result.fill_square(next);
-        if enemy_pieces_bitboard.get_square(next) {
-            return result;
-        }
-        next = direction.next(next);
-    }
-    result
+    let pext_mask = BISHOP_PEXT_MASK[square.to_index()];
+    let pext_index = BISHOP_PEXT_INDEX[square.to_index()];
+
+    let occ_bb = friendly_bb | enemy_bb;
+
+    let blockers_index: usize = unsafe { _pext_u64(occ_bb.value, pext_mask.value) as usize };
+
+    let moves = PEXT_TABLE[pext_index + blockers_index];
+    moves & !friendly_bb
 }

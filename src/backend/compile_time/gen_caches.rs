@@ -1,14 +1,17 @@
 use crate::backend::compile_time::gen_caches_non_sliders::{
     PawnMoveType, calculate_potential_moves_cache, generate_pawn_moves,
 };
-use crate::backend::compile_time::gen_caches_sliders::gen_cache_sliders;
+use crate::backend::compile_time::gen_caches_sliders::{PEXT_TABLE_SIZE, gen_cache_sliders};
 use crate::backend::compile_time::generated::caches::{
-    CACHE_CAPTURE_PAWN, CACHE_DOUBLE_PUSH_PAWN, CACHE_KING, CACHE_KNIGHT, CACHE_QUIET_PAWN,
+    CACHE_BISHOP_PEXT_INDEX, CACHE_BISHOP_PEXT_MASK, CACHE_CAPTURE_PAWN, CACHE_DOUBLE_PUSH_PAWN,
+    CACHE_KING, CACHE_KNIGHT, CACHE_PEXT_TABLE, CACHE_QUIET_PAWN, CACHE_ROOK_PEXT_INDEX,
+    CACHE_ROOK_PEXT_MASK,
 };
 use crate::backend::constants::{SIDES, SQUARES_AMOUNT};
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::piece::Piece;
 use std::fs;
+
 // ----------------------------------------
 // READING
 // ----------------------------------------
@@ -32,6 +35,7 @@ use std::fs;
 pub const KING_MOVES: [BitBoard; SQUARES_AMOUNT] = read_bb_cache(&CACHE_KING);
 pub const KNIGHT_MOVES: [BitBoard; SQUARES_AMOUNT] = read_bb_cache(&CACHE_KNIGHT);
 
+// Various pawn caches:
 pub const PAWN_QUIET_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
     read_2d_bb_cache(CACHE_QUIET_PAWN);
 pub const PAWN_CAPTURE_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
@@ -39,11 +43,20 @@ pub const PAWN_CAPTURE_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
 pub const PAWN_DOUBLE_PUSH_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
     read_2d_bb_cache(CACHE_DOUBLE_PUSH_PAWN);
 
-pub const fn read_bb_cache(cache: &[u64; SQUARES_AMOUNT]) -> [BitBoard; SQUARES_AMOUNT] {
-    let mut potential_moves = [BitBoard::new(); SQUARES_AMOUNT];
+// Various slider caches:
+pub const ROOK_PEXT_MASK: [BitBoard; SQUARES_AMOUNT] = read_bb_cache(&CACHE_ROOK_PEXT_MASK);
+pub const ROOK_PEXT_INDEX: [usize; SQUARES_AMOUNT] = CACHE_ROOK_PEXT_INDEX;
+
+pub const BISHOP_PEXT_MASK: [BitBoard; SQUARES_AMOUNT] = read_bb_cache(&CACHE_BISHOP_PEXT_MASK);
+pub const BISHOP_PEXT_INDEX: [usize; SQUARES_AMOUNT] = CACHE_BISHOP_PEXT_INDEX;
+
+pub static PEXT_TABLE: [BitBoard; PEXT_TABLE_SIZE] = read_bb_cache(&CACHE_PEXT_TABLE);
+
+pub const fn read_bb_cache<const N: usize>(cache: &[u64; N]) -> [BitBoard; N] {
+    let mut potential_moves = [BitBoard::new(); N];
 
     let mut square_index: usize = 0;
-    while square_index < SQUARES_AMOUNT {
+    while square_index < N {
         let value = cache[square_index];
         let bb = BitBoard { value };
         potential_moves[square_index] = bb;
@@ -70,8 +83,6 @@ pub const fn read_2d_bb_cache(
 
     potential_moves
 }
-
-pub const fn read_index_cache() {}
 
 // ----------------------------------------
 // WRITING
@@ -121,7 +132,7 @@ pub fn write_caches() {
             rook_pext_mask
         ),
         format!(
-            "pub const CACHE_ROOK_PEXT_INDEX: [i32; 64] = {:?};",
+            "pub const CACHE_ROOK_PEXT_INDEX: [usize; 64] = {:?};",
             rook_pext_index
         ),
         format!(
@@ -129,7 +140,7 @@ pub fn write_caches() {
             bishop_pext_mask
         ),
         format!(
-            "pub const CACHE_BISHOP_PEXT_INDEX: [i32; 64] = {:?};",
+            "pub const CACHE_BISHOP_PEXT_INDEX: [usize; 64] = {:?};",
             bishop_pext_index
         ),
         // TODO: const leads to inlining, static does not. Is this better in my case?

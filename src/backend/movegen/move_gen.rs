@@ -3,7 +3,7 @@ use crate::backend::constants::SQUARES_AMOUNT;
 use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen_king_util::gen_castles;
 use crate::backend::movegen::move_gen_pawn_util::gen_pawn_moves;
-use crate::backend::movegen::move_gen_sliders::get_moves_for_non_slider_piece;
+use crate::backend::movegen::move_gen_sliders::get_slider_moves;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
 use crate::backend::state::piece::Piece::{King, Knight};
@@ -66,7 +66,7 @@ pub fn get_pseudo_legal_moves(game_state: &State) -> Vec<Moove> {
 
     // Gen queen, bishop and rook moves
     for slider_type in SLIDER_PIECES {
-        let mut moves = get_moves_for_non_slider_piece(
+        let mut moves = get_slider_moves(
             slider_type,
             bitboard_manager.get_colored_piece_bb(slider_type, active_color),
             friendly_pieces_bb,
@@ -97,7 +97,7 @@ pub(crate) fn iterate_over_bitboard_for_non_slider(
     for square in piece_bitboard {
         // ... get the potential moves for the piece on that square...
         // SLIDER: (This only works this easily for non-sliders)
-        let mut potential_moves_bitboard = moves_cache[square.square_to_index()];
+        let mut potential_moves_bitboard = moves_cache[square.to_index()];
         // ... apply the mask ...
         potential_moves_bitboard &= !mask_bitboard;
 
