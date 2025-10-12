@@ -1,4 +1,4 @@
-use crate::backend::state::piece::PieceColor;
+use crate::backend::state::piece::Side;
 use getset::Setters;
 use std::fmt::{Display, Formatter};
 
@@ -125,22 +125,22 @@ impl Square {
         self.rank == 0 || self.rank == 7
     }
 
-    pub const fn is_pawn_start(&self, color: PieceColor) -> bool {
+    pub const fn is_pawn_start(&self, color: Side) -> bool {
         match color {
-            PieceColor::White => self.rank == 1,
-            PieceColor::Black => self.rank == 6,
+            Side::White => self.rank == 1,
+            Side::Black => self.rank == 6,
         }
     }
 
     // forward means the direction that the pawns travel in for that side
-    pub const fn forward_by_one(&self, color: PieceColor) -> Square {
+    pub const fn forward_by_one(&self, color: Side) -> Square {
         match color {
-            PieceColor::White => Square::new(self.file, self.rank + 1),
-            PieceColor::Black => Square::new(self.file, self.rank - 1),
+            Side::White => Square::new(self.file, self.rank + 1),
+            Side::Black => Square::new(self.file, self.rank - 1),
         }
     }
 
-    pub const fn back_by_one(&self, color: PieceColor) -> Square {
+    pub const fn back_by_one(&self, color: Side) -> Square {
         self.forward_by_one(color.opposite())
     }
 

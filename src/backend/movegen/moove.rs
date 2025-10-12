@@ -1,5 +1,5 @@
-use crate::backend::state::piece::PieceType;
-use crate::backend::state::piece::PieceType::{Bishop, Knight, Queen, Rook};
+use crate::backend::state::piece::Piece;
+use crate::backend::state::piece::Piece::{Bishop, Knight, Queen, Rook};
 use crate::backend::state::square::Square;
 use getset::{CloneGetters, Setters};
 use std::fmt::{Display, Formatter};
@@ -37,7 +37,7 @@ pub struct Moove {
     #[getset(get_clone = "pub", set = "pub")]
     to: Square,
     #[getset(get_clone = "pub", set = "pub")]
-    promotion_type: Option<PieceType>,
+    promotion_type: Option<Piece>,
 }
 
 impl Moove {

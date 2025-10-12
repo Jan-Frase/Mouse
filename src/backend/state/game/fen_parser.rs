@@ -1,6 +1,8 @@
-use crate::backend::state::board::bitboard_manager::BitboardManager;
+use crate::backend::state::board::bb_manager::BBManager;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
-use crate::backend::state::piece::{Piece, PieceColor, PieceType};
+use crate::backend::state::piece::Piece::{Bishop, King, Knight, Pawn, Queen, Rook};
+use crate::backend::state::piece::Side::{Black, White};
+use crate::backend::state::piece::{Piece, Side};
 use crate::backend::state::square::Square;
 
 /// Parses a FEN (Forsyth-Edwards Notation) string and updates the corresponding game state.
@@ -15,8 +17,8 @@ use crate::backend::state::square::Square;
 /// * `half_move_clock` - A mutable reference to a `u16` to update the current half-move clock count.
 pub fn parse_fen(
     fen_string: &str,
-    bit_board_manager: &mut BitboardManager,
-    active_color: &mut PieceColor,
+    bit_board_manager: &mut BBManager,
+    active_color: &mut Side,
     irreversible_data: &mut IrreversibleData,
     half_move_clock: &mut u16,
 ) {
@@ -88,17 +90,17 @@ fn parse_castling_rights(irreversible_data: &mut IrreversibleData, castling_righ
     }
 }
 
-fn parse_active_color(active_color: &mut PieceColor, active_color_string: &str) {
+fn parse_active_color(active_color: &mut Side, active_color_string: &str) {
     match active_color_string {
-        "w" => *active_color = PieceColor::White,
-        "b" => *active_color = PieceColor::Black,
+        "w" => *active_color = Side::White,
+        "b" => *active_color = Side::Black,
         _ => {
             panic!("Invalid character in FEN string");
         }
     }
 }
 
-fn parse_position(bit_board_manager: &mut BitboardManager, positions_string: &str) {
+fn parse_position(bit_board_manager: &mut BBManager, positions_string: &str) {
     let mut file = 0;
     let mut rank = 7;
     for char in positions_string.chars() {
@@ -111,80 +113,68 @@ fn parse_position(bit_board_manager: &mut BitboardManager, positions_string: &st
                 rank -= 1;
             }
             'P' => {
-                bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Pawn, PieceColor::White))
-                    .fill_square(Square::new(file, rank));
+                fill_square(bit_board_manager, Pawn, White, Square::new(file, rank));
                 file += 1;
             }
             'p' => {
-                bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Pawn, PieceColor::Black))
-                    .fill_square(Square::new(file, rank));
+                fill_square(bit_board_manager, Pawn, Black, Square::new(file, rank));
                 file += 1;
             }
             'R' => {
-                bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Rook, PieceColor::White))
-                    .fill_square(Square::new(file, rank));
+                fill_square(bit_board_manager, Rook, White, Square::new(file, rank));
                 file += 1;
             }
             'r' => {
-                bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Rook, PieceColor::Black))
-                    .fill_square(Square::new(file, rank));
+                fill_square(bit_board_manager, Rook, Black, Square::new(file, rank));
                 file += 1;
             }
             'N' => {
-                bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Knight, PieceColor::White))
-                    .fill_square(Square::new(file, rank));
+                fill_square(bit_board_manager, Knight, White, Square::new(file, rank));
                 file += 1;
             }
             'n' => {
-                bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Knight, PieceColor::Black))
-                    .fill_square(Square::new(file, rank));
+                fill_square(bit_board_manager, Knight, Black, Square::new(file, rank));
                 file += 1;
             }
             'B' => {
-                bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Bishop, PieceColor::White))
-                    .fill_square(Square::new(file, rank));
+                fill_square(bit_board_manager, Bishop, White, Square::new(file, rank));
                 file += 1;
             }
             'b' => {
-                bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Bishop, PieceColor::Black))
-                    .fill_square(Square::new(file, rank));
+                fill_square(bit_board_manager, Bishop, Black, Square::new(file, rank));
                 file += 1;
             }
             'Q' => {
-                bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Queen, PieceColor::White))
-                    .fill_square(Square::new(file, rank));
+                fill_square(bit_board_manager, Queen, White, Square::new(file, rank));
                 file += 1;
             }
             'q' => {
-                bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::Queen, PieceColor::Black))
-                    .fill_square(Square::new(file, rank));
+                fill_square(bit_board_manager, Queen, Black, Square::new(file, rank));
                 file += 1;
             }
             'K' => {
-                bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::King, PieceColor::White))
-                    .fill_square(Square::new(file, rank));
+                fill_square(bit_board_manager, King, White, Square::new(file, rank));
                 file += 1;
             }
             'k' => {
-                bit_board_manager
-                    .get_bitboard_mut(Piece::new(PieceType::King, PieceColor::Black))
-                    .fill_square(Square::new(file, rank));
+                fill_square(bit_board_manager, King, Black, Square::new(file, rank));
                 file += 1;
             }
             _ => {
                 panic!("Invalid character in FEN string");
             }
         }
+    }
+
+    fn fill_square(
+        bb_manager: &mut BBManager,
+        piece_type: Piece,
+        piece_color: Side,
+        square: Square,
+    ) {
+        bb_manager.get_piece_bb_mut(piece_type).fill_square(square);
+        bb_manager
+            .get_all_pieces_bb_off_mut(piece_color)
+            .fill_square(square);
     }
 }
