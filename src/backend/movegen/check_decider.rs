@@ -1,6 +1,4 @@
-use crate::backend::compile_time::move_cache_non_sliders::{
-    KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES,
-};
+use crate::backend::compile_time::gen_caches::{KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES};
 use crate::backend::movegen::move_gen_sliders::calculate_slider_move_bitboard;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;

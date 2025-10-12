@@ -1,4 +1,4 @@
-use crate::backend::compile_time::move_cache_non_sliders::{KING_MOVES, KNIGHT_MOVES};
+use crate::backend::compile_time::gen_caches::{KING_MOVES, KNIGHT_MOVES};
 use crate::backend::constants::SQUARES_AMOUNT;
 use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen_king_util::gen_castles;
