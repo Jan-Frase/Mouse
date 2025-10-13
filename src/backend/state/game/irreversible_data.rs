@@ -1,24 +1,17 @@
 use crate::backend::movegen::moove::CastleType;
 use crate::backend::state::piece::{Piece, Side};
 use crate::backend::state::square::Square;
-use getset::{CloneGetters, Setters};
 
 /// The `IrreversibleData` struct stores data that is irreversible.
 /// For example, this remembers what kind of piece was captured for `unmake_move()`.
-#[derive(CloneGetters, Setters, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct IrreversibleData {
-    #[getset(get_clone = "pub", set = "pub")]
-    captured_piece: Option<Piece>,
-    #[getset(get_clone = "pub", set = "pub")]
-    en_passant_square: Option<Square>,
-    #[getset(get_clone = "pub", set = "pub")]
-    white_long_castle_rights: bool,
-    #[getset(get_clone = "pub", set = "pub")]
-    white_short_castle_rights: bool,
-    #[getset(get_clone = "pub", set = "pub")]
-    black_long_castle_rights: bool,
-    #[getset(get_clone = "pub", set = "pub")]
-    black_short_castle_rights: bool,
+    pub captured_piece: Option<Piece>,
+    pub en_passant_square: Option<Square>,
+    pub white_long_castle_rights: bool,
+    pub white_short_castle_rights: bool,
+    pub black_long_castle_rights: bool,
+    pub black_short_castle_rights: bool,
 }
 
 impl IrreversibleData {

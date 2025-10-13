@@ -6,9 +6,6 @@ edition = "2024"
 [lib]
 name = "mouse"
 
-[dependencies]
-getset = "0.1.6"
-
 [build]
 rustflags = ["-C", "target-cpu=native"]
 

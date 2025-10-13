@@ -45,7 +45,7 @@ pub fn parse_fen(
 
 fn parse_en_passant(irreversible_data: &mut IrreversibleData, en_passant_file_string: &str) {
     if en_passant_file_string == "-" {
-        irreversible_data.set_en_passant_square(None);
+        irreversible_data.en_passant_square = None;
         return;
     }
 
@@ -53,37 +53,37 @@ fn parse_en_passant(irreversible_data: &mut IrreversibleData, en_passant_file_st
     for char in en_passant_file_string.chars() {
         match char {
             'a'..='h' => {
-                en_passant_square.set_file(char.to_digit(36).unwrap() as i8 - 10);
+                en_passant_square.file = char.to_digit(36).unwrap() as i8 - 10;
             }
             '3' | '6' => {
-                en_passant_square.set_rank(char.to_digit(10).unwrap() as i8 - 1);
+                en_passant_square.rank = char.to_digit(10).unwrap() as i8 - 1;
             }
             _ => panic!("Invalid character in FEN string"),
         }
     }
-    irreversible_data.set_en_passant_square(Some(en_passant_square));
+    irreversible_data.en_passant_square = Some(en_passant_square);
 }
 
 fn parse_castling_rights(irreversible_data: &mut IrreversibleData, castling_rights_string: &str) {
     for char in castling_rights_string.chars() {
         match char {
             '-' => {
-                irreversible_data.set_white_long_castle_rights(false);
-                irreversible_data.set_white_short_castle_rights(false);
-                irreversible_data.set_black_long_castle_rights(false);
-                irreversible_data.set_black_short_castle_rights(false);
+                irreversible_data.white_long_castle_rights = false;
+                irreversible_data.white_short_castle_rights = false;
+                irreversible_data.black_long_castle_rights = false;
+                irreversible_data.black_short_castle_rights = false;
             }
             'K' => {
-                irreversible_data.set_white_short_castle_rights(true);
+                irreversible_data.white_short_castle_rights = true;
             }
             'k' => {
-                irreversible_data.set_black_short_castle_rights(true);
+                irreversible_data.black_short_castle_rights = true;
             }
             'Q' => {
-                irreversible_data.set_white_long_castle_rights(true);
+                irreversible_data.white_long_castle_rights = true;
             }
             'q' => {
-                irreversible_data.set_black_long_castle_rights(true);
+                irreversible_data.black_long_castle_rights = true;
             }
             _ => panic!("Invalid character in FEN string"),
         }

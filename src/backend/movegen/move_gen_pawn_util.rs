@@ -87,7 +87,7 @@ pub fn get_double_pawn_push_moves(
 pub fn create_pawn_capture_mask(game_state: &State, enemy_pieces_bitboard: BitBoard) -> BitBoard {
     // Capture pawn moves
     let mut pawn_capture_mask = enemy_pieces_bitboard;
-    match game_state.irreversible_data().en_passant_square() {
+    match game_state.irreversible_data.en_passant_square {
         None => {}
         Some(ep_square) => {
             pawn_capture_mask.fill_square(ep_square);
@@ -103,14 +103,14 @@ pub fn promotion_logic(moves: &mut Vec<Moove>) {
     }
     for index in (0..moves.len()).rev() {
         let moove = moves[index];
-        if moove.to().is_on_promotion_rank() {
+        if moove.to.is_on_promotion_rank() {
             for piece_type in PROMOTABLE_PIECES {
                 if piece_type == Queen {
-                    moves[index].set_promotion_type(Some(Queen));
+                    moves[index].promotion_type = Some(Queen);
                     continue;
                 }
                 let mut moove = moove;
-                moove.set_promotion_type(Some(piece_type));
+                moove.promotion_type = Some(piece_type);
                 moves.push(moove);
             }
         }

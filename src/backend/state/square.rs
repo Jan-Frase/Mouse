@@ -1,5 +1,4 @@
 use crate::backend::state::piece::Side;
-use getset::Setters;
 use std::fmt::{Display, Formatter};
 
 pub const A1: Square = Square::new(0, 0);
@@ -25,12 +24,10 @@ pub const H8: Square = Square::new(7, 7);
 ///
 /// To make it easier to memorize: file => the letter part, rank => the number part
 /// or put differently: file => vertical / x part, rank => horizontal / y part
-#[derive(Copy, Clone, Debug, Setters, Ord, Eq, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, Ord, Eq, PartialEq, PartialOrd)]
 pub struct Square {
-    #[getset(set = "pub")]
-    file: i8,
-    #[getset(set = "pub")]
-    rank: i8,
+    pub file: i8,
+    pub rank: i8,
 }
 
 impl Square {

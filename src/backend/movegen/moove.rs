@@ -1,7 +1,6 @@
 use crate::backend::state::piece::Piece;
 use crate::backend::state::piece::Piece::{Bishop, Knight, Queen, Rook};
 use crate::backend::state::square::Square;
-use getset::{CloneGetters, Setters};
 use std::fmt::{Display, Formatter};
 
 #[derive(Copy, Clone)]
@@ -30,14 +29,11 @@ impl CastleType {
 ///
 /// Alternatively, each Move could store a bitboard, with one bit set where we currently are and one where we are going to.
 /// To "make" this move we then would only need to xor it with the bitboard for the piece.
-#[derive(Copy, Clone, Debug, CloneGetters, Setters, Ord, Eq, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, Ord, Eq, PartialEq, PartialOrd)]
 pub struct Moove {
-    #[getset(get_clone = "pub", set = "pub")]
-    from: Square,
-    #[getset(get_clone = "pub", set = "pub")]
-    to: Square,
-    #[getset(get_clone = "pub", set = "pub")]
-    promotion_type: Option<Piece>,
+    pub from: Square,
+    pub to: Square,
+    pub promotion_type: Option<Piece>,
 }
 
 impl Moove {

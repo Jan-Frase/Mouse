@@ -53,7 +53,7 @@ pub fn root_debug_perft(root_state: &mut State, depth: u8) -> u64 {
     for chess_move in moves {
         let state = root_state.make_move(chess_move);
         // If we are in check after making the move -> skip.
-        if is_in_check(&state, state.active_color().opposite()) {
+        if is_in_check(&state, state.active_color.opposite()) {
             // game_state.unmake_move(chess_move);
             continue;
         }

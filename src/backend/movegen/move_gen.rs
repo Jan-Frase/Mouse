@@ -23,15 +23,15 @@ use crate::backend::state::square::Square;
 /// * A `Vec<Moove>` containing all the computed pseudo legal moves for the current player's
 ///   pieces.
 pub fn get_pseudo_legal_moves(game_state: &State) -> Vec<Moove> {
-    let bitboard_manager = game_state.bb_manager();
+    let bitboard_manager = &game_state.bb_manager;
     // Bitboard containing all pieces of the active color. These block moves.
-    let friendly_pieces_bb = bitboard_manager.get_all_pieces_bb_off(game_state.active_color());
+    let friendly_pieces_bb = bitboard_manager.get_all_pieces_bb_off(game_state.active_color);
     // Bitboard containing all pieces of the opponent color. These are relevant for sliders and pawn captures.
     let enemy_pieces_bb =
-        bitboard_manager.get_all_pieces_bb_off(game_state.active_color().opposite());
+        bitboard_manager.get_all_pieces_bb_off(game_state.active_color.opposite());
 
     let mut all_pseudo_legal_moves = Vec::new();
-    let active_color = game_state.active_color();
+    let active_color = game_state.active_color;
 
     // Move gen for king and knight (excluding castles)
     for trivial_type in TRIVIAL_PIECES {
