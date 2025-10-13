@@ -10,7 +10,7 @@ use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, N
 /// - `value` (`u64`): The underlying 64-bit integer used to store the board's state.
 #[derive(Copy, Clone, Debug)]
 pub struct BitBoard {
-    value: u64,
+    pub value: u64,
 }
 
 impl BitBoard {
@@ -39,7 +39,7 @@ impl BitBoard {
         bitboard
     }
 
-    pub const fn new_from_rank(rank: i8) -> Self {
+    pub fn new_from_rank(rank: i8) -> Self {
         let mut bitboard = BitBoard::new();
 
         let mut file = 0;

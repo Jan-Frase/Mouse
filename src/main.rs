@@ -9,6 +9,7 @@ use std::env::Args;
 mod backend;
 
 fn main() {
+    // write_caches();
     let args = env::args();
     run_perftree_debug(args);
 }
