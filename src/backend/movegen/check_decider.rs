@@ -7,9 +7,9 @@ use crate::backend::state::piece::{ALL_PIECES, Piece, Side};
 use crate::backend::state::square::Square;
 
 pub fn is_in_check_on_square(game_state: &State, color: Side, king_square: Square) -> bool {
-    let friendly_bb = game_state.bb_manager().get_all_pieces_bb_off(color);
+    let friendly_bb = game_state.bb_manager.get_all_pieces_bb_off(color);
     let enemy_bb = game_state
-        .bb_manager()
+        .bb_manager
         .get_all_pieces_bb_off(color.opposite());
 
     // Iterate over all pieces. Let`s assume we are checking for knights.
@@ -24,7 +24,7 @@ pub fn is_in_check_on_square(game_state: &State, color: Side, king_square: Squar
         );
 
         // Get the bitboard that marks where enemy knights are standing.
-        let enemy_piece_bitboard = game_state.bb_manager().get_piece_bb(piece_type) & enemy_bb;
+        let enemy_piece_bitboard = game_state.bb_manager.get_piece_bb(piece_type) & enemy_bb;
 
         // Check if at least one of the places we could move to contains an enemy knight.
         let resulting_bitboard = attack_bitboard & enemy_piece_bitboard;
@@ -72,8 +72,8 @@ pub fn is_in_check(game_state: &State, color: Side) -> bool {
 
 /// Returns the square where the king of the respective side is located.
 fn get_kings_square(game_state: &State, color: Side) -> Square {
-    let king_bitboard = game_state.bb_manager().get_piece_bb(Piece::King);
-    let side_bb = game_state.bb_manager().get_all_pieces_bb_off(color);
+    let king_bitboard = game_state.bb_manager.get_piece_bb(Piece::King);
+    let side_bb = game_state.bb_manager.get_all_pieces_bb_off(color);
     let mut bb = king_bitboard & side_bb;
     bb.next().unwrap()
 }

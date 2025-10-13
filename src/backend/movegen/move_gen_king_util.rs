@@ -27,11 +27,11 @@ pub fn gen_castles(
     game_state: &State,
     combined_bb: BitBoard,
 ) {
-    let irreversible_data = game_state.irreversible_data();
+    let irreversible_data = &game_state.irreversible_data;
 
     for castle_type in CastleType::get_all_types() {
         let (castling_rights, squares_the_king_moves_through, between_king_rook_bb, moove) =
-            get_needed_constants(irreversible_data, &castle_type, game_state.active_color());
+            get_needed_constants(irreversible_data, &castle_type, game_state.active_color);
 
         gen_castle(
             all_pseudo_legal_moves,
@@ -62,7 +62,7 @@ fn gen_castle(
     // are we moving through checks?
     for square in squares_the_king_moves_through.iter() {
         // if so -> stop
-        if is_in_check_on_square(game_state, game_state.active_color(), *square) {
+        if is_in_check_on_square(game_state, game_state.active_color, *square) {
             return;
         }
     }
