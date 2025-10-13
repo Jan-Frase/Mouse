@@ -68,7 +68,7 @@ impl Square {
     /// - `Square`: A struct representing the chessboard square with the following fields:
     ///   - `file`: The column (0 to 7) computed as `index % 8`.
     ///   - `rank`: The row (0 to 7) computed as `index / 8`.
-    pub const fn index_to_square(index: i8) -> Square {
+    pub fn index_to_square(index: i8) -> Square {
         Square {
             file: index % 8,
             rank: index / 8,
@@ -92,7 +92,7 @@ impl Square {
     ///
     /// * `true` - If the position is valid.
     /// * `false` - Otherwise.
-    pub const fn is_valid(&self) -> bool {
+    pub fn is_valid(&self) -> bool {
         self.file >= 0 && self.file < 8 && self.rank >= 0 && self.rank < 8
     }
 
@@ -109,7 +109,7 @@ impl Square {
     ///
     /// # Returns
     /// * `i8` - The value of the `file` field.
-    pub const fn file(&self) -> i8 {
+    pub fn file(&self) -> i8 {
         self.file
     }
 
@@ -117,7 +117,7 @@ impl Square {
     ///
     /// # Returns
     /// * `i8` - The value of the `file` field.
-    pub const fn rank(&self) -> i8 {
+    pub fn rank(&self) -> i8 {
         self.rank
     }
 
@@ -125,7 +125,7 @@ impl Square {
         self.rank == 0 || self.rank == 7
     }
 
-    pub const fn is_pawn_start(&self, color: Side) -> bool {
+    pub fn is_pawn_start(&self, color: Side) -> bool {
         match color {
             Side::White => self.rank == 1,
             Side::Black => self.rank == 6,
@@ -133,22 +133,22 @@ impl Square {
     }
 
     // forward means the direction that the pawns travel in for that side
-    pub const fn forward_by_one(&self, color: Side) -> Square {
+    pub fn forward_by_one(&self, color: Side) -> Square {
         match color {
             Side::White => Square::new(self.file, self.rank + 1),
             Side::Black => Square::new(self.file, self.rank - 1),
         }
     }
 
-    pub const fn back_by_one(&self, color: Side) -> Square {
+    pub fn back_by_one(&self, color: Side) -> Square {
         self.forward_by_one(color.opposite())
     }
 
-    pub const fn right_by_one(&self) -> Square {
+    pub fn right_by_one(&self) -> Square {
         Square::new(self.file + 1, self.rank)
     }
 
-    pub const fn left_by_one(&self) -> Square {
+    pub fn left_by_one(&self) -> Square {
         Square::new(self.file - 1, self.rank)
     }
 }

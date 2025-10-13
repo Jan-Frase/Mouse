@@ -39,7 +39,7 @@ impl BitBoard {
         bitboard
     }
 
-    pub const fn new_from_rank(rank: i8) -> Self {
+    pub fn new_from_rank(rank: i8) -> Self {
         let mut bitboard = BitBoard::new();
 
         let mut file = 0;
