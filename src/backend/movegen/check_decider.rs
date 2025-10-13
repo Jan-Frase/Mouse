@@ -86,9 +86,9 @@ fn get_attack_bitboard_for_piece_and_square(
     enemy_bb: BitBoard,
 ) -> BitBoard {
     match piece_type {
-        Piece::King => KING_MOVES[square.to_index()],
-        Piece::Knight => KNIGHT_MOVES[square.to_index()],
-        Piece::Pawn => PAWN_CAPTURE_MOVES[piece_color as usize][square.to_index()],
+        Piece::King => KING_MOVES[square.square_to_index()],
+        Piece::Knight => KNIGHT_MOVES[square.square_to_index()],
+        Piece::Pawn => PAWN_CAPTURE_MOVES[piece_color as usize][square.square_to_index()],
         Rook => get_slider_moves_at_square(Rook, square, friendly_bb, enemy_bb),
         Bishop => get_slider_moves_at_square(Bishop, square, friendly_bb, enemy_bb),
         Queen => get_slider_moves_at_square(Queen, square, friendly_bb, enemy_bb),

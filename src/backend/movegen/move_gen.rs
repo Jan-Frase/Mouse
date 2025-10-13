@@ -97,7 +97,7 @@ pub(crate) fn iterate_over_bitboard_for_non_slider(
     for square in piece_bitboard {
         // ... get the potential moves for the piece on that square...
         // SLIDER: (This only works this easily for non-sliders)
-        let mut potential_moves_bitboard = moves_cache[square.to_index()];
+        let mut potential_moves_bitboard = moves_cache[square.square_to_index()];
         // ... apply the mask ...
         potential_moves_bitboard &= !mask_bitboard;
 
