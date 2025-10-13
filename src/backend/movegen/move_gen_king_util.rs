@@ -22,11 +22,7 @@ const WHITE_SHORT_CASTLE_CHECK_SQUARES: [Square; 3] = [E1, F1, G1];
 const BLACK_LONG_CASTLE_CHECK_SQUARES: [Square; 3] = [E8, D8, C8];
 const BLACK_SHORT_CASTLE_CHECK_SQUARES: [Square; 3] = [E8, F8, G8];
 
-pub fn gen_castles(
-    all_pseudo_legal_moves: &mut Vec<Moove>,
-    game_state: &State,
-    combined_bb: BitBoard,
-) {
+pub fn gen_castles(moves: &mut Vec<Moove>, game_state: &State, combined_bb: BitBoard) {
     let irreversible_data = &game_state.irreversible_data;
 
     for castle_type in CastleType::get_all_types() {
@@ -34,7 +30,7 @@ pub fn gen_castles(
             get_needed_constants(irreversible_data, &castle_type, game_state.active_color);
 
         gen_castle(
-            all_pseudo_legal_moves,
+            moves,
             game_state,
             combined_bb,
             castling_rights,

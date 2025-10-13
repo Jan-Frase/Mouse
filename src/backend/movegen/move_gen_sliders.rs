@@ -9,20 +9,18 @@ use crate::backend::state::square::Square;
 use std::arch::x86_64::_pext_u64;
 
 pub fn get_slider_moves(
+    moves: &mut Vec<Moove>,
     piece_type: Piece,
     piece_bb: BitBoard,
     friendly_pieces_bb: BitBoard,
     enemy_pieces_bb: BitBoard,
-) -> Vec<Moove> {
-    let mut moves: Vec<Moove> = Vec::new();
-
+) {
     for square in piece_bb {
         let moves_for_piece_bb =
             get_slider_moves_at_square(piece_type, square, friendly_pieces_bb, enemy_pieces_bb);
 
         moves.append(&mut convert_bitboard_to_moves(square, moves_for_piece_bb));
     }
-    moves
 }
 
 pub fn get_slider_moves_at_square(

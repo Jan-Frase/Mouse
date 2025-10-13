@@ -22,16 +22,13 @@ use crate::backend::state::square::Square;
 ///
 /// * A `Vec<Moove>` containing all the computed pseudo legal moves for the current player's
 ///   pieces.
-pub fn get_pseudo_legal_moves(game_state: &State) -> Vec<Moove> {
-    let bitboard_manager = &game_state.bb_manager;
-    // Bitboard containing all pieces of the active color. These block moves.
-    let friendly_pieces_bb = bitboard_manager.get_all_pieces_bb_off(game_state.active_color);
-    // Bitboard containing all pieces of the opponent color. These are relevant for sliders and pawn captures.
-    let enemy_pieces_bb =
-        bitboard_manager.get_all_pieces_bb_off(game_state.active_color.opposite());
+pub fn get_pseudo_legal_moves(state: &State) -> Vec<Moove> {
+    let friendly_pieces_bb = state.bb_manager.get_all_pieces_bb_off(state.active_color);
+    let enemy_pieces_bb = state
+        .bb_manager
+        .get_all_pieces_bb_off(state.active_color.opposite());
 
-    let mut all_pseudo_legal_moves = Vec::new();
-    let active_color = game_state.active_color;
+    let mut moves = Vec::with_capacity(50);
 
     // Move gen for king and knight (excluding castles)
     for trivial_type in TRIVIAL_PIECES {
@@ -40,42 +37,41 @@ pub fn get_pseudo_legal_moves(game_state: &State) -> Vec<Moove> {
             King => KING_MOVES,
             _ => panic!("This is not a trivial type."),
         };
-        let mut moves = iterate_over_bitboard_for_non_slider(
+        iterate_over_bitboard_for_non_slider(
+            &mut moves,
             moves_cache,
-            bitboard_manager.get_colored_piece_bb(trivial_type, active_color),
+            state
+                .bb_manager
+                .get_colored_piece_bb(trivial_type, state.active_color),
             friendly_pieces_bb,
         );
-        all_pseudo_legal_moves.append(&mut moves);
     }
 
-    gen_castles(
-        &mut all_pseudo_legal_moves,
-        game_state,
-        friendly_pieces_bb | enemy_pieces_bb,
-    );
+    gen_castles(&mut moves, state, state.bb_manager.get_all_pieces_bb());
 
     // Gen pawn moves, quiet, captures, double pushes
     gen_pawn_moves(
-        game_state,
-        bitboard_manager,
+        &mut moves,
+        state,
         friendly_pieces_bb,
         enemy_pieces_bb,
-        &mut all_pseudo_legal_moves,
-        active_color,
+        state.active_color,
     );
 
     // Gen queen, bishop and rook moves
     for slider_type in SLIDER_PIECES {
-        let mut moves = get_slider_moves(
+        get_slider_moves(
+            &mut moves,
             slider_type,
-            bitboard_manager.get_colored_piece_bb(slider_type, active_color),
+            state
+                .bb_manager
+                .get_colored_piece_bb(slider_type, state.active_color),
             friendly_pieces_bb,
             enemy_pieces_bb,
         );
-        all_pseudo_legal_moves.append(&mut moves);
     }
 
-    all_pseudo_legal_moves
+    moves
 }
 
 // ------------------------------------
@@ -83,13 +79,11 @@ pub fn get_pseudo_legal_moves(game_state: &State) -> Vec<Moove> {
 // ------------------------------------
 
 pub(crate) fn iterate_over_bitboard_for_non_slider(
+    moves: &mut Vec<Moove>,
     moves_cache: [BitBoard; SQUARES_AMOUNT],
     piece_bitboard: BitBoard,
     mask_bitboard: BitBoard,
-) -> Vec<Moove> {
-    // PERF: Instead of creating a new vector for each piece, we could reuse the same vector and append to it.
-    let mut moves: Vec<Moove> = Vec::new();
-
+) {
     // Example: We are doing this for all knights.
     // The `moves_cache` array would for each square contain all viable moves for a knight.
 
@@ -107,8 +101,6 @@ pub(crate) fn iterate_over_bitboard_for_non_slider(
             potential_moves_bitboard,
         ));
     }
-
-    moves
 }
 
 pub fn convert_bitboard_to_moves(square: Square, moves_bitboard: BitBoard) -> Vec<Moove> {

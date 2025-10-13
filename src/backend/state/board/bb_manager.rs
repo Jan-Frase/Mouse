@@ -46,6 +46,10 @@ impl BBManager {
         }
     }
 
+    pub fn get_all_pieces_bb(&self) -> BitBoard {
+        self.white_bb | self.black_bb
+    }
+
     /// Returns a `BitBoard` containing all the positions currently occupied by pieces
     /// of the specified color.
     pub fn get_all_pieces_bb_off_mut(&mut self, color: Side) -> &mut BitBoard {

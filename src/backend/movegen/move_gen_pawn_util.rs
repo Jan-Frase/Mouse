@@ -2,6 +2,7 @@ use crate::backend::compile_time::gen_caches::{
     PAWN_CAPTURE_MOVES, PAWN_DOUBLE_PUSH_MOVES, PAWN_QUIET_MOVES,
 };
 use crate::backend::movegen::moove::Moove;
+use crate::backend::movegen::move_gen::iterate_over_bitboard_for_non_slider;
 use crate::backend::state::board::bb_manager::BBManager;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
@@ -9,38 +10,42 @@ use crate::backend::state::piece::Piece::{Pawn, Queen};
 use crate::backend::state::piece::{PROMOTABLE_PIECES, Side};
 
 pub fn gen_pawn_moves(
+    moves: &mut Vec<Moove>,
     game_state: &State,
-    bitboard_manager: &BBManager,
     friendly_pieces_bb: BitBoard,
     enemy_pieces_bb: BitBoard,
-    all_pseudo_legal_moves: &mut Vec<Moove>,
     active_color: Side,
 ) {
+    let mut pawn_moves = Vec::new();
     // Quiet pawn moves
-    let mut moves = crate::backend::movegen::move_gen::iterate_over_bitboard_for_non_slider(
+    iterate_over_bitboard_for_non_slider(
+        &mut pawn_moves,
         PAWN_QUIET_MOVES[active_color as usize],
-        bitboard_manager.get_colored_piece_bb(Pawn, active_color),
+        game_state
+            .bb_manager
+            .get_colored_piece_bb(Pawn, active_color),
         friendly_pieces_bb | enemy_pieces_bb,
     );
-    promotion_logic(&mut moves);
-    all_pseudo_legal_moves.append(&mut moves);
 
     // Capture pawn moves
-    let mut moves = crate::backend::movegen::move_gen::iterate_over_bitboard_for_non_slider(
+    iterate_over_bitboard_for_non_slider(
+        &mut pawn_moves,
         PAWN_CAPTURE_MOVES[active_color as usize],
-        bitboard_manager.get_colored_piece_bb(Pawn, active_color),
+        game_state
+            .bb_manager
+            .get_colored_piece_bb(Pawn, active_color),
         create_pawn_capture_mask(game_state, enemy_pieces_bb),
     );
-    promotion_logic(&mut moves);
-    all_pseudo_legal_moves.append(&mut moves);
+    promotion_logic(&mut pawn_moves);
+    moves.append(&mut pawn_moves);
 
     // Double pawn push moves
-    let mut moves = get_double_pawn_push_moves(
-        bitboard_manager,
+    let mut pawn_moves = get_double_pawn_push_moves(
+        &game_state.bb_manager,
         active_color,
         friendly_pieces_bb | enemy_pieces_bb,
     );
-    all_pseudo_legal_moves.append(&mut moves);
+    moves.append(&mut pawn_moves);
 }
 pub fn get_double_pawn_push_moves(
     bitboard_manager: &BBManager,
