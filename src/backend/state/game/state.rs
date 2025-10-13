@@ -145,7 +145,7 @@ impl State {
         // Clear the square on the captured piece's bitboard if it exists.
         if let Some(captured_piece) = captured_piece {
             // Store the captured piece type in the irreversible data.
-            irreversible_data.captured_piece = (Some(captured_piece));
+            irreversible_data.captured_piece = Some(captured_piece);
             // Remove the captured piece from its bitboard.
             let captured_piece_bitboard = self.bb_manager.get_piece_bb_mut(captured_piece);
             captured_piece_bitboard.clear_square(capture_square);
@@ -172,7 +172,7 @@ impl State {
             // the pawn starting square and one forward
             let ep_square = moove.to.back_by_one(self.active_color);
 
-            irreversible_data.en_passant_square = (Some(ep_square));
+            irreversible_data.en_passant_square = Some(ep_square);
         }
     }
 

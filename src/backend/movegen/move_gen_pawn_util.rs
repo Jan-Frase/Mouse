@@ -106,11 +106,11 @@ pub fn promotion_logic(moves: &mut Vec<Moove>) {
         if moove.to.is_on_promotion_rank() {
             for piece_type in PROMOTABLE_PIECES {
                 if piece_type == Queen {
-                    moves[index].promotion_type = (Some(Queen));
+                    moves[index].promotion_type = Some(Queen);
                     continue;
                 }
                 let mut moove = moove;
-                moove.promotion_type = (Some(piece_type));
+                moove.promotion_type = Some(piece_type);
                 moves.push(moove);
             }
         }
