@@ -1,95 +1,73 @@
-use crate::backend::compile_time::gen_caches::{
-    PAWN_CAPTURE_MOVES, PAWN_DOUBLE_PUSH_MOVES, PAWN_QUIET_MOVES,
-};
+use crate::backend::compile_time::gen_caches::PAWN_CAPTURE_MOVES;
 use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen::iterate_over_bitboard_for_non_slider;
-use crate::backend::state::board::bb_manager::BBManager;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
 use crate::backend::state::piece::Piece::{Pawn, Queen};
 use crate::backend::state::piece::{PROMOTABLE_PIECES, Side};
 
+const WHITE_PAWN_START_RANK_BB: BitBoard = BitBoard::new_from_rank(1);
+const BLACK_PAWN_START_RANK_BB: BitBoard = BitBoard::new_from_rank(6);
+
 pub fn gen_pawn_moves(
     moves: &mut Vec<Moove>,
-    game_state: &State,
+    state: &State,
     friendly_pieces_bb: BitBoard,
     enemy_pieces_bb: BitBoard,
     active_color: Side,
 ) {
-    let mut pawn_moves = Vec::new();
-    // Quiet pawn moves
-    iterate_over_bitboard_for_non_slider(
-        &mut pawn_moves,
-        PAWN_QUIET_MOVES[active_color as usize],
-        game_state
-            .bb_manager
-            .get_colored_piece_bb(Pawn, active_color),
-        friendly_pieces_bb | enemy_pieces_bb,
-    );
+    let occupancy_bb = friendly_pieces_bb | enemy_pieces_bb;
+    let pawn_bb = state.bb_manager.get_colored_piece_bb(Pawn, active_color);
 
-    // Capture pawn moves
-    iterate_over_bitboard_for_non_slider(
-        &mut pawn_moves,
-        PAWN_CAPTURE_MOVES[active_color as usize],
-        game_state
-            .bb_manager
-            .get_colored_piece_bb(Pawn, active_color),
-        create_pawn_capture_mask(game_state, enemy_pieces_bb),
-    );
-    promotion_logic(&mut pawn_moves);
-    moves.append(&mut pawn_moves);
-
-    // Double pawn push moves
-    let mut pawn_moves = get_double_pawn_push_moves(
-        &game_state.bb_manager,
-        active_color,
-        friendly_pieces_bb | enemy_pieces_bb,
-    );
-    moves.append(&mut pawn_moves);
-}
-pub fn get_double_pawn_push_moves(
-    bitboard_manager: &BBManager,
-    active_color: Side,
-    all_pieces_bb: BitBoard,
-) -> Vec<Moove> {
-    let mut moves: Vec<Moove> = Vec::new();
-
-    let mut pawn_bitboard = bitboard_manager.get_colored_piece_bb(Pawn, active_color);
-
-    let starting_bitboard = match active_color {
-        Side::White => BitBoard::new_from_rank(1),
-        Side::Black => BitBoard::new_from_rank(6),
+    // single push
+    let mut push_pawn_bb = match active_color {
+        Side::White => pawn_bb << 8,
+        Side::Black => pawn_bb >> 8,
     };
-
-    pawn_bitboard &= starting_bitboard;
-
-    for square in pawn_bitboard {
-        let mut single_push_bb = PAWN_QUIET_MOVES[active_color as usize][square.square_to_index()];
-        single_push_bb &= all_pieces_bb;
-        if !single_push_bb.is_empty() {
-            continue;
+    push_pawn_bb &= !occupancy_bb;
+    for square in push_pawn_bb {
+        let moove = Moove::new(square.back_by_one(active_color), square);
+        if square.is_on_promotion_rank() {
+            for piece_type in PROMOTABLE_PIECES {
+                let mut promotion_move = moove;
+                promotion_move.promotion_type = Some(piece_type);
+                moves.push(promotion_move);
+            }
+        } else {
+            moves.push(moove);
         }
+    }
 
-        let mut double_push_bb =
-            PAWN_DOUBLE_PUSH_MOVES[active_color as usize][square.square_to_index()];
-        double_push_bb &= all_pieces_bb;
-        if !double_push_bb.is_empty() {
-            continue;
+    // double push
+    let double_push_pawn_bb = match active_color {
+        Side::White => {
+            (((pawn_bb & WHITE_PAWN_START_RANK_BB) << 8) & !occupancy_bb) << 8 & !occupancy_bb
         }
-
+        Side::Black => {
+            (((pawn_bb & BLACK_PAWN_START_RANK_BB) >> 8) & !occupancy_bb) >> 8 & !occupancy_bb
+        }
+    };
+    for square in double_push_pawn_bb {
         let moove = Moove::new(
+            square.back_by_one(active_color).back_by_one(active_color),
             square,
-            square
-                .forward_by_one(active_color)
-                .forward_by_one(active_color),
         );
         moves.push(moove);
     }
 
-    moves
+    let mut pawn_moves = Vec::new();
+    // Capture pawn moves
+    iterate_over_bitboard_for_non_slider(
+        &mut pawn_moves,
+        PAWN_CAPTURE_MOVES[active_color as usize],
+        state.bb_manager.get_colored_piece_bb(Pawn, active_color),
+        create_pawn_capture_mask(state, enemy_pieces_bb),
+    );
+    promotion_logic(&mut pawn_moves);
+    moves.append(&mut pawn_moves);
 }
 
-pub fn create_pawn_capture_mask(game_state: &State, enemy_pieces_bitboard: BitBoard) -> BitBoard {
+fn create_pawn_capture_mask(game_state: &State, enemy_pieces_bitboard: BitBoard) -> BitBoard {
     // Capture pawn moves
     let mut pawn_capture_mask = enemy_pieces_bitboard;
     match game_state.irreversible_data.en_passant_square {
@@ -102,7 +80,7 @@ pub fn create_pawn_capture_mask(game_state: &State, enemy_pieces_bitboard: BitBo
     pawn_capture_mask
 }
 
-pub fn promotion_logic(moves: &mut Vec<Moove>) {
+fn promotion_logic(moves: &mut Vec<Moove>) {
     if moves.is_empty() {
         return;
     }
