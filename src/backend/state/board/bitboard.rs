@@ -1,8 +1,9 @@
-use crate::backend::constants::FILES_AMOUNT;
+use crate::backend::constants::{FILES_AMOUNT, RANKS_AMOUNT};
 use crate::backend::state::square::Square;
 use std::fmt::{Display, Formatter};
 use std::ops::{
     BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Shl, ShlAssign, Shr,
+    ShrAssign,
 };
 
 /// A struct that represents a BitBoard.
@@ -48,6 +49,18 @@ impl BitBoard {
         while file < FILES_AMOUNT {
             bitboard.fill_square(Square::new(file as i8, rank));
             file += 1;
+        }
+
+        bitboard
+    }
+
+    pub const fn new_from_file(file: i8) -> Self {
+        let mut bitboard = BitBoard::new();
+
+        let mut rank = 0;
+        while rank < RANKS_AMOUNT {
+            bitboard.fill_square(Square::new(file, rank as i8));
+            rank += 1;
         }
 
         bitboard
@@ -135,6 +148,12 @@ impl Shl<i32> for BitBoard {
         BitBoard {
             value: self.value << rhs,
         }
+    }
+}
+
+impl ShrAssign<u32> for BitBoard {
+    fn shr_assign(&mut self, rhs: u32) {
+        self.value >>= rhs;
     }
 }
 
