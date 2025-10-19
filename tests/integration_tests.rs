@@ -194,3 +194,11 @@ fn test_perft_17() {
     let nodes = perft(&state, 4);
     assert_eq!(nodes, 112371);
 }
+
+#[test]
+fn test_perft_18() {
+    let state = State::new_from_fen("4k3/8/8/p7/1P6/8/8/4K3 b - - 0 1");
+
+    let nodes = perft(&state, 1);
+    assert_eq!(nodes, 7);
+}
