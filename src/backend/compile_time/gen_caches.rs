@@ -3,9 +3,8 @@ use crate::backend::compile_time::gen_caches_non_sliders::{
 };
 use crate::backend::compile_time::gen_caches_sliders::{PEXT_TABLE_SIZE, gen_cache_sliders};
 use crate::backend::compile_time::generated::caches::{
-    CACHE_BISHOP_PEXT_INDEX, CACHE_BISHOP_PEXT_MASK, CACHE_CAPTURE_PAWN, CACHE_DOUBLE_PUSH_PAWN,
-    CACHE_KING, CACHE_KNIGHT, CACHE_PEXT_TABLE, CACHE_QUIET_PAWN, CACHE_ROOK_PEXT_INDEX,
-    CACHE_ROOK_PEXT_MASK,
+    CACHE_BISHOP_PEXT_INDEX, CACHE_BISHOP_PEXT_MASK, CACHE_CAPTURE_PAWN, CACHE_KING, CACHE_KNIGHT,
+    CACHE_PEXT_TABLE, CACHE_ROOK_PEXT_INDEX, CACHE_ROOK_PEXT_MASK,
 };
 use crate::backend::constants::{SIDES, SQUARES_AMOUNT};
 use crate::backend::state::board::bitboard::BitBoard;
@@ -35,13 +34,9 @@ use std::fs;
 pub const KING_MOVES: [BitBoard; SQUARES_AMOUNT] = read_bb_cache(&CACHE_KING);
 pub const KNIGHT_MOVES: [BitBoard; SQUARES_AMOUNT] = read_bb_cache(&CACHE_KNIGHT);
 
-// Various pawn caches:
-pub const PAWN_QUIET_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
-    read_2d_bb_cache(CACHE_QUIET_PAWN);
+// Due for removal, only exists until check_decider gets reworked.
 pub const PAWN_CAPTURE_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
     read_2d_bb_cache(CACHE_CAPTURE_PAWN);
-pub const PAWN_DOUBLE_PUSH_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] =
-    read_2d_bb_cache(CACHE_DOUBLE_PUSH_PAWN);
 
 // Various slider caches:
 pub const ROOK_PEXT_MASK: [BitBoard; SQUARES_AMOUNT] = read_bb_cache(&CACHE_ROOK_PEXT_MASK);
@@ -95,12 +90,8 @@ pub fn write_caches() {
     let knight_moves = calculate_potential_moves_cache(Piece::Knight);
     let knight_moves = knight_moves.map(|b| b.value);
 
-    let quiet_pawn_moves = generate_pawn_moves(PawnMoveType::Quiet);
-    let quiet_pawn_moves = quiet_pawn_moves.map(|a| a.map(|b| b.value));
     let capture_pawn_moves = generate_pawn_moves(PawnMoveType::Capture);
     let capture_pawn_moves = capture_pawn_moves.map(|a| a.map(|b| b.value));
-    let double_push_pawn_moves = generate_pawn_moves(PawnMoveType::DoublePush);
-    let double_push_pawn_moves = double_push_pawn_moves.map(|a| a.map(|b| b.value));
 
     let pext_data = gen_cache_sliders();
     let rook_pext_mask = pext_data.rook_pext_mask;
@@ -116,16 +107,8 @@ pub fn write_caches() {
         format!("pub const CACHE_KING: [u64; 64] = {:?};", king_moves),
         format!("pub const CACHE_KNIGHT: [u64; 64] = {:?};", knight_moves),
         format!(
-            "pub const CACHE_QUIET_PAWN: [[u64; 64]; 2] = {:?};",
-            quiet_pawn_moves
-        ),
-        format!(
             "pub const CACHE_CAPTURE_PAWN: [[u64; 64]; 2] = {:?};",
             capture_pawn_moves
-        ),
-        format!(
-            "pub const CACHE_DOUBLE_PUSH_PAWN: [[u64; 64]; 2] = {:?};",
-            double_push_pawn_moves
         ),
         format!(
             "pub const CACHE_ROOK_PEXT_MASK: [u64; 64] = {:?};",
