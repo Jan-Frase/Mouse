@@ -6,8 +6,7 @@ use crate::backend::movegen::move_gen_pawn_util::gen_pawn_moves;
 use crate::backend::movegen::move_gen_sliders::get_slider_moves;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
-use crate::backend::state::piece::Piece::{King, Knight};
-use crate::backend::state::piece::{SLIDER_PIECES, TRIVIAL_PIECES};
+use crate::backend::state::piece::Piece::*;
 use crate::backend::state::square::Square;
 
 /// Generates and returns all the pseudo legal moves for the current player's pieces
@@ -31,21 +30,23 @@ pub fn get_pseudo_legal_moves(state: &State) -> Vec<Moove> {
     let mut moves = Vec::with_capacity(50);
 
     // Move gen for king and knight (excluding castles)
-    for trivial_type in TRIVIAL_PIECES {
-        let moves_cache = match trivial_type {
-            Knight => KNIGHT_MOVES,
-            King => KING_MOVES,
-            _ => panic!("This is not a trivial type."),
-        };
-        iterate_over_bitboard_for_non_slider(
-            &mut moves,
-            moves_cache,
-            state
-                .bb_manager
-                .get_colored_piece_bb(trivial_type, state.active_color),
-            friendly_pieces_bb,
-        );
-    }
+    iterate_over_bitboard_for_non_slider(
+        &mut moves,
+        KING_MOVES,
+        state
+            .bb_manager
+            .get_colored_piece_bb(King, state.active_color),
+        friendly_pieces_bb,
+    );
+
+    iterate_over_bitboard_for_non_slider(
+        &mut moves,
+        KNIGHT_MOVES,
+        state
+            .bb_manager
+            .get_colored_piece_bb(Knight, state.active_color),
+        friendly_pieces_bb,
+    );
 
     gen_castles(&mut moves, state, state.bb_manager.get_all_pieces_bb());
 
@@ -59,17 +60,33 @@ pub fn get_pseudo_legal_moves(state: &State) -> Vec<Moove> {
     );
 
     // Gen queen, bishop and rook moves
-    for slider_type in SLIDER_PIECES {
-        get_slider_moves(
-            &mut moves,
-            slider_type,
-            state
-                .bb_manager
-                .get_colored_piece_bb(slider_type, state.active_color),
-            friendly_pieces_bb,
-            enemy_pieces_bb,
-        );
-    }
+    get_slider_moves(
+        &mut moves,
+        Queen,
+        state
+            .bb_manager
+            .get_colored_piece_bb(Queen, state.active_color),
+        friendly_pieces_bb,
+        enemy_pieces_bb,
+    );
+    get_slider_moves(
+        &mut moves,
+        Bishop,
+        state
+            .bb_manager
+            .get_colored_piece_bb(Bishop, state.active_color),
+        friendly_pieces_bb,
+        enemy_pieces_bb,
+    );
+    get_slider_moves(
+        &mut moves,
+        Rook,
+        state
+            .bb_manager
+            .get_colored_piece_bb(Rook, state.active_color),
+        friendly_pieces_bb,
+        enemy_pieces_bb,
+    );
 
     moves
 }
