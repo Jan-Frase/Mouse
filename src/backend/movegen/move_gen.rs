@@ -96,18 +96,17 @@ pub(crate) fn iterate_over_bitboard_for_non_slider(
         potential_moves_bitboard &= !mask_bitboard;
 
         //... and convert the resulting bitboard to a list of moves.
-        moves.append(&mut convert_bitboard_to_moves(
+        convert_bitboard_to_moves(
+            moves,
             square,
             potential_moves_bitboard,
-        ));
+        );
     }
 }
 
-pub fn convert_bitboard_to_moves(square: Square, moves_bitboard: BitBoard) -> Vec<Moove> {
+pub fn convert_bitboard_to_moves(moves: &mut Vec<Moove>,square: Square, moves_bitboard: BitBoard) {
     // generate all the moves
-    let mut moves: Vec<Moove> = Vec::new();
     for to_square in moves_bitboard {
         moves.push(Moove::new(square, to_square))
     }
-    moves
 }

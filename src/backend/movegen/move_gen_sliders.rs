@@ -19,7 +19,7 @@ pub fn get_slider_moves(
         let moves_for_piece_bb =
             get_slider_moves_at_square(piece_type, square, friendly_pieces_bb, enemy_pieces_bb);
 
-        moves.append(&mut convert_bitboard_to_moves(square, moves_for_piece_bb));
+        convert_bitboard_to_moves(moves, square, moves_for_piece_bb);
     }
 }
 
