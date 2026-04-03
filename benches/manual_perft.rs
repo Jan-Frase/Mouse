@@ -1,13 +1,13 @@
 use mouse::State;
 use mouse::backend::perft::perft;
-use perft_fixtures::perft_fixtures::{NORMAL_PERFT, PerftFixture};
+use perft_fixtures::perft_fixtures::{LONG_PERFT, PerftFixture};
 use std::time::Instant;
 
 pub fn manual_perft() {
     let mut total_nodes = 0;
 
     let now = Instant::now();
-    for perft_fixture in NORMAL_PERFT {
+    for perft_fixture in LONG_PERFT {
         let nodes = run_nps_perft(perft_fixture);
         total_nodes += nodes;
     }
