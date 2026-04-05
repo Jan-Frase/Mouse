@@ -1,5 +1,5 @@
 use crate::backend::compile_time::gen_caches_non_sliders::{
-    PawnMoveType, calculate_potential_moves_cache, generate_pawn_moves,
+    calculate_potential_moves_cache, generate_pawn_moves,
 };
 use crate::backend::compile_time::gen_caches_sliders::{PEXT_TABLE_SIZE, gen_cache_sliders};
 use crate::backend::compile_time::generated::caches::{
@@ -90,7 +90,7 @@ pub fn write_caches() {
     let knight_moves = calculate_potential_moves_cache(Piece::Knight);
     let knight_moves = knight_moves.map(|b| b.value);
 
-    let capture_pawn_moves = generate_pawn_moves(PawnMoveType::Capture);
+    let capture_pawn_moves = generate_pawn_moves();
     let capture_pawn_moves = capture_pawn_moves.map(|a| a.map(|b| b.value));
 
     let pext_data = gen_cache_sliders();

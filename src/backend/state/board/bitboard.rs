@@ -1,4 +1,4 @@
-use crate::backend::constants::{FILES_AMOUNT, RANKS_AMOUNT};
+use crate::backend::constants::SIDE_LENGTH;
 use crate::backend::state::square::Square;
 use std::fmt::{Display, Formatter};
 use std::ops::{
@@ -25,73 +25,22 @@ impl BitBoard {
     }
 
     /// Converts a given `Square` into a corresponding bitboard.
-    const fn new_from_square(square: Square) -> BitBoard {
+    fn new_from_square(square: Square) -> BitBoard {
         let index = square.square_to_index();
         BitBoard { value: 1 << index }
     }
 
-    pub const fn new_from_squares(squares: &[Square]) -> Self {
-        let mut bitboard = BitBoard::new();
-
-        let mut index = 0;
-        while index < squares.len() {
-            bitboard.fill_square(squares[index]);
-            index += 1;
-        }
-
-        bitboard
-    }
-
-    pub const fn new_from_rank(rank: i8) -> Self {
-        let mut bitboard = BitBoard::new();
-
-        let mut file = 0;
-        while file < FILES_AMOUNT {
-            bitboard.fill_square(Square::new(file as i8, rank));
-            file += 1;
-        }
-
-        bitboard
-    }
-
-    pub const fn new_from_file(file: i8) -> Self {
-        let mut bitboard = BitBoard::new();
-
-        let mut rank = 0;
-        while rank < RANKS_AMOUNT {
-            bitboard.fill_square(Square::new(file, rank as i8));
-            rank += 1;
-        }
-
-        bitboard
-    }
-
     /// Checks if the value of the current instance is empty or zero.
-    ///
-    /// # Returns
-    /// - `true` if the value of the instance is `0`.
-    /// - `false` otherwise.
     pub fn is_empty(&self) -> bool {
         self.value == 0
     }
 
     /// Checks if the value of the current instance is empty or zero.
-    ///
-    /// # Returns
-    /// - `true` if the value of the instance is `0`.
-    /// - `false` otherwise.
     pub fn is_not_empty(&self) -> bool {
         self.value != 0
     }
 
     /// Checks if a given square is occupied.
-    ///
-    /// # Arguments
-    /// * `square` - The square to check, represented as a `Square` instance.
-    ///
-    /// # Returns
-    /// * `true` if the square is occupied.
-    /// * `false` if the square is unoccupied.
     pub fn get_square(&self, square: Square) -> bool {
         let index = Self::new_from_square(square);
         let bitboard_after_mask = self.value & index.value;
@@ -99,26 +48,64 @@ impl BitBoard {
     }
 
     /// Marks a square as filled by setting the corresponding bit in the `value` field.
-    ///
-    /// # Parameters
-    ///
-    /// * `square` - A `Square` instance representing the square to be marked as filled.
-    pub const fn fill_square(&mut self, square: Square) {
+    pub fn fill_square(&mut self, square: Square) {
         let bit = Self::new_from_square(square);
         self.value |= bit.value;
     }
 
     /// Marks a square on a board as empty by setting the corresponding bit in the `value` field.
-    ///
-    /// # Parameters
-    ///
-    /// * `square` - A `Square` instance representing the square to be marked as filled.
     pub fn clear_square(&mut self, square: Square) {
         let bit = Self::new_from_square(square);
         self.value ^= bit.value;
     }
 }
 
+// ---------------------------------------
+// Only for use during const!
+// ---------------------------------------
+impl BitBoard {
+    pub const fn new_from_squares(squares: &[Square]) -> Self {
+        let mut bitboard = BitBoard::new();
+
+        let mut index = 0;
+        while index < squares.len() {
+            let square = squares[index];
+            let bb: u64 = 1 << (square.rank * 8 + square.file);
+            bitboard.value |= bb;
+            index += 1;
+        }
+
+        bitboard
+    }
+
+    pub const fn new_from_rank(rank: i8) -> Self {
+        let mut squares = [Square::new(0, 0); SIDE_LENGTH];
+        let mut file = 0;
+
+        while file < SIDE_LENGTH {
+            squares[file] = Square::new(file as i8, rank);
+            file += 1;
+        }
+
+        Self::new_from_squares(&squares)
+    }
+
+    pub const fn new_from_file(file: i8) -> Self {
+        let mut squares = [Square::new(0, 0); SIDE_LENGTH];
+        let mut rank = 0;
+
+        while rank < SIDE_LENGTH {
+            squares[rank] = Square::new(file, rank as i8);
+            rank += 1;
+        }
+
+        Self::new_from_squares(&squares)
+    }
+}
+
+// ---------------------------------------
+// Iterator, Operator overloads, and Display.
+// ---------------------------------------
 impl Iterator for BitBoard {
     type Item = Square;
 
@@ -167,7 +154,6 @@ impl Shr<i32> for BitBoard {
     }
 }
 
-// Various bitwise operations on BitBoards.
 impl Not for BitBoard {
     type Output = Self;
 

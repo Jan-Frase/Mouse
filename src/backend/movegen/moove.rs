@@ -56,18 +56,8 @@ impl Moove {
         (self.from.file() - self.to.file()).abs() == 2
     }
 
-    /// This assumes that the moved piece is a king and only checks if the target file is 6.
-    fn is_short_castle(&self) -> bool {
-        self.to.file() == 6
-    }
-
-    /// This assumes that the moved piece is a king and only checks if the target file is 2.
-    fn is_long_castle(&self) -> bool {
-        self.to.file() == 2
-    }
-
     pub fn get_castle_type(&self) -> CastleType {
-        if self.is_short_castle() {
+        if self.to.file() == 6 {
             CastleType::Short
         } else {
             CastleType::Long

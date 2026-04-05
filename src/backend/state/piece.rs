@@ -20,10 +20,6 @@ pub const ALL_PIECES: [Piece; 6] = [
 
 pub const PROMOTABLE_PIECES: [Piece; 4] = [Piece::Rook, Piece::Knight, Piece::Bishop, Piece::Queen];
 
-pub const SLIDER_PIECES: [Piece; 3] = [Piece::Rook, Piece::Bishop, Piece::Queen];
-
-pub const TRIVIAL_PIECES: [Piece; 2] = [Piece::Knight, Piece::King];
-
 /// Represents the color of a piece.
 #[derive(Copy, Clone, Debug)]
 pub enum Side {

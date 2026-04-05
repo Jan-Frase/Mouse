@@ -40,6 +40,8 @@ const POSITION_6: PerftFen = PerftFen {
     name: "position 6",
 };
 
+/*
+Some old test positions. I will leave them here for now.
 const KING_ONLY: PerftFen = PerftFen {
     fen: "4k3/8/8/8/8/8/8/4K3 w - - 0 1",
     name: "king only",
@@ -69,7 +71,7 @@ const KING_AND_QUEEN: PerftFen = PerftFen {
     fen: "3qk3/8/8/8/8/8/8/3QK3 w - - 0 11",
     name: "king and queen",
 };
-
+ */
 // -----------------------------------------
 // Depths and results for perft tests
 // -----------------------------------------

@@ -3,12 +3,6 @@ use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::piece::{Piece, Side};
 use crate::backend::state::square::Square;
 
-pub enum PawnMoveType {
-    Quiet,
-    Capture,
-    DoublePush,
-}
-
 /// Initializes a collection of bitboards representing all possible moves for each square.
 ///
 /// Since this function is const, it can be evaluated at compile time.
@@ -115,7 +109,7 @@ fn generate_knight_moves(square: Square) -> BitBoard {
     bitboard
 }
 
-pub fn generate_pawn_moves(pawn_move_type: PawnMoveType) -> [[BitBoard; SQUARES_AMOUNT]; SIDES] {
+pub fn generate_pawn_moves() -> [[BitBoard; SQUARES_AMOUNT]; SIDES] {
     let mut quiet_moves = [[BitBoard::new(); SQUARES_AMOUNT]; SIDES];
 
     let mut side_index = 0;
@@ -134,17 +128,7 @@ pub fn generate_pawn_moves(pawn_move_type: PawnMoveType) -> [[BitBoard; SQUARES_
             // generate a square struct from the index
             let square = Square::index_to_square(square_index as i8);
 
-            match pawn_move_type {
-                PawnMoveType::Quiet => {
-                    generate_pawn_quiet_moves(square, &mut bitboard, active_color);
-                }
-                PawnMoveType::Capture => {
-                    generate_pawn_attack_moves(square, &mut bitboard, active_color);
-                }
-                PawnMoveType::DoublePush => {
-                    generate_pawn_double_push_moves(square, &mut bitboard, active_color);
-                }
-            }
+            generate_pawn_attack_moves(square, &mut bitboard, active_color);
 
             // and generate the moves for that square
             potential_moves[square_index] = bitboard;
@@ -160,13 +144,6 @@ pub fn generate_pawn_moves(pawn_move_type: PawnMoveType) -> [[BitBoard; SQUARES_
     quiet_moves
 }
 
-fn generate_pawn_quiet_moves(square: Square, bitboard: &mut BitBoard, active_color: Side) {
-    let forward_square = square.forward_by_one(active_color);
-    if forward_square.is_valid() {
-        bitboard.fill_square(forward_square);
-    }
-}
-
 fn generate_pawn_attack_moves(square: Square, bitboard: &mut BitBoard, active_color: Side) {
     let right_diagonal_square = square.right_by_one().forward_by_one(active_color);
     let left_diagonal_square = square.left_by_one().forward_by_one(active_color);
@@ -177,15 +154,4 @@ fn generate_pawn_attack_moves(square: Square, bitboard: &mut BitBoard, active_co
     if left_diagonal_square.is_valid() {
         bitboard.fill_square(left_diagonal_square);
     }
-}
-
-fn generate_pawn_double_push_moves(square: Square, bitboard: &mut BitBoard, active_color: Side) {
-    if !square.is_pawn_start(active_color) {
-        return;
-    }
-
-    let double_pushed_square = square
-        .forward_by_one(active_color)
-        .forward_by_one(active_color);
-    bitboard.fill_square(double_pushed_square);
 }
