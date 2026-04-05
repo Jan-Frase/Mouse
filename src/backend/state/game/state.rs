@@ -1,3 +1,4 @@
+use crate::backend::compile_time::util::bb_from_squares;
 use crate::backend::movegen::moove::{CastleType, Moove};
 use crate::backend::state::board::bb_manager::BBManager;
 use crate::backend::state::board::bitboard::BitBoard;
@@ -7,10 +8,10 @@ use crate::backend::state::piece::Piece::{King, Pawn, Rook};
 use crate::backend::state::piece::{Piece, Side};
 use crate::backend::state::square::{A1, A8, D1, D8, F1, F8, H1, H8, Square};
 
-const ROOK_SWAP_WHITE_LONG_CASTLE_BB: BitBoard = BitBoard::new_from_squares(&[A1, D1]);
-const ROOK_SWAP_WHITE_SHORT_CASTLE_BB: BitBoard = BitBoard::new_from_squares(&[H1, F1]);
-const ROOK_SWAP_BLACK_LONG_CASTLE_BB: BitBoard = BitBoard::new_from_squares(&[A8, D8]);
-const ROOK_SWAP_BLACK_SHORT_CASTLE_BB: BitBoard = BitBoard::new_from_squares(&[H8, F8]);
+const ROOK_SWAP_WHITE_LONG_CASTLE_BB: BitBoard = bb_from_squares(&[A1, D1]);
+const ROOK_SWAP_WHITE_SHORT_CASTLE_BB: BitBoard = bb_from_squares(&[H1, F1]);
+const ROOK_SWAP_BLACK_LONG_CASTLE_BB: BitBoard = bb_from_squares(&[A8, D8]);
+const ROOK_SWAP_BLACK_SHORT_CASTLE_BB: BitBoard = bb_from_squares(&[H8, F8]);
 
 #[derive(Debug, Clone)]
 pub struct State {

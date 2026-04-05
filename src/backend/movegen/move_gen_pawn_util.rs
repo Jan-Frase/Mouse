@@ -1,3 +1,5 @@
+use crate::backend::compile_time::util::bb_from_file;
+use crate::backend::compile_time::util::bb_from_rank;
 use crate::backend::movegen::moove::Moove;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
@@ -5,15 +7,15 @@ use crate::backend::state::piece::Piece::Pawn;
 use crate::backend::state::piece::{PROMOTABLE_PIECES, Side};
 use crate::backend::state::square::Square;
 
-const BLACK_PROMOTION_RANK_BB: BitBoard = BitBoard::new_from_rank(0);
-const WHITE_PROMOTION_RANK_BB: BitBoard = BitBoard::new_from_rank(7);
-const WHITE_PAWN_START_RANK_BB: BitBoard = BitBoard::new_from_rank(1);
-const BLACK_PAWN_START_RANK_BB: BitBoard = BitBoard::new_from_rank(6);
+const BLACK_PROMOTION_RANK_BB: BitBoard = bb_from_rank(0);
+const WHITE_PROMOTION_RANK_BB: BitBoard = bb_from_rank(7);
+const WHITE_PAWN_START_RANK_BB: BitBoard = bb_from_rank(1);
+const BLACK_PAWN_START_RANK_BB: BitBoard = bb_from_rank(6);
 const PROMOTION_RANKS_BB: BitBoard = BitBoard {
     value: (BLACK_PROMOTION_RANK_BB.value | WHITE_PROMOTION_RANK_BB.value),
 };
-const LEFT_SIDE_BB: BitBoard = BitBoard::new_from_file(0);
-const RIGHT_SIDE_BB: BitBoard = BitBoard::new_from_file(7);
+const LEFT_SIDE_BB: BitBoard = bb_from_file(0);
+const RIGHT_SIDE_BB: BitBoard = bb_from_file(7);
 
 pub fn gen_pawn_moves(
     moves: &mut Vec<Moove>,

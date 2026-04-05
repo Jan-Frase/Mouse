@@ -1,4 +1,3 @@
-use crate::backend::constants::SIDE_LENGTH;
 use crate::backend::state::square::Square;
 use std::fmt::{Display, Formatter};
 use std::ops::{
@@ -61,49 +60,6 @@ impl BitBoard {
 }
 
 // ---------------------------------------
-// Only for use during const!
-// ---------------------------------------
-impl BitBoard {
-    pub const fn new_from_squares(squares: &[Square]) -> Self {
-        let mut bitboard = BitBoard::new();
-
-        let mut index = 0;
-        while index < squares.len() {
-            let square = squares[index];
-            let bb: u64 = 1 << (square.rank * 8 + square.file);
-            bitboard.value |= bb;
-            index += 1;
-        }
-
-        bitboard
-    }
-
-    pub const fn new_from_rank(rank: i8) -> Self {
-        let mut squares = [Square::new(0, 0); SIDE_LENGTH];
-        let mut file = 0;
-
-        while file < SIDE_LENGTH {
-            squares[file] = Square::new(file as i8, rank);
-            file += 1;
-        }
-
-        Self::new_from_squares(&squares)
-    }
-
-    pub const fn new_from_file(file: i8) -> Self {
-        let mut squares = [Square::new(0, 0); SIDE_LENGTH];
-        let mut rank = 0;
-
-        while rank < SIDE_LENGTH {
-            squares[rank] = Square::new(file, rank as i8);
-            rank += 1;
-        }
-
-        Self::new_from_squares(&squares)
-    }
-}
-
-// ---------------------------------------
 // Iterator, Operator overloads, and Display.
 // ---------------------------------------
 impl Iterator for BitBoard {
@@ -115,7 +71,7 @@ impl Iterator for BitBoard {
         }
 
         let index = self.value.trailing_zeros();
-        let square = Square::index_to_square(index as i8);
+        let square = Square::new_from_index(index as i8);
         self.clear_square(square);
 
         Some(square)

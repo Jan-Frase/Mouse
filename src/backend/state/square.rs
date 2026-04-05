@@ -65,7 +65,7 @@ impl Square {
     /// - `Square`: A struct representing the chessboard square with the following fields:
     ///   - `file`: The column (0 to 7) computed as `index % 8`.
     ///   - `rank`: The row (0 to 7) computed as `index / 8`.
-    pub fn index_to_square(index: i8) -> Square {
+    pub const fn new_from_index(index: i8) -> Square {
         Square {
             file: index % 8,
             rank: index / 8,
@@ -80,33 +80,11 @@ impl Square {
         (self.file + self.rank * 8) as usize
     }
 
-    /// Checks if the current position is valid.
-    ///
-    /// A position is considered valid if both the `file` and `rank` values fall within
-    /// the bounds of a chessboard.
-    ///
-    /// # Returns
-    ///
-    /// * `true` - If the position is valid.
-    /// * `false` - Otherwise.
-    pub fn is_valid(&self) -> bool {
-        self.file >= 0 && self.file < 8 && self.rank >= 0 && self.rank < 8
-    }
-
-    /// Determines if the object is not valid. Simply negates "is_valid()".
-    ///
-    /// # Returns
-    /// * `true` - If the object is not valid.
-    /// * `false` - If the object is valid.
-    pub fn is_not_valid(&self) -> bool {
-        !self.is_valid()
-    }
-
     /// Returns the 'file' attribute of the current instance. These aren't derived from getset because they need to be const.
     ///
     /// # Returns
     /// * `i8` - The value of the `file` field.
-    pub fn file(&self) -> i8 {
+    pub const fn file(&self) -> i8 {
         self.file
     }
 
@@ -114,7 +92,7 @@ impl Square {
     ///
     /// # Returns
     /// * `i8` - The value of the `file` field.
-    pub fn rank(&self) -> i8 {
+    pub const fn rank(&self) -> i8 {
         self.rank
     }
 

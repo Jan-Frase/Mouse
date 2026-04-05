@@ -1,3 +1,4 @@
+use crate::backend::compile_time::util::bb_from_squares;
 use crate::backend::movegen::check_decider::is_in_check_on_square;
 use crate::backend::movegen::moove::{CastleType, Moove};
 use crate::backend::state::board::bitboard::BitBoard;
@@ -7,10 +8,10 @@ use crate::backend::state::piece::Side;
 use crate::backend::state::square::{B1, B8, C1, C8, D1, D8, E1, E8, F1, F8, G1, G8, Square};
 
 // Made these values with: https://tearth.dev/bitboard-viewer/
-const WHITE_LONG_CASTLE_MASK: BitBoard = BitBoard::new_from_squares(&[B1, C1, D1]);
-const WHITE_SHORT_CASTLE_MASK: BitBoard = BitBoard::new_from_squares(&[F1, G1]);
-const BLACK_LONG_CASTLE_MASK: BitBoard = BitBoard::new_from_squares(&[B8, C8, D8]);
-const BLACK_SHORT_CASTLE_MASK: BitBoard = BitBoard::new_from_squares(&[F8, G8]);
+const WHITE_LONG_CASTLE_MASK: BitBoard = bb_from_squares(&[B1, C1, D1]);
+const WHITE_SHORT_CASTLE_MASK: BitBoard = bb_from_squares(&[F1, G1]);
+const BLACK_LONG_CASTLE_MASK: BitBoard = bb_from_squares(&[B8, C8, D8]);
+const BLACK_SHORT_CASTLE_MASK: BitBoard = bb_from_squares(&[F8, G8]);
 
 const WHITE_LONG_CASTLE_MOVE: Moove = Moove::new(E1, C1);
 const WHITE_SHORT_CASTLE_MOVE: Moove = Moove::new(E1, G1);
