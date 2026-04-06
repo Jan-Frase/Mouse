@@ -1,9 +1,11 @@
+use crate::backend::movegen::moove::Moove;
 use crate::backend::state::board::bb_manager::BBManager;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
 use crate::backend::state::piece::Piece::{Bishop, King, Knight, Pawn, Queen, Rook};
 use crate::backend::state::piece::Side::{Black, White};
 use crate::backend::state::piece::{Piece, Side};
 use crate::backend::state::square::Square;
+use crate::backend::state::square::square_from_rank_and_file;
 
 /// Parses a FEN (Forsyth-Edwards Notation) string and updates the corresponding game state.
 /// https://www.chessprogramming.org/Forsyth-Edwards_Notation
@@ -49,19 +51,20 @@ fn parse_en_passant(irreversible_data: &mut IrreversibleData, en_passant_file_st
         return;
     }
 
-    let mut en_passant_square = Square::new(0, 0);
+    let mut file = 0;
+    let mut rank = 0;
     for char in en_passant_file_string.chars() {
         match char {
             'a'..='h' => {
-                en_passant_square.file = char.to_digit(36).unwrap() as i8 - 10;
+                file = char.to_digit(36).unwrap() as i8 - 10;
             }
             '3' | '6' => {
-                en_passant_square.rank = char.to_digit(10).unwrap() as i8 - 1;
+                rank = char.to_digit(10).unwrap() as i8 - 1;
             }
             _ => panic!("Invalid character in FEN string"),
         }
     }
-    irreversible_data.en_passant_square = Some(en_passant_square);
+    irreversible_data.en_passant_square = Some(square_from_rank_and_file(rank, file));
 }
 
 fn parse_castling_rights(irreversible_data: &mut IrreversibleData, castling_rights_string: &str) {
@@ -113,51 +116,111 @@ fn parse_position(bit_board_manager: &mut BBManager, positions_string: &str) {
                 rank -= 1;
             }
             'P' => {
-                fill_square(bit_board_manager, Pawn, White, Square::new(file, rank));
+                fill_square(
+                    bit_board_manager,
+                    Pawn,
+                    White,
+                    square_from_rank_and_file(rank, file),
+                );
                 file += 1;
             }
             'p' => {
-                fill_square(bit_board_manager, Pawn, Black, Square::new(file, rank));
+                fill_square(
+                    bit_board_manager,
+                    Pawn,
+                    Black,
+                    square_from_rank_and_file(rank, file),
+                );
                 file += 1;
             }
             'R' => {
-                fill_square(bit_board_manager, Rook, White, Square::new(file, rank));
+                fill_square(
+                    bit_board_manager,
+                    Rook,
+                    White,
+                    square_from_rank_and_file(rank, file),
+                );
                 file += 1;
             }
             'r' => {
-                fill_square(bit_board_manager, Rook, Black, Square::new(file, rank));
+                fill_square(
+                    bit_board_manager,
+                    Rook,
+                    Black,
+                    square_from_rank_and_file(rank, file),
+                );
                 file += 1;
             }
             'N' => {
-                fill_square(bit_board_manager, Knight, White, Square::new(file, rank));
+                fill_square(
+                    bit_board_manager,
+                    Knight,
+                    White,
+                    square_from_rank_and_file(rank, file),
+                );
                 file += 1;
             }
             'n' => {
-                fill_square(bit_board_manager, Knight, Black, Square::new(file, rank));
+                fill_square(
+                    bit_board_manager,
+                    Knight,
+                    Black,
+                    square_from_rank_and_file(rank, file),
+                );
                 file += 1;
             }
             'B' => {
-                fill_square(bit_board_manager, Bishop, White, Square::new(file, rank));
+                fill_square(
+                    bit_board_manager,
+                    Bishop,
+                    White,
+                    square_from_rank_and_file(rank, file),
+                );
                 file += 1;
             }
             'b' => {
-                fill_square(bit_board_manager, Bishop, Black, Square::new(file, rank));
+                fill_square(
+                    bit_board_manager,
+                    Bishop,
+                    Black,
+                    square_from_rank_and_file(rank, file),
+                );
                 file += 1;
             }
             'Q' => {
-                fill_square(bit_board_manager, Queen, White, Square::new(file, rank));
+                fill_square(
+                    bit_board_manager,
+                    Queen,
+                    White,
+                    square_from_rank_and_file(rank, file),
+                );
                 file += 1;
             }
             'q' => {
-                fill_square(bit_board_manager, Queen, Black, Square::new(file, rank));
+                fill_square(
+                    bit_board_manager,
+                    Queen,
+                    Black,
+                    square_from_rank_and_file(rank, file),
+                );
                 file += 1;
             }
             'K' => {
-                fill_square(bit_board_manager, King, White, Square::new(file, rank));
+                fill_square(
+                    bit_board_manager,
+                    King,
+                    White,
+                    square_from_rank_and_file(rank, file),
+                );
                 file += 1;
             }
             'k' => {
-                fill_square(bit_board_manager, King, Black, Square::new(file, rank));
+                fill_square(
+                    bit_board_manager,
+                    King,
+                    Black,
+                    square_from_rank_and_file(rank, file),
+                );
                 file += 1;
             }
             _ => {
@@ -176,5 +239,45 @@ fn parse_position(bit_board_manager: &mut BBManager, positions_string: &str) {
         bb_manager
             .get_all_pieces_bb_off_mut(piece_color)
             .fill_square(square);
+    }
+}
+
+// -------------------
+
+pub fn square_from_uci_notation(uci_notation: &str) -> Square {
+    let mut file = 0;
+    let mut rank = 0;
+
+    for char in uci_notation.chars() {
+        match char {
+            'a'..='h' => file = char.to_digit(36).unwrap() - 10,
+            '1'..='8' => rank = char.to_digit(10).unwrap() - 1,
+            _ => panic!("Invalid uci notation"),
+        }
+    }
+
+    square_from_rank_and_file(rank as i8, file as i8)
+}
+
+pub fn moove_from_uci_notation(uci_notation: &str) -> Moove {
+    let from = square_from_uci_notation(&uci_notation[0..2]);
+    let to = square_from_uci_notation(&uci_notation[2..4]);
+
+    let promotion_char = uci_notation.chars().nth(4);
+    let promotion_type = match promotion_char {
+        None => Option::None,
+        Some(char) => match char {
+            'r' => Some(Rook),
+            'n' => Some(Knight),
+            'b' => Some(Bishop),
+            'q' => Some(Queen),
+            _ => panic!("Invalid promotion type {:?}", uci_notation),
+        },
+    };
+
+    Moove {
+        from,
+        to,
+        promotion_type,
     }
 }

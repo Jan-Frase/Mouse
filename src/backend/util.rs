@@ -1,28 +1,19 @@
-use crate::backend::constants::SIDE_LENGTH;
+use crate::backend::constants::{A1, SIDE_LENGTH};
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::square::Square;
-
-pub const fn is_square_valid(square: Square) -> bool {
-    square.file() >= 0 && square.file() <= 7 && square.rank() >= 0 && square.rank() <= 7
-}
-
-pub const fn square_to_bb(square: Square) -> BitBoard {
-    let mut bitboard = BitBoard::new();
-    let bb: u64 = 1 << (square.rank * 8 + square.file);
-    bitboard.value = bb;
-    bitboard
-}
+use crate::backend::state::square::square_from_rank_and_file;
 
 // ---------------------------------------
-// Only for use during const!
+// Nothing in this file should be performance-critical!
 // ---------------------------------------
+
 pub const fn bb_from_squares(squares: &[Square]) -> BitBoard {
     let mut bitboard = BitBoard::new();
 
     let mut index = 0;
     while index < squares.len() {
         let square = squares[index];
-        let bb: u64 = 1 << (square.rank * 8 + square.file);
+        let bb: u64 = 1 << square;
         bitboard.value |= bb;
         index += 1;
     }
@@ -31,11 +22,11 @@ pub const fn bb_from_squares(squares: &[Square]) -> BitBoard {
 }
 
 pub const fn bb_from_rank(rank: i8) -> BitBoard {
-    let mut squares = [Square::new(0, 0); SIDE_LENGTH];
+    let mut squares = [A1; SIDE_LENGTH];
     let mut file = 0;
 
     while file < SIDE_LENGTH {
-        squares[file] = Square::new(file as i8, rank);
+        squares[file] = square_from_rank_and_file(rank, file as i8);
         file += 1;
     }
 
@@ -43,11 +34,11 @@ pub const fn bb_from_rank(rank: i8) -> BitBoard {
 }
 
 pub const fn bb_from_file(file: i8) -> BitBoard {
-    let mut squares = [Square::new(0, 0); SIDE_LENGTH];
+    let mut squares = [A1; SIDE_LENGTH];
     let mut rank = 0;
 
     while rank < SIDE_LENGTH {
-        squares[rank] = Square::new(file, rank as i8);
+        squares[rank] = square_from_rank_and_file(rank as i8, file);
         rank += 1;
     }
 

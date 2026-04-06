@@ -1,6 +1,5 @@
 use crate::backend::state::piece::Piece;
-use crate::backend::state::piece::Piece::{Bishop, Knight, Queen, Rook};
-use crate::backend::state::square::Square;
+use crate::backend::state::square::{Square, get_file};
 use std::fmt::{Display, Formatter};
 
 #[derive(Copy, Clone)]
@@ -48,42 +47,20 @@ impl Moove {
 
     /// This assumes that the moved piece is a pawn and only checks if the rank changed by 2.
     pub fn is_double_pawn_push(&self) -> bool {
-        (self.from.rank() - self.to.rank()).abs() == 2
+        self.from.abs_diff(self.to) == 16
     }
 
     /// This assumes that the moved piece is a king and only checks if the file changed by 2.
+    /// TODO: Not sure if this is bug free but i think so lol
     pub fn is_castle(&self) -> bool {
-        (self.from.file() - self.to.file()).abs() == 2
+        self.from.abs_diff(self.to) == 2
     }
 
     pub fn get_castle_type(&self) -> CastleType {
-        if self.to.file() == 6 {
+        if get_file(self.to) == 6 {
             CastleType::Short
         } else {
             CastleType::Long
-        }
-    }
-
-    pub fn new_from_uci_notation(uci_notation: &str) -> Moove {
-        let from = Square::new_from_uci_notation(&uci_notation[0..2]);
-        let to = Square::new_from_uci_notation(&uci_notation[2..4]);
-
-        let promotion_char = uci_notation.chars().nth(4);
-        let promotion_type = match promotion_char {
-            None => Option::None,
-            Some(char) => match char {
-                'r' => Some(Rook),
-                'n' => Some(Knight),
-                'b' => Some(Bishop),
-                'q' => Some(Queen),
-                _ => panic!("Invalid promotion type {:?}", uci_notation),
-            },
-        };
-
-        Moove {
-            from,
-            to,
-            promotion_type,
         }
     }
 }
@@ -98,10 +75,10 @@ impl Display for Moove {
         result.push_str(match self.promotion_type {
             None => "",
             Some(promotion_type) => match promotion_type {
-                Rook => "r",
-                Knight => "n",
-                Bishop => "b",
-                Queen => "q",
+                Piece::Rook => "r",
+                Piece::Knight => "n",
+                Piece::Bishop => "b",
+                Piece::Queen => "q",
                 _ => panic!("Invalid promotion type {:?}", promotion_type),
             },
         });

@@ -1,9 +1,10 @@
-use crate::backend::compile_time::util::is_square_valid;
-use crate::backend::compile_time::util::square_to_bb;
-use crate::backend::constants::{SIDES, SQUARES_AMOUNT};
+use crate::backend::compile_time::gen_util::{
+    is_square_at_left_edge, is_square_at_right_edge, is_square_valid, square_to_bb,
+};
+use crate::backend::constants::{A1, A8, H1, SIDES, SQUARES_AMOUNT};
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::piece::{Piece, Side};
-use crate::backend::state::square::Square;
+use crate::backend::state::square::{Square, get_file, get_rank};
 
 /// Initializes a collection of bitboards representing all possible moves for each square.
 ///
@@ -19,19 +20,16 @@ pub const fn gen_potential_moves_cache(piece_type: Piece) -> [BitBoard; SQUARES_
     let mut potential_moves = [BitBoard::new(); SQUARES_AMOUNT];
 
     // iterate over all squares
-    let mut square_index: usize = 0;
-    while square_index < SQUARES_AMOUNT {
-        // generate a square struct from the index
-        let square = Square::new_from_index(square_index as i8);
-
+    let mut square: Square = A1;
+    while square < SQUARES_AMOUNT as u8 {
         // and generate the moves for that square
-        potential_moves[square_index] = match piece_type {
+        potential_moves[square as usize] = match piece_type {
             Piece::Knight => generate_knight_moves(square),
             Piece::King => generate_king_moves(square),
             _ => panic!("Invalid piece type"),
         };
 
-        square_index += 1;
+        square += 1;
     }
 
     potential_moves
@@ -47,13 +45,16 @@ pub const fn gen_potential_moves_cache(piece_type: Piece) -> [BitBoard; SQUARES_
 const fn generate_king_moves(square: Square) -> BitBoard {
     let mut bitboard = BitBoard::new();
 
+    let rank = get_rank(square);
+    let file = get_file(square);
+
     // since this fn is const, we can't use a loop
     // instead we use a while loop
     // to iterate over the surrounding files
-    let mut file_offset = -1;
+    let mut file_offset: i8 = -1;
     while file_offset <= 1 {
         // and ranks
-        let mut rank_offset = -1;
+        let mut rank_offset: i8 = -1;
         while rank_offset <= 1 {
             // skip the current square
             if file_offset == 0 && rank_offset == 0 {
@@ -61,11 +62,12 @@ const fn generate_king_moves(square: Square) -> BitBoard {
                 continue;
             }
             // create the relevant square
-            let current_square =
-                Square::new(square.file() + file_offset, square.rank() + rank_offset);
+            let current_rank = rank + rank_offset;
+            let current_file = file + file_offset;
 
             // and add it if it's valid
-            if is_square_valid(current_square) {
+            if is_square_valid(current_rank, current_file) {
+                let current_square = (current_rank * 8 + current_file) as Square;
                 let bb = square_to_bb(current_square);
                 bitboard.value |= bb.value;
             }
@@ -81,6 +83,8 @@ const fn generate_king_moves(square: Square) -> BitBoard {
 /// Same as above but for the knight.
 const fn generate_knight_moves(square: Square) -> BitBoard {
     let mut bitboard = BitBoard::new();
+    let file = get_file(square);
+    let rank = get_rank(square);
 
     // The offsets for the knight moves. Starting in the top left corner.
     // `_ _ _ _ _ _ _ _`
@@ -97,12 +101,12 @@ const fn generate_knight_moves(square: Square) -> BitBoard {
     let mut index = 0;
     while index < 8 {
         // Calculate the current square.
-        let x_pos = square.file() + offset_x[index];
-        let y_pos = square.rank() + offset_y[index];
-        let current_square = Square::new(x_pos, y_pos);
+        let x_pos = file + offset_x[index];
+        let y_pos = rank + offset_y[index];
 
         // If it is valid, add it to the bitboard.
-        if is_square_valid(current_square) {
+        if is_square_valid(x_pos, y_pos) {
+            let current_square = (x_pos * 8 + y_pos) as Square;
             let bb = square_to_bb(current_square);
             bitboard.value |= bb.value;
         }
@@ -126,18 +130,16 @@ pub const fn gen_pawn_captures() -> [[BitBoard; SQUARES_AMOUNT]; SIDES] {
         let mut potential_moves = [BitBoard::new(); SQUARES_AMOUNT];
 
         // iterate over all squares
-        let mut square_index: usize = 0;
-        while square_index < SQUARES_AMOUNT {
-            let mut bitboard = BitBoard::new();
+        let mut square: Square = A1;
+        while square < SQUARES_AMOUNT as u8 {
             // generate a square struct from the index
-            let square = Square::new_from_index(square_index as i8);
 
-            generate_pawn_attack_moves(square, &mut bitboard, active_color);
+            let bb = generate_pawn_attack_moves(square, active_color);
 
             // and generate the moves for that square
-            potential_moves[square_index] = bitboard;
+            potential_moves[square as usize] = bb;
 
-            square_index += 1;
+            square += 1;
         }
 
         quiet_moves[side_index] = potential_moves;
@@ -148,25 +150,31 @@ pub const fn gen_pawn_captures() -> [[BitBoard; SQUARES_AMOUNT]; SIDES] {
     quiet_moves
 }
 
-const fn generate_pawn_attack_moves(square: Square, bitboard: &mut BitBoard, active_color: Side) {
+const fn generate_pawn_attack_moves(square: Square, active_color: Side) -> BitBoard {
+    let mut bitboard = BitBoard::new();
     let mut current_square = square;
 
     match active_color {
         Side::White => {
-            current_square.rank = current_square.rank + 1;
+            if current_square >= A8 {
+                return bitboard;
+            }
+            current_square += 8;
         }
         Side::Black => {
-            current_square.rank = current_square.rank - 1;
+            if current_square <= H1 {
+                return bitboard;
+            }
+            current_square -= 8;
         }
     }
 
-    let right_diagonal_square = Square::new(current_square.file + 1, current_square.rank);
-    let left_diagonal_square = Square::new(current_square.file - 1, current_square.rank);
+    if !is_square_at_right_edge(current_square) {
+        bitboard.value |= square_to_bb(current_square + 1).value;
+    }
+    if !is_square_at_left_edge(current_square) {
+        bitboard.value |= square_to_bb(current_square - 1).value;
+    }
 
-    if is_square_valid(right_diagonal_square) {
-        bitboard.value |= square_to_bb(right_diagonal_square).value;
-    }
-    if is_square_valid(left_diagonal_square) {
-        bitboard.value |= square_to_bb(left_diagonal_square).value;
-    }
+    bitboard
 }

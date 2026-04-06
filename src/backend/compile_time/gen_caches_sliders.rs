@@ -1,8 +1,8 @@
-use crate::backend::compile_time::util::{is_square_valid, square_to_bb};
-use crate::backend::constants::SQUARES_AMOUNT;
+use crate::backend::compile_time::gen_util::is_square_valid;
+use crate::backend::constants::{A1, SQUARES_AMOUNT};
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::piece::Piece;
-use crate::backend::state::square::Square;
+use crate::backend::state::square::{Square, get_file, get_rank};
 
 pub const PEXT_TABLE_SIZE: usize = 107_648;
 
@@ -80,15 +80,13 @@ const fn gen_for_piece(
     pext_table: &mut [BitBoard; PEXT_TABLE_SIZE],
     current_pext_table_index: &mut usize,
 ) {
-    let mut square_index: usize = 0;
-    while square_index < SQUARES_AMOUNT {
-        let square = Square::new_from_index(square_index as i8);
-
-        piece_pext_index[square_index] = *current_pext_table_index;
+    let mut square: Square = A1;
+    while square < SQUARES_AMOUNT as u8 {
+        piece_pext_index[square as usize] = *current_pext_table_index;
 
         let mut relevant_squares = calculate_slider_move_bitboard(piece, square, BitBoard::new());
         relevant_squares.value = relevant_squares.value & !adjust_edge_of_board(square).value;
-        piece_pext_mask[square_index] = relevant_squares;
+        piece_pext_mask[square as usize] = relevant_squares;
 
         let amount_of_blocker_squares = relevant_squares.value.count_ones();
         let amount_of_possible_blocker_configurations = 2u64.pow(amount_of_blocker_squares);
@@ -105,22 +103,25 @@ const fn gen_for_piece(
             blocker_config_index += 1;
         }
 
-        square_index += 1;
+        square += 1;
     }
 }
 
 const fn adjust_edge_of_board(square: Square) -> BitBoard {
+    let file = get_file(square);
+    let rank = get_rank(square);
+
     let mut adjustment_mask = BitBoard::new();
-    if square.file() == 0 {
+    if file == 0 {
         adjustment_mask.value |= LEFT_SIDE_MASK.value;
     }
-    if square.file() == 7 {
+    if file == 7 {
         adjustment_mask.value |= RIGHT_SIDE_MASK.value;
     }
-    if square.rank() == 0 {
+    if rank == 0 {
         adjustment_mask.value |= BOTTOM_SIDE_MASK.value;
     }
-    if square.rank() == 7 {
+    if rank == 7 {
         adjustment_mask.value |= TOP_SIDE_MASK.value;
     }
 
@@ -166,16 +167,16 @@ enum SlideDirection {
 }
 
 impl SlideDirection {
-    const fn next(&self, square: Square) -> Square {
+    const fn next(&self, file: i8, rank: i8) -> (i8, i8) {
         match self {
-            SlideDirection::Up => Square::new(square.file(), square.rank() + 1),
-            SlideDirection::UpRight => Square::new(square.file() + 1, square.rank() + 1),
-            SlideDirection::Right => Square::new(square.file() + 1, square.rank()),
-            SlideDirection::DownRight => Square::new(square.file() + 1, square.rank() - 1),
-            SlideDirection::Down => Square::new(square.file(), square.rank() - 1),
-            SlideDirection::DownLeft => Square::new(square.file() - 1, square.rank() - 1),
-            SlideDirection::Left => Square::new(square.file() - 1, square.rank()),
-            SlideDirection::UpLeft => Square::new(square.file() - 1, square.rank() + 1),
+            SlideDirection::Up => (file, rank + 1),
+            SlideDirection::UpRight => (file + 1, rank + 1),
+            SlideDirection::Right => (file + 1, rank),
+            SlideDirection::DownRight => (file + 1, rank - 1),
+            SlideDirection::Down => (file, rank - 1),
+            SlideDirection::DownLeft => (file - 1, rank - 1),
+            SlideDirection::Left => (file - 1, rank),
+            SlideDirection::UpLeft => (file - 1, rank + 1),
         }
     }
 }
@@ -245,14 +246,18 @@ const fn calculate_max_slide_range(
     blocker_bb: BitBoard,
 ) -> u64 {
     let mut result = BitBoard::new();
-    let mut next = direction.next(square);
-    while is_square_valid(next) {
-        let bb = square_to_bb(next);
+    let file = get_file(square);
+    let rank = get_rank(square);
+    let mut next = direction.next(file, rank);
+
+    while is_square_valid(next.1, next.0) {
+        let mut bb = BitBoard::new();
+        bb.value = 1 << (next.1 * 8 + next.0);
         result.value |= bb.value;
         if blocker_bb.value & bb.value != 0 {
             return result.value;
         }
-        next = direction.next(next);
+        next = direction.next(next.0, next.1);
     }
     result.value
 }

@@ -1,4 +1,4 @@
-use crate::backend::compile_time::util::bb_from_squares;
+use crate::backend::constants::{A1, A8, D1, D8, F1, F8, H1, H8};
 use crate::backend::movegen::moove::{CastleType, Moove};
 use crate::backend::state::board::bb_manager::BBManager;
 use crate::backend::state::board::bitboard::BitBoard;
@@ -6,7 +6,8 @@ use crate::backend::state::game::fen_parser::parse_fen;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
 use crate::backend::state::piece::Piece::{King, Pawn, Rook};
 use crate::backend::state::piece::{Piece, Side};
-use crate::backend::state::square::{A1, A8, D1, D8, F1, F8, H1, H8, Square};
+use crate::backend::state::square::{Square, back_by_one};
+use crate::backend::util::bb_from_squares;
 
 const ROOK_SWAP_WHITE_LONG_CASTLE_BB: BitBoard = bb_from_squares(&[A1, D1]);
 const ROOK_SWAP_WHITE_SHORT_CASTLE_BB: BitBoard = bb_from_squares(&[H1, F1]);
@@ -132,7 +133,7 @@ impl State {
             && ep_square == moove.to
         {
             // update the captured square to the ep_square - offset
-            *capture_square = moove.to.back_by_one(self.active_color);
+            *capture_square = back_by_one(moove.to, self.active_color);
         }
     }
 
@@ -171,7 +172,7 @@ impl State {
     ) {
         if moove.is_double_pawn_push() {
             // the pawn starting square and one forward
-            let ep_square = moove.to.back_by_one(self.active_color);
+            let ep_square = back_by_one(moove.to, self.active_color);
 
             irreversible_data.en_passant_square = Some(ep_square);
         }

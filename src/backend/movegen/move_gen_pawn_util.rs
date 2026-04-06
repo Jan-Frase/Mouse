@@ -1,11 +1,11 @@
-use crate::backend::compile_time::util::bb_from_file;
-use crate::backend::compile_time::util::bb_from_rank;
 use crate::backend::movegen::moove::Moove;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
 use crate::backend::state::piece::Piece::Pawn;
 use crate::backend::state::piece::{PROMOTABLE_PIECES, Side};
 use crate::backend::state::square::Square;
+use crate::backend::state::square::{get_file, square_from_rank_and_file};
+use crate::backend::util::{bb_from_file, bb_from_rank};
 
 const BLACK_PROMOTION_RANK_BB: BitBoard = bb_from_rank(0);
 const WHITE_PROMOTION_RANK_BB: BitBoard = bb_from_rank(7);
@@ -147,10 +147,7 @@ fn pawn_bb_to_moves_no_promotion(
     rank_offset: i8,
 ) {
     for square in pawn_bb {
-        let from_square = Square {
-            file: square.file + file_offset,
-            rank: square.rank + rank_offset,
-        };
+        let from_square = (square as i8 + 8 * rank_offset + file_offset) as Square;
         let moove = Moove::new(from_square, square);
         moves.push(moove);
     }
@@ -163,12 +160,11 @@ fn pawn_bb_to_moves_promotion(
     rank_offset: i8,
 ) {
     for square in pawn_bb {
-        let from_square = Square {
-            file: square.file + file_offset,
-            rank: square.rank + rank_offset,
-        };
+        let file = get_file(square);
+        let rank = get_file(square);
+        let offset_square = square_from_rank_and_file(rank + rank_offset, file + file_offset);
         for piece_type in PROMOTABLE_PIECES {
-            let mut moove = Moove::new(from_square, square);
+            let mut moove = Moove::new(offset_square, square);
             moove.promotion_type = Some(piece_type);
             moves.push(moove);
         }
