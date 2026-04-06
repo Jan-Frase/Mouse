@@ -231,7 +231,7 @@ const fn calculate_slider_move_bitboard(
                 i += 1;
             }
         }
-        _ => !panic!("Invalid piece type"),
+        _ => unreachable!(),
     }
 
     move_bitboard

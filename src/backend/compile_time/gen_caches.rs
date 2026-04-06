@@ -30,7 +30,6 @@ pub const KNIGHT_MOVES: [BitBoard; SQUARES_AMOUNT] = gen_potential_moves_cache(P
 // Due for removal, only exists until check_decider gets reworked.
 pub const PAWN_CAPTURE_MOVES: [[BitBoard; SQUARES_AMOUNT]; SIDES] = gen_pawn_captures();
 
-#[allow(long_running_const_eval)]
 const PEXT_DATA: PextData = gen_cache_sliders();
 
 // Various slider caches:
