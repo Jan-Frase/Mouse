@@ -9,6 +9,7 @@ pub const PIECE_TYPE_COUNT: usize = 6;
 // White, Black
 pub const SIDES: usize = 2;
 
+#[allow(unused_variables)]
 // All Squares
 pub const A1: Square = 0;
 pub const B1: Square = 1;

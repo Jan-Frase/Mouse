@@ -6,7 +6,7 @@ use crate::backend::state::game::fen_parser::parse_fen;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
 use crate::backend::state::piece::Piece::{King, Pawn, Rook};
 use crate::backend::state::piece::{Piece, Side};
-use crate::backend::state::square::{Square, back_by_one};
+use crate::backend::state::square::{Square, back_by_one, get_file, get_rank};
 use crate::backend::util::bb_from_squares;
 
 const ROOK_SWAP_WHITE_LONG_CASTLE_BB: BitBoard = bb_from_squares(&[A1, D1]);
@@ -67,6 +67,12 @@ impl State {
         let mut next_ir_data = IrreversibleData::new_from_previous_state(&self.irreversible_data);
 
         // Get the type of moved piece.
+        assert!(
+            get_rank(moove.from) >= 0
+                && get_rank(moove.from) < 8
+                && get_file(moove.from) >= 0
+                && get_file(moove.from) < 8,
+        );
         let moved_piece = self.bb_manager.get_piece_at_square(moove.from).unwrap();
 
         // Usually the square something was captured on (if something was captured at all) is the square we moved to...

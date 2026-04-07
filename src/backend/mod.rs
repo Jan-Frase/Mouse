@@ -1,6 +1,6 @@
 pub mod compile_time;
-mod constants;
+pub mod constants;
 pub(crate) mod movegen;
 pub mod perft;
 pub(crate) mod state;
-mod util;
+pub mod util;

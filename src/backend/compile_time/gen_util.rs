@@ -25,7 +25,7 @@ pub const fn is_square_at_left_edge(square: Square) -> bool {
 }
 
 pub const fn is_square_valid(rank: i8, file: i8) -> bool {
-    rank > 0 && rank < 8 && file > 0 && file < 8
+    rank >= 0 && rank < 8 && file >= 0 && file < 8
 }
 
 pub const fn square_to_bb(square: Square) -> BitBoard {

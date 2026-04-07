@@ -4,6 +4,7 @@ use crate::backend::compile_time::gen_util::{
 use crate::backend::constants::{A1, A8, H1, SIDES, SQUARES_AMOUNT};
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::piece::{Piece, Side};
+use crate::backend::state::square::square_from_rank_and_file;
 use crate::backend::state::square::{Square, get_file, get_rank};
 
 /// Initializes a collection of bitboards representing all possible moves for each square.
@@ -95,18 +96,18 @@ const fn generate_knight_moves(square: Square) -> BitBoard {
     // `_ _ 7 _ 6 _ _ _`
     // `_ _ _ _ _ _ _ _`
     // `_ _ _ _ _ _ _ _`
-    let offset_x = [-2, -1, 1, 2, 2, 1, -1, -2];
-    let offset_y = [1, 2, 2, 1, -1, -2, -2, -1];
+    let file_offset = [-2, -1, 1, 2, 2, 1, -1, -2];
+    let rank_offset = [1, 2, 2, 1, -1, -2, -2, -1];
 
     let mut index = 0;
     while index < 8 {
         // Calculate the current square.
-        let x_pos = file + offset_x[index];
-        let y_pos = rank + offset_y[index];
+        let current_file = file + file_offset[index];
+        let current_rank = rank + rank_offset[index];
 
         // If it is valid, add it to the bitboard.
-        if is_square_valid(x_pos, y_pos) {
-            let current_square = (x_pos * 8 + y_pos) as Square;
+        if is_square_valid(current_rank, current_file) {
+            let current_square = square_from_rank_and_file(current_rank, current_file);
             let bb = square_to_bb(current_square);
             bitboard.value |= bb.value;
         }

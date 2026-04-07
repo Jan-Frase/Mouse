@@ -1,5 +1,5 @@
 use crate::backend::state::piece::Piece;
-use crate::backend::state::square::{Square, get_file};
+use crate::backend::state::square::{Square, get_file, square_to_string};
 use std::fmt::{Display, Formatter};
 
 #[derive(Copy, Clone)]
@@ -70,8 +70,8 @@ impl Display for Moove {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut result = String::new();
 
-        result.push_str(&self.from.to_string());
-        result.push_str(&self.to.to_string());
+        result.push_str(&square_to_string(self.from));
+        result.push_str(&square_to_string(self.to));
         result.push_str(match self.promotion_type {
             None => "",
             Some(promotion_type) => match promotion_type {

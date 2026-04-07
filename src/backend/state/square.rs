@@ -21,3 +21,36 @@ pub fn back_by_one(square: Square, color: Side) -> Square {
         Side::Black => square + 8,
     }
 }
+
+pub fn square_to_string(square: Square) -> String {
+    let mut result = String::new();
+
+    let file = get_file(square);
+    let rank = get_rank(square);
+
+    result.push_str(match file {
+        0 => "a",
+        1 => "b",
+        2 => "c",
+        3 => "d",
+        4 => "e",
+        5 => "f",
+        6 => "g",
+        7 => "h",
+        _ => panic!("Invalid file value"),
+    });
+
+    result.push_str(match rank {
+        0 => "1",
+        1 => "2",
+        2 => "3",
+        3 => "4",
+        4 => "5",
+        5 => "6",
+        6 => "7",
+        7 => "8",
+        _ => panic!("Invalid rank value"),
+    });
+
+    result
+}
