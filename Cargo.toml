@@ -15,7 +15,7 @@ codegen-units = 1
 lto = true
 
 [dev-dependencies]
-criterion = "0.7.0"
+criterion = "0.8.2"
 iai = { git = "https://github.com/sigaloid/iai", rev = "d56a597" }
 perft_fixtures = { path = "perft_fixtures" }
 
