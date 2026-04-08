@@ -1,4 +1,4 @@
-use crate::backend::compile_time::gen_caches::{
+use crate::backend::caches::{
     BISHOP_PEXT_INDEX, BISHOP_PEXT_MASK, PEXT_TABLE, ROOK_PEXT_INDEX, ROOK_PEXT_MASK,
 };
 use crate::backend::movegen::moove::Moove;

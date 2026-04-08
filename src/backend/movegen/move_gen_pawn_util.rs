@@ -5,17 +5,25 @@ use crate::backend::state::piece::Piece::Pawn;
 use crate::backend::state::piece::{PROMOTABLE_PIECES, Side};
 use crate::backend::state::square::Square;
 use crate::backend::state::square::{get_file, square_from_rank_and_file};
-use crate::backend::util::{bb_from_file, bb_from_rank};
 
-const BLACK_PROMOTION_RANK_BB: BitBoard = bb_from_rank(0);
-const WHITE_PROMOTION_RANK_BB: BitBoard = bb_from_rank(7);
-const WHITE_PAWN_START_RANK_BB: BitBoard = bb_from_rank(1);
-const BLACK_PAWN_START_RANK_BB: BitBoard = bb_from_rank(6);
+// Made with https://tearth.dev/bitboard-viewer/
+const BLACK_PROMOTION_RANK_BB: BitBoard = BitBoard { value: 0xff };
+const WHITE_PROMOTION_RANK_BB: BitBoard = BitBoard {
+    value: 0xff00000000000000,
+};
+const WHITE_PAWN_START_RANK_BB: BitBoard = BitBoard { value: 0xff00 };
+const BLACK_PAWN_START_RANK_BB: BitBoard = BitBoard {
+    value: 0xff000000000000,
+};
 const PROMOTION_RANKS_BB: BitBoard = BitBoard {
     value: (BLACK_PROMOTION_RANK_BB.value | WHITE_PROMOTION_RANK_BB.value),
 };
-const LEFT_SIDE_BB: BitBoard = bb_from_file(0);
-const RIGHT_SIDE_BB: BitBoard = bb_from_file(7);
+const LEFT_SIDE_BB: BitBoard = BitBoard {
+    value: 0x101010101010101,
+};
+const RIGHT_SIDE_BB: BitBoard = BitBoard {
+    value: 0x8080808080808080,
+};
 
 pub fn gen_pawn_moves(
     moves: &mut Vec<Moove>,

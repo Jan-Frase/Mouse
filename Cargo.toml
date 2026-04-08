@@ -2,6 +2,7 @@
 name = "Mouse"
 version = "0.1.0"
 edition = "2024"
+build = "build/build.rs"
 
 [lib]
 name = "mouse"

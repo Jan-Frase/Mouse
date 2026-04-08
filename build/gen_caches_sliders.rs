@@ -1,55 +1,50 @@
-use crate::backend::compile_time::gen_util::is_square_valid;
-use crate::backend::constants::{A1, SQUARES_AMOUNT};
-use crate::backend::state::board::bitboard::BitBoard;
-use crate::backend::state::piece::Piece;
-use crate::backend::state::square::{Square, get_file, get_rank};
+use crate::gen_util::{is_square_valid, square_to_file, square_to_rank};
 
 pub const PEXT_TABLE_SIZE: usize = 107_648;
 
 // Made with: https://tearth.dev/bitboard-viewer
-const EDGE_OF_BOARD_MASK: BitBoard = BitBoard {
-    value: 18411139144890810879,
-};
+const EDGE_OF_BOARD_MASK: u64 =
+    0b11111111_10000001_10000001_10000001_10000001_10000001_10000001_11111111;
 
-const LEFT_SIDE_MASK: BitBoard = BitBoard {
-    value: 282578800148736,
-};
+const LEFT_SIDE_MASK: u64 = 282578800148736;
 
-const RIGHT_SIDE_MASK: BitBoard = BitBoard {
-    value: 36170086419038208,
-};
+const RIGHT_SIDE_MASK: u64 = 36170086419038208;
 
-const TOP_SIDE_MASK: BitBoard = BitBoard {
-    value: 9079256848778919936,
-};
+const TOP_SIDE_MASK: u64 = 9079256848778919936;
 
-const BOTTOM_SIDE_MASK: BitBoard = BitBoard { value: 126 };
+const BOTTOM_SIDE_MASK: u64 = 126;
 
 // ----------------------------------------
 // PEXT GEN LOGIC
 // ----------------------------------------
 // https://lorentzvedeler.com/2025/03/03/Pext-Tables/
 
-pub struct PextData {
-    pub rook_pext_mask: [BitBoard; SQUARES_AMOUNT],
-    pub rook_pext_index: [usize; SQUARES_AMOUNT],
-    pub bishop_pext_mask: [BitBoard; SQUARES_AMOUNT],
-    pub bishop_pext_index: [usize; SQUARES_AMOUNT],
-    pub pext_table: [BitBoard; PEXT_TABLE_SIZE],
+enum Piece {
+    Rook,
+    Bishop,
+    Queen,
 }
 
-pub const fn gen_cache_sliders() -> PextData {
-    let mut rook_pext_mask = [BitBoard::new(); SQUARES_AMOUNT];
-    let mut rook_pext_index = [0usize; SQUARES_AMOUNT];
+pub struct PextData {
+    pub rook_pext_mask: [u64; 64],
+    pub rook_pext_index: [usize; 64],
+    pub bishop_pext_mask: [u64; 64],
+    pub bishop_pext_index: [usize; 64],
+    pub pext_table: [u64; PEXT_TABLE_SIZE],
+}
 
-    let mut bishop_pext_mask = [BitBoard::new(); SQUARES_AMOUNT];
-    let mut bishop_pext_index = [0usize; SQUARES_AMOUNT];
+pub fn gen_cache_sliders() -> PextData {
+    let mut rook_pext_mask = [0; 64];
+    let mut rook_pext_index = [0usize; 64];
 
-    let mut pext_table = [BitBoard::new(); 107_648];
+    let mut bishop_pext_mask = [0; 64];
+    let mut bishop_pext_index = [0usize; 64];
+
+    let mut pext_table = [0; 107_648];
     let mut current_pext_table_index = 0;
 
     gen_for_piece(
-        Piece::Rook,
+        &Piece::Rook,
         &mut rook_pext_mask,
         &mut rook_pext_index,
         &mut pext_table,
@@ -57,7 +52,7 @@ pub const fn gen_cache_sliders() -> PextData {
     );
 
     gen_for_piece(
-        Piece::Bishop,
+        &Piece::Bishop,
         &mut bishop_pext_mask,
         &mut bishop_pext_index,
         &mut pext_table,
@@ -73,66 +68,62 @@ pub const fn gen_cache_sliders() -> PextData {
     }
 }
 
-const fn gen_for_piece(
-    piece: Piece,
-    piece_pext_mask: &mut [BitBoard; SQUARES_AMOUNT],
-    piece_pext_index: &mut [usize; SQUARES_AMOUNT],
-    pext_table: &mut [BitBoard; PEXT_TABLE_SIZE],
+fn gen_for_piece(
+    piece: &Piece,
+    piece_pext_mask: &mut [u64; 64],
+    piece_pext_index: &mut [usize; 64],
+    pext_table: &mut [u64; PEXT_TABLE_SIZE],
     current_pext_table_index: &mut usize,
 ) {
-    let mut square: Square = A1;
-    while square < SQUARES_AMOUNT as u8 {
+    for square in 0..64 {
         piece_pext_index[square as usize] = *current_pext_table_index;
 
-        let mut relevant_squares = calculate_slider_move_bitboard(piece, square, BitBoard::new());
-        relevant_squares.value = relevant_squares.value & !adjust_edge_of_board(square).value;
+        let mut relevant_squares = calculate_slider_move_bitboard(piece, square, 0);
+        relevant_squares = relevant_squares & !adjust_edge_of_board(square);
         piece_pext_mask[square as usize] = relevant_squares;
 
-        let amount_of_blocker_squares = relevant_squares.value.count_ones();
+        let amount_of_blocker_squares = relevant_squares.count_ones();
         let amount_of_possible_blocker_configurations = 2u64.pow(amount_of_blocker_squares);
         // Iterate over all possible permutations of blocker configurations
         let mut blocker_config_index = 0;
         while blocker_config_index < amount_of_possible_blocker_configurations {
-            let blockers: u64 = pdep64(blocker_config_index, relevant_squares.value);
+            let blockers: u64 = pdep64(blocker_config_index, relevant_squares);
 
-            let moves_bb =
-                calculate_slider_move_bitboard(piece, square, BitBoard { value: blockers });
+            let moves_bb = calculate_slider_move_bitboard(piece, square, blockers);
             pext_table[*current_pext_table_index] = moves_bb;
             *current_pext_table_index += 1;
 
             blocker_config_index += 1;
         }
-
-        square += 1;
     }
 }
 
-const fn adjust_edge_of_board(square: Square) -> BitBoard {
-    let file = get_file(square);
-    let rank = get_rank(square);
+fn adjust_edge_of_board(square: i8) -> u64 {
+    let rank = square_to_rank(square);
+    let file = square_to_file(square);
 
-    let mut adjustment_mask = BitBoard::new();
+    let mut adjustment_mask = 0u64;
     if file == 0 {
-        adjustment_mask.value |= LEFT_SIDE_MASK.value;
+        adjustment_mask |= LEFT_SIDE_MASK;
     }
     if file == 7 {
-        adjustment_mask.value |= RIGHT_SIDE_MASK.value;
+        adjustment_mask |= RIGHT_SIDE_MASK;
     }
     if rank == 0 {
-        adjustment_mask.value |= BOTTOM_SIDE_MASK.value;
+        adjustment_mask |= BOTTOM_SIDE_MASK;
     }
     if rank == 7 {
-        adjustment_mask.value |= TOP_SIDE_MASK.value;
+        adjustment_mask |= TOP_SIDE_MASK;
     }
 
-    adjustment_mask.value = EDGE_OF_BOARD_MASK.value & !adjustment_mask.value;
+    adjustment_mask = EDGE_OF_BOARD_MASK & !adjustment_mask;
     adjustment_mask
 }
 
 /// this exists to provide a const alternative to the pdep intrinsic.
 /// its implementations is based on:
 /// https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_pdep_u64&ig_expand=490
-const fn pdep64(word: u64, mask: u64) -> u64 {
+fn pdep64(word: u64, mask: u64) -> u64 {
     let mut out = 0;
     let mut input_idx = 0;
 
@@ -167,7 +158,7 @@ enum SlideDirection {
 }
 
 impl SlideDirection {
-    const fn next(&self, file: i8, rank: i8) -> (i8, i8) {
+    fn next(&self, file: i8, rank: i8) -> (i8, i8) {
         match self {
             SlideDirection::Up => (file, rank + 1),
             SlideDirection::UpRight => (file + 1, rank + 1),
@@ -204,31 +195,26 @@ const QUEEN_DIR: [SlideDirection; 8] = [
     SlideDirection::UpLeft,
 ];
 
-const fn calculate_slider_move_bitboard(
-    piece_type: Piece,
-    square: Square,
-    blocker_bb: BitBoard,
-) -> BitBoard {
-    let mut move_bitboard: BitBoard = BitBoard::new();
+fn calculate_slider_move_bitboard(piece_type: &Piece, square: i8, blocker_bb: u64) -> u64 {
+    let mut move_bitboard = 0u64;
 
     let mut i = 0;
     match piece_type {
         Piece::Rook => {
             while i < 4 {
-                move_bitboard.value |= calculate_max_slide_range(square, &ROOK_DIR[i], blocker_bb);
+                move_bitboard |= calculate_max_slide_range(square, &ROOK_DIR[i], blocker_bb);
                 i += 1;
             }
         }
         Piece::Bishop => {
             while i < 4 {
-                move_bitboard.value |=
-                    calculate_max_slide_range(square, &BISHOP_DIR[i], blocker_bb);
+                move_bitboard |= calculate_max_slide_range(square, &BISHOP_DIR[i], blocker_bb);
                 i += 1;
             }
         }
         Piece::Queen => {
             while i < 8 {
-                move_bitboard.value |= calculate_max_slide_range(square, &QUEEN_DIR[i], blocker_bb);
+                move_bitboard |= calculate_max_slide_range(square, &QUEEN_DIR[i], blocker_bb);
                 i += 1;
             }
         }
@@ -240,24 +226,20 @@ const fn calculate_slider_move_bitboard(
 
 /// Computes a bitboard containing all squares
 /// that the piece on the given square can slide to in the given direction
-const fn calculate_max_slide_range(
-    square: Square,
-    direction: &SlideDirection,
-    blocker_bb: BitBoard,
-) -> u64 {
-    let mut result = BitBoard::new();
-    let file = get_file(square);
-    let rank = get_rank(square);
+fn calculate_max_slide_range(square: i8, direction: &SlideDirection, blocker_bb: u64) -> u64 {
+    let mut result = 0u64;
+    let rank = square_to_rank(square);
+    let file = square_to_file(square);
     let mut next = direction.next(file, rank);
 
     while is_square_valid(next.1, next.0) {
-        let mut bb = BitBoard::new();
-        bb.value = 1 << (next.1 * 8 + next.0);
-        result.value |= bb.value;
-        if blocker_bb.value & bb.value != 0 {
-            return result.value;
+        let mut bb = 0u64;
+        bb = 1 << (next.1 * 8 + next.0);
+        result |= bb;
+        if blocker_bb & bb != 0 {
+            return result;
         }
         next = direction.next(next.0, next.1);
     }
-    result.value
+    result
 }

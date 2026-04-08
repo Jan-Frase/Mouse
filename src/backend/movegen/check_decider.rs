@@ -1,4 +1,4 @@
-use crate::backend::compile_time::gen_caches::{KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES};
+use crate::backend::caches::{KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES};
 use crate::backend::movegen::move_gen_sliders::get_slider_moves_at_square;
 use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;

@@ -1,105 +1,18 @@
-use crate::backend::compile_time::gen_caches::{
-    BISHOP_PEXT_MASK, KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES, PEXT_TABLE, ROOK_PEXT_INDEX,
-    ROOK_PEXT_MASK,
+use crate::backend::caches::{
+    BISHOP_PEXT_INDEX, BISHOP_PEXT_MASK, KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES, PEXT_TABLE,
+    ROOK_PEXT_INDEX, ROOK_PEXT_MASK,
 };
 use crate::backend::movegen::check_decider::is_in_check;
 use crate::backend::movegen::move_gen::get_pseudo_legal_moves;
 use crate::backend::perft::perft;
 use crate::backend::state::game::fen_parser::moove_from_uci_notation;
 use crate::backend::state::game::state::State;
-use crate::backend::state::square::square_to_string;
-use mouse::backend::compile_time::gen_caches::BISHOP_PEXT_INDEX;
 use std::env;
 use std::env::Args;
 
 mod backend;
 
 fn main() {
-    let mut square = crate::backend::constants::A1;
-
-    while square < crate::backend::constants::SQUARES_AMOUNT as u8 {
-        assert_eq!(
-            KNIGHT_MOVES[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_KNIGHT[square as usize],
-            "square: {}, is: {}, should be: {}",
-            square_to_string(square),
-            KNIGHT_MOVES[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_KNIGHT[square as usize]
-        );
-        assert_eq!(
-            KING_MOVES[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_KING[square as usize],
-            "square: {}, is: {}, should be: {}",
-            square_to_string(square),
-            KNIGHT_MOVES[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_KNIGHT[square as usize]
-        );
-
-        assert_eq!(
-            PAWN_CAPTURE_MOVES[square as usize][0].value,
-            crate::backend::compile_time::caches::CACHE_CAPTURE_PAWN[square as usize][0],
-            "square: {}, is: {}, should be: {}",
-            square_to_string(square),
-            KNIGHT_MOVES[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_KNIGHT[square as usize]
-        );
-        assert_eq!(
-            PAWN_CAPTURE_MOVES[square as usize][1].value,
-            crate::backend::compile_time::caches::CACHE_CAPTURE_PAWN[square as usize][1],
-            "square: {}, is: {}, should be: {}",
-            square_to_string(square),
-            KNIGHT_MOVES[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_KNIGHT[square as usize]
-        );
-
-        assert_eq!(
-            ROOK_PEXT_MASK[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_ROOK_PEXT_MASK[square as usize],
-            "square: {}, is: {}, should be: {}",
-            square_to_string(square),
-            KNIGHT_MOVES[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_KNIGHT[square as usize]
-        );
-        assert_eq!(
-            ROOK_PEXT_INDEX[square as usize],
-            crate::backend::compile_time::caches::CACHE_ROOK_PEXT_INDEX[square as usize],
-            "square: {}, is: {}, should be: {}",
-            square_to_string(square),
-            KNIGHT_MOVES[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_KNIGHT[square as usize]
-        );
-
-        assert_eq!(
-            BISHOP_PEXT_MASK[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_ROOK_PEXT_MASK[square as usize],
-            "square: {}, is: {}, should be: {}",
-            square_to_string(square),
-            KNIGHT_MOVES[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_KNIGHT[square as usize]
-        );
-        assert_eq!(
-            BISHOP_PEXT_INDEX[square as usize],
-            crate::backend::compile_time::caches::CACHE_BISHOP_PEXT_INDEX[square as usize],
-            "square: {}, is: {}, should be: {}",
-            square_to_string(square),
-            KNIGHT_MOVES[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_KNIGHT[square as usize]
-        );
-
-        assert_eq!(
-            PEXT_TABLE[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_PEXT_TABLE[square as usize],
-            "square: {}, is: {}, should be: {}",
-            square_to_string(square),
-            KNIGHT_MOVES[square as usize].value,
-            crate::backend::compile_time::caches::CACHE_KNIGHT[square as usize]
-        );
-
-        square += 1;
-    }
-
-    return;
-
     let args = env::args();
     run_perftree_debug(args);
 }

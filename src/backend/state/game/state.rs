@@ -7,12 +7,15 @@ use crate::backend::state::game::irreversible_data::IrreversibleData;
 use crate::backend::state::piece::Piece::{King, Pawn, Rook};
 use crate::backend::state::piece::{Piece, Side};
 use crate::backend::state::square::{Square, back_by_one, get_file, get_rank};
-use crate::backend::util::bb_from_squares;
 
-const ROOK_SWAP_WHITE_LONG_CASTLE_BB: BitBoard = bb_from_squares(&[A1, D1]);
-const ROOK_SWAP_WHITE_SHORT_CASTLE_BB: BitBoard = bb_from_squares(&[H1, F1]);
-const ROOK_SWAP_BLACK_LONG_CASTLE_BB: BitBoard = bb_from_squares(&[A8, D8]);
-const ROOK_SWAP_BLACK_SHORT_CASTLE_BB: BitBoard = bb_from_squares(&[H8, F8]);
+const ROOK_SWAP_WHITE_LONG_CASTLE_BB: BitBoard = BitBoard { value: 0x9 };
+const ROOK_SWAP_WHITE_SHORT_CASTLE_BB: BitBoard = BitBoard { value: 0xa0 };
+const ROOK_SWAP_BLACK_LONG_CASTLE_BB: BitBoard = BitBoard {
+    value: 0x900000000000000,
+};
+const ROOK_SWAP_BLACK_SHORT_CASTLE_BB: BitBoard = BitBoard {
+    value: 0xa000000000000000,
+};
 
 #[derive(Debug, Clone)]
 pub struct State {
