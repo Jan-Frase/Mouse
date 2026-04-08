@@ -3,7 +3,7 @@ use crate::backend::state::board::bitboard::BitBoard;
 use crate::backend::state::game::state::State;
 use crate::backend::state::piece::Piece::Pawn;
 use crate::backend::state::piece::{PROMOTABLE_PIECES, Side};
-use crate::backend::state::square::Square;
+use crate::backend::state::square::{Square, get_rank};
 use crate::backend::state::square::{get_file, square_from_rank_and_file};
 
 // Made with https://tearth.dev/bitboard-viewer/
@@ -169,7 +169,7 @@ fn pawn_bb_to_moves_promotion(
 ) {
     for square in pawn_bb {
         let file = get_file(square);
-        let rank = get_file(square);
+        let rank = get_rank(square);
         let offset_square = square_from_rank_and_file(rank + rank_offset, file + file_offset);
         for piece_type in PROMOTABLE_PIECES {
             let mut moove = Moove::new(offset_square, square);
