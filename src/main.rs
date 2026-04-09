@@ -1,15 +1,16 @@
 use crate::backend::movegen::check_decider::is_in_check;
-use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen::get_pseudo_legal_moves;
 use crate::backend::perft::perft;
+use crate::backend::state::game::fen_parser::moove_from_uci_notation;
 use crate::backend::state::game::state::State;
+use std::env;
 use std::env::Args;
 
 mod backend;
 
 fn main() {
-    // let args = env::args();
-    // run_perftree_debug(args);
+    let args = env::args();
+    run_perftree_debug(args);
 }
 
 // --------------------------------------------- //
@@ -31,7 +32,7 @@ pub fn run_perftree_debug(mut input: Args) {
         // Code golfing
         mooves
             .split_whitespace()
-            .map(Moove::new_from_uci_notation)
+            .map(moove_from_uci_notation)
             .for_each(|moove| {
                 game_state = game_state.make_move(moove);
             });

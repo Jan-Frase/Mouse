@@ -1,4 +1,4 @@
-use crate::backend::compile_time::gen_caches::{KING_MOVES, KNIGHT_MOVES};
+use crate::backend::caches::{KING_MOVES, KNIGHT_MOVES};
 use crate::backend::constants::SQUARES_AMOUNT;
 use crate::backend::movegen::moove::Moove;
 use crate::backend::movegen::move_gen_king_util::gen_castles;
@@ -108,20 +108,16 @@ pub(crate) fn iterate_over_bitboard_for_non_slider(
     for square in piece_bitboard {
         // ... get the potential moves for the piece on that square...
         // SLIDER: (This only works this easily for non-sliders)
-        let mut potential_moves_bitboard = moves_cache[square.square_to_index()];
+        let mut potential_moves_bitboard = moves_cache[square as usize];
         // ... apply the mask ...
         potential_moves_bitboard &= !mask_bitboard;
 
         //... and convert the resulting bitboard to a list of moves.
-        convert_bitboard_to_moves(
-            moves,
-            square,
-            potential_moves_bitboard,
-        );
+        convert_bitboard_to_moves(moves, square, potential_moves_bitboard);
     }
 }
 
-pub fn convert_bitboard_to_moves(moves: &mut Vec<Moove>,square: Square, moves_bitboard: BitBoard) {
+pub fn convert_bitboard_to_moves(moves: &mut Vec<Moove>, square: Square, moves_bitboard: BitBoard) {
     // generate all the moves
     for to_square in moves_bitboard {
         moves.push(Moove::new(square, to_square))

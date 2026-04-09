@@ -1,161 +1,57 @@
+use crate::backend::constants::SIDE_LENGTH;
 use crate::backend::state::piece::Side;
-use std::fmt::{Display, Formatter};
 
-pub const A1: Square = Square::new(0, 0);
-pub const B1: Square = Square::new(1, 0);
-pub const C1: Square = Square::new(2, 0);
-pub const D1: Square = Square::new(3, 0);
-pub const E1: Square = Square::new(4, 0);
-pub const F1: Square = Square::new(5, 0);
-pub const G1: Square = Square::new(6, 0);
-pub const H1: Square = Square::new(7, 0);
-pub const A8: Square = Square::new(0, 7);
-pub const B8: Square = Square::new(1, 7);
-pub const C8: Square = Square::new(2, 7);
-pub const D8: Square = Square::new(3, 7);
-pub const E8: Square = Square::new(4, 7);
-pub const F8: Square = Square::new(5, 7);
-pub const G8: Square = Square::new(6, 7);
-pub const H8: Square = Square::new(7, 7);
+// Square is simply an index where 0 is A1 and 63 is H8
+pub type Square = u8;
 
-/// This represents a square on the chess board.
-/// The square A1 is at file == 0 and rank == 0.
-/// The square H1 is at file == 7 and rank == 0.
-///
-/// To make it easier to memorize: file => the letter part, rank => the number part
-/// or put differently: file => vertical / x part, rank => horizontal / y part
-#[derive(Copy, Clone, Debug, Ord, Eq, PartialEq, PartialOrd)]
-pub struct Square {
-    pub file: i8,
-    pub rank: i8,
+pub const fn square_from_rank_and_file(rank: i8, file: i8) -> Square {
+    (rank * SIDE_LENGTH + file) as Square
 }
 
-impl Square {
-    /// Creates a new 'Square' instance.
-    pub const fn new(file: i8, rank: i8) -> Self {
-        Self { file, rank }
-    }
+pub const fn get_rank(square: Square) -> i8 {
+    (square as i8) / SIDE_LENGTH
+}
 
-    pub fn new_from_uci_notation(uci_notation: &str) -> Self {
-        let mut file = 0;
-        let mut rank = 0;
+pub const fn get_file(square: Square) -> i8 {
+    (square as i8) % SIDE_LENGTH
+}
 
-        for char in uci_notation.chars() {
-            match char {
-                'a'..='h' => file = char.to_digit(36).unwrap() - 10,
-                '1'..='8' => rank = char.to_digit(10).unwrap() - 1,
-                _ => panic!("Invalid uci notation"),
-            }
-        }
-
-        Square {
-            file: file as i8,
-            rank: rank as i8,
-        }
-    }
-
-    /// Converts a given index (i8) to a `Square` object.
-    ///
-    /// # Parameters
-    /// - `index`: An `i8` representing the index of a square on a chessboard.
-    ///   The valid range for the index is 0 to 63, where 0 corresponds to
-    ///   A1 (bottom-left corner) and 63 corresponds to H8 (top-right corner).
-    ///
-    /// # Returns
-    /// - `Square`: A struct representing the chessboard square with the following fields:
-    ///   - `file`: The column (0 to 7) computed as `index % 8`.
-    ///   - `rank`: The row (0 to 7) computed as `index / 8`.
-    pub const fn new_from_index(index: i8) -> Square {
-        Square {
-            file: index % 8,
-            rank: index / 8,
-        }
-    }
-    /// Calculates the zero-based index of a square on a chessboard based on its file and rank.
-    ///
-    /// This is useful for representing a chessboard square as a single integer from 0 to 63
-    /// # Returns
-    /// A usize representing the square's index.
-    pub fn square_to_index(&self) -> usize {
-        (self.file + self.rank * 8) as usize
-    }
-
-    /// Returns the 'file' attribute of the current instance. These aren't derived from getset because they need to be const.
-    ///
-    /// # Returns
-    /// * `i8` - The value of the `file` field.
-    pub const fn file(&self) -> i8 {
-        self.file
-    }
-
-    /// Returns the 'rank' attribute of the current instance. These aren't derived from getset because they need to be const.
-    ///
-    /// # Returns
-    /// * `i8` - The value of the `file` field.
-    pub const fn rank(&self) -> i8 {
-        self.rank
-    }
-
-    pub fn is_on_promotion_rank(&self) -> bool {
-        self.rank == 0 || self.rank == 7
-    }
-
-    pub fn is_pawn_start(&self, color: Side) -> bool {
-        match color {
-            Side::White => self.rank == 1,
-            Side::Black => self.rank == 6,
-        }
-    }
-
-    // forward means the direction that the pawns travel in for that side
-    pub fn forward_by_one(&self, color: Side) -> Square {
-        match color {
-            Side::White => Square::new(self.file, self.rank + 1),
-            Side::Black => Square::new(self.file, self.rank - 1),
-        }
-    }
-
-    pub fn back_by_one(&self, color: Side) -> Square {
-        self.forward_by_one(color.opposite())
-    }
-
-    pub fn right_by_one(&self) -> Square {
-        Square::new(self.file + 1, self.rank)
-    }
-
-    pub fn left_by_one(&self) -> Square {
-        Square::new(self.file - 1, self.rank)
+pub fn back_by_one(square: Square, color: Side) -> Square {
+    match color {
+        Side::White => square - SIDE_LENGTH as u8,
+        Side::Black => square + SIDE_LENGTH as u8,
     }
 }
 
-/// Turns a `Square` instance into a string like "a1".
-impl Display for Square {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut result = String::new();
-        result.push_str(match self.file {
-            0 => "a",
-            1 => "b",
-            2 => "c",
-            3 => "d",
-            4 => "e",
-            5 => "f",
-            6 => "g",
-            7 => "h",
-            _ => panic!("Invalid file value"),
-        });
+pub fn square_to_string(square: Square) -> String {
+    let mut result = String::new();
 
-        result.push_str(match self.rank {
-            0 => "1",
-            1 => "2",
-            2 => "3",
-            3 => "4",
-            4 => "5",
-            5 => "6",
-            6 => "7",
-            7 => "8",
-            _ => panic!("Invalid rank value"),
-        });
+    let file = get_file(square);
+    let rank = get_rank(square);
 
-        write!(f, "{}", result)
-    }
+    result.push_str(match file {
+        0 => "a",
+        1 => "b",
+        2 => "c",
+        3 => "d",
+        4 => "e",
+        5 => "f",
+        6 => "g",
+        7 => "h",
+        _ => panic!("Invalid file value"),
+    });
+
+    result.push_str(match rank {
+        0 => "1",
+        1 => "2",
+        2 => "3",
+        3 => "4",
+        4 => "5",
+        5 => "6",
+        6 => "7",
+        7 => "8",
+        _ => panic!("Invalid rank value"),
+    });
+
+    result
 }

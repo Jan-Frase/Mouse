@@ -1,4 +1,4 @@
-use crate::backend::compile_time::util::bb_from_squares;
+use crate::backend::constants::{A1, A8, H1, H8};
 use crate::backend::movegen::moove::{CastleType, Moove};
 use crate::backend::state::board::bb_manager::BBManager;
 use crate::backend::state::board::bitboard::BitBoard;
@@ -6,12 +6,16 @@ use crate::backend::state::game::fen_parser::parse_fen;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
 use crate::backend::state::piece::Piece::{King, Pawn, Rook};
 use crate::backend::state::piece::{Piece, Side};
-use crate::backend::state::square::{A1, A8, D1, D8, F1, F8, H1, H8, Square};
+use crate::backend::state::square::{Square, back_by_one};
 
-const ROOK_SWAP_WHITE_LONG_CASTLE_BB: BitBoard = bb_from_squares(&[A1, D1]);
-const ROOK_SWAP_WHITE_SHORT_CASTLE_BB: BitBoard = bb_from_squares(&[H1, F1]);
-const ROOK_SWAP_BLACK_LONG_CASTLE_BB: BitBoard = bb_from_squares(&[A8, D8]);
-const ROOK_SWAP_BLACK_SHORT_CASTLE_BB: BitBoard = bb_from_squares(&[H8, F8]);
+const ROOK_SWAP_WHITE_LONG_CASTLE_BB: BitBoard = BitBoard { value: 0x9 };
+const ROOK_SWAP_WHITE_SHORT_CASTLE_BB: BitBoard = BitBoard { value: 0xa0 };
+const ROOK_SWAP_BLACK_LONG_CASTLE_BB: BitBoard = BitBoard {
+    value: 0x900000000000000,
+};
+const ROOK_SWAP_BLACK_SHORT_CASTLE_BB: BitBoard = BitBoard {
+    value: 0xa000000000000000,
+};
 
 #[derive(Debug, Clone)]
 pub struct State {
@@ -23,6 +27,9 @@ pub struct State {
 
 impl State {
     /// Creates a new `GameState` instance with default values.
+    /// This is not turned into a `default` as many constuctors in this program need to be const.
+    /// Those cant be `default`ed and i would rather keep it constitent.
+    #[allow(clippy::new_without_default)]
     pub fn new() -> State {
         State {
             bb_manager: BBManager::new(),
@@ -132,7 +139,7 @@ impl State {
             && ep_square == moove.to
         {
             // update the captured square to the ep_square - offset
-            *capture_square = moove.to.back_by_one(self.active_color);
+            *capture_square = back_by_one(moove.to, self.active_color);
         }
     }
 
@@ -171,7 +178,7 @@ impl State {
     ) {
         if moove.is_double_pawn_push() {
             // the pawn starting square and one forward
-            let ep_square = moove.to.back_by_one(self.active_color);
+            let ep_square = back_by_one(moove.to, self.active_color);
 
             irreversible_data.en_passant_square = Some(ep_square);
         }

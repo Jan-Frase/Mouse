@@ -1,4 +1,4 @@
-use crate::backend::compile_time::gen_caches::{
+use crate::backend::caches::{
     BISHOP_PEXT_INDEX, BISHOP_PEXT_MASK, PEXT_TABLE, ROOK_PEXT_INDEX, ROOK_PEXT_MASK,
 };
 use crate::backend::movegen::moove::Moove;
@@ -41,8 +41,8 @@ pub fn get_slider_moves_at_square(
 }
 
 fn get_rook_moves_at_square(square: Square, friendly_bb: BitBoard, enemy_bb: BitBoard) -> BitBoard {
-    let pext_mask = ROOK_PEXT_MASK[square.square_to_index()];
-    let pext_index = ROOK_PEXT_INDEX[square.square_to_index()];
+    let pext_mask = ROOK_PEXT_MASK[square as usize];
+    let pext_index = ROOK_PEXT_INDEX[square as usize];
 
     let occ_bb = friendly_bb | enemy_bb;
 
@@ -57,8 +57,8 @@ fn get_bishop_moves_at_square(
     friendly_bb: BitBoard,
     enemy_bb: BitBoard,
 ) -> BitBoard {
-    let pext_mask = BISHOP_PEXT_MASK[square.square_to_index()];
-    let pext_index = BISHOP_PEXT_INDEX[square.square_to_index()];
+    let pext_mask = BISHOP_PEXT_MASK[square as usize];
+    let pext_index = BISHOP_PEXT_INDEX[square as usize];
 
     let occ_bb = friendly_bb | enemy_bb;
 
