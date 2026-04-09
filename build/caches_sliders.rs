@@ -185,25 +185,25 @@ const BISHOP_DIR: [SlideDirection; 4] = [
 ];
 
 fn calculate_slider_move_bitboard(piece_type: &Piece, square: i8, blocker_bb: u64) -> u64 {
-    let mut move_bitboard = 0u64;
+    let mut move_bb = 0u64;
 
     let mut i = 0;
     match piece_type {
         Piece::Rook => {
             while i < 4 {
-                move_bitboard |= calculate_max_slide_range(square, &ROOK_DIR[i], blocker_bb);
+                move_bb |= calculate_max_slide_range(square, &ROOK_DIR[i], blocker_bb);
                 i += 1;
             }
         }
         Piece::Bishop => {
             while i < 4 {
-                move_bitboard |= calculate_max_slide_range(square, &BISHOP_DIR[i], blocker_bb);
+                move_bb |= calculate_max_slide_range(square, &BISHOP_DIR[i], blocker_bb);
                 i += 1;
             }
         }
     }
 
-    move_bitboard
+    move_bb
 }
 
 /// Computes a bitboard containing all squares

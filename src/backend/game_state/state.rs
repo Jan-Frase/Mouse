@@ -88,20 +88,20 @@ impl State {
         next_state.make_move_capture(&mut next_ir_data, capture_square);
 
         // Get the bitboard for the piece that was moved.
-        let mut moved_piece_bitboard = next_state.bb_manager.get_piece_bb_mut(moved_piece);
+        let mut moved_piece_bb = next_state.bb_manager.get_piece_bb_mut(moved_piece);
 
         // Clear the square that the piece was moved from.
-        moved_piece_bitboard.clear_square(moove.from);
+        moved_piece_bb.clear_square(moove.from);
 
         // Update the moved piece bb if it was a pawn promotion
         match moove.promotion_type {
             None => {}
             Some(promotion_type) => {
-                moved_piece_bitboard = next_state.bb_manager.get_piece_bb_mut(promotion_type);
+                moved_piece_bb = next_state.bb_manager.get_piece_bb_mut(promotion_type);
             }
         }
         // Fill the square it moved to.
-        moved_piece_bitboard.fill_square(moove.to);
+        moved_piece_bb.fill_square(moove.to);
 
         next_state
             .bb_manager
@@ -155,8 +155,8 @@ impl State {
             // Store the captured piece type in the irreversible data.
             irreversible_data.captured_piece = Some(captured_piece);
             // Remove the captured piece from its bitboard.
-            let captured_piece_bitboard = self.bb_manager.get_piece_bb_mut(captured_piece);
-            captured_piece_bitboard.clear_square(capture_square);
+            let captured_piece_bb = self.bb_manager.get_piece_bb_mut(captured_piece);
+            captured_piece_bb.clear_square(capture_square);
             self.bb_manager
                 .get_all_pieces_bb_off_mut(self.active_color.opposite())
                 .clear_square(capture_square);

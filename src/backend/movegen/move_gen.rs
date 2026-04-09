@@ -98,22 +98,22 @@ pub fn get_pseudo_legal_moves(state: &State) -> Vec<Moove> {
 pub(crate) fn iterate_over_bitboard_for_non_slider(
     moves: &mut Vec<Moove>,
     moves_cache: [BitBoard; SQUARES_AMOUNT],
-    piece_bitboard: BitBoard,
+    piece_bb: BitBoard,
     mask_bitboard: BitBoard,
 ) {
     // Example: We are doing this for all knights.
     // The `moves_cache` array would for each square contain all viable moves for a knight.
 
     // We iterate over all squares with a knight on it...
-    for square in piece_bitboard {
+    for square in piece_bb {
         // ... get the potential moves for the piece on that square...
         // SLIDER: (This only works this easily for non-sliders)
-        let mut potential_moves_bitboard = moves_cache[square as usize];
+        let mut potential_moves_bb = moves_cache[square as usize];
         // ... apply the mask ...
-        potential_moves_bitboard &= !mask_bitboard;
+        potential_moves_bb &= !mask_bitboard;
 
         //... and convert the resulting bitboard to a list of moves.
-        convert_bitboard_to_moves(moves, square, potential_moves_bitboard);
+        convert_bitboard_to_moves(moves, square, potential_moves_bb);
     }
 }
 

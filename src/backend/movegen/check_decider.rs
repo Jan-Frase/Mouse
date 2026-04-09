@@ -6,16 +6,16 @@ use crate::backend::types::piece::Piece::{Bishop, Queen, Rook};
 use crate::backend::types::piece::{ALL_PIECES, Piece, Side};
 use crate::backend::types::square::Square;
 
-pub fn is_in_check_on_square(game_state: &State, color: Side, king_square: Square) -> bool {
-    let friendly_bb = game_state.bb_manager.get_all_pieces_bb_off(color);
-    let enemy_bb = game_state
+pub fn is_in_check_on_square(state: &State, color: Side, king_square: Square) -> bool {
+    let friendly_bb = state.bb_manager.get_all_pieces_bb_off(color);
+    let enemy_bb = state
         .bb_manager
         .get_all_pieces_bb_off(color.opposite());
 
     // Iterate over all pieces. Let`s assume we are checking for knights.
     for piece_type in ALL_PIECES {
         // Get the bitboard that represents all possible attacks.
-        let attack_bitboard = get_attack_bitboard_for_piece_and_square(
+        let attack_bb = get_attack_bitboard_for_piece_and_square(
             piece_type,
             color,
             king_square,
@@ -24,12 +24,12 @@ pub fn is_in_check_on_square(game_state: &State, color: Side, king_square: Squar
         );
 
         // Get the bitboard that marks where enemy knights are standing.
-        let enemy_piece_bitboard = game_state.bb_manager.get_piece_bb(piece_type) & enemy_bb;
+        let enemy_piece_bb = state.bb_manager.get_piece_bb(piece_type) & enemy_bb;
 
         // Check if at least one of the places we could move to contains an enemy knight.
-        let resulting_bitboard = attack_bitboard & enemy_piece_bitboard;
+        let resulting_bb = attack_bb & enemy_piece_bb;
         // If so, we know that the king is in check.
-        if resulting_bitboard.is_not_empty() {
+        if resulting_bb.is_not_empty() {
             return true;
         }
     }
@@ -55,7 +55,7 @@ pub fn is_in_check_on_square(game_state: &State, color: Side, king_square: Squar
 /// - A boolean value:
 ///   - `true` if the king of the specified color is in check.
 ///   - `false` otherwise.
-pub fn is_in_check(game_state: &State, color: Side) -> bool {
+pub fn is_in_check(state: &State, color: Side) -> bool {
     // Idea:
     // If, for example, color == white, we want to figure out if white is currently in check.
     // We then pretend that the white king is one after the other replaced by: pawn, rook, bishop, queen, king.
@@ -66,21 +66,21 @@ pub fn is_in_check(game_state: &State, color: Side) -> bool {
     // We can & this bitboard with the bitboard for black bishops and realize that it is not empty.
     // Thus, we now know that the white king is in check by a black bishop.
     // I hope this makes sense :)
-    let king_square = get_kings_square(game_state, color);
-    is_in_check_on_square(game_state, color, king_square)
+    let king_square = get_kings_square(state, color);
+    is_in_check_on_square(state, color, king_square)
 }
 
 /// Returns the square where the king of the respective side is located.
-fn get_kings_square(game_state: &State, color: Side) -> Square {
-    let king_bitboard = game_state.bb_manager.get_piece_bb(Piece::King);
-    let side_bb = game_state.bb_manager.get_all_pieces_bb_off(color);
-    let mut bb = king_bitboard & side_bb;
+fn get_kings_square(state: &State, color: Side) -> Square {
+    let king_bb = state.bb_manager.get_piece_bb(Piece::King);
+    let side_bb = state.bb_manager.get_all_pieces_bb_off(color);
+    let mut bb = king_bb & side_bb;
     bb.next().unwrap()
 }
 
 fn get_attack_bitboard_for_piece_and_square(
     piece_type: Piece,
-    piece_color: Side,
+    side: Side,
     square: Square,
     friendly_bb: BitBoard,
     enemy_bb: BitBoard,
@@ -88,7 +88,7 @@ fn get_attack_bitboard_for_piece_and_square(
     match piece_type {
         Piece::King => KING_MOVES[square as usize],
         Piece::Knight => KNIGHT_MOVES[square as usize],
-        Piece::Pawn => PAWN_CAPTURE_MOVES[piece_color as usize][square as usize],
+        Piece::Pawn => PAWN_CAPTURE_MOVES[side as usize][square as usize],
         Rook => get_slider_moves_at_square(Rook, square, friendly_bb, enemy_bb),
         Bishop => get_slider_moves_at_square(Bishop, square, friendly_bb, enemy_bb),
         Queen => get_slider_moves_at_square(Queen, square, friendly_bb, enemy_bb),

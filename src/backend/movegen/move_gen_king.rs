@@ -27,16 +27,16 @@ const WHITE_SHORT_CASTLE_CHECK_SQUARES: [Square; 3] = [E1, F1, G1];
 const BLACK_LONG_CASTLE_CHECK_SQUARES: [Square; 3] = [E8, D8, C8];
 const BLACK_SHORT_CASTLE_CHECK_SQUARES: [Square; 3] = [E8, F8, G8];
 
-pub fn gen_castles(moves: &mut Vec<Moove>, game_state: &State, combined_bb: BitBoard) {
-    let irreversible_data = &game_state.irreversible_data;
+pub fn gen_castles(moves: &mut Vec<Moove>, state: &State, combined_bb: BitBoard) {
+    let irreversible_data = &state.irreversible_data;
 
     for castle_type in CastleType::get_all_types() {
         let (castling_rights, squares_the_king_moves_through, between_king_rook_bb, moove) =
-            get_needed_constants(irreversible_data, &castle_type, game_state.active_color);
+            get_needed_constants(irreversible_data, &castle_type, state.active_color);
 
         gen_castle(
             moves,
-            game_state,
+            state,
             combined_bb,
             castling_rights,
             squares_the_king_moves_through,
@@ -48,7 +48,7 @@ pub fn gen_castles(moves: &mut Vec<Moove>, game_state: &State, combined_bb: BitB
 
 fn gen_castle(
     all_pseudo_legal_moves: &mut Vec<Moove>,
-    game_state: &State,
+    state: &State,
     combined_bb: BitBoard,
     castling_rights: bool,
     squares_the_king_moves_through: [Square; 3],
@@ -63,7 +63,7 @@ fn gen_castle(
     // are we moving through checks?
     for square in squares_the_king_moves_through.iter() {
         // if so -> stop
-        if is_in_check_on_square(game_state, game_state.active_color, *square) {
+        if is_in_check_on_square(state, state.active_color, *square) {
             return;
         }
     }
@@ -82,32 +82,32 @@ fn gen_castle(
 fn get_needed_constants(
     irreversible_data: &IrreversibleData,
     castle_types: &CastleType,
-    piece_color: Side,
+    side: Side,
 ) -> (bool, [Square; 3], BitBoard, Moove) {
     match castle_types {
-        CastleType::Long => match piece_color {
+        CastleType::Long => match side {
             Side::White => (
-                irreversible_data.get_long_castle_rights(piece_color),
+                irreversible_data.get_long_castle_rights(side),
                 WHITE_LONG_CASTLE_CHECK_SQUARES,
                 WHITE_LONG_CASTLE_MASK,
                 WHITE_LONG_CASTLE_MOVE,
             ),
             Side::Black => (
-                irreversible_data.get_long_castle_rights(piece_color),
+                irreversible_data.get_long_castle_rights(side),
                 BLACK_LONG_CASTLE_CHECK_SQUARES,
                 BLACK_LONG_CASTLE_MASK,
                 BLACK_LONG_CASTLE_MOVE,
             ),
         },
-        CastleType::Short => match piece_color {
+        CastleType::Short => match side {
             Side::White => (
-                irreversible_data.get_short_castle_rights(piece_color),
+                irreversible_data.get_short_castle_rights(side),
                 WHITE_SHORT_CASTLE_CHECK_SQUARES,
                 WHITE_SHORT_CASTLE_MASK,
                 WHITE_SHORT_CASTLE_MOVE,
             ),
             Side::Black => (
-                irreversible_data.get_short_castle_rights(piece_color),
+                irreversible_data.get_short_castle_rights(side),
                 BLACK_SHORT_CASTLE_CHECK_SQUARES,
                 BLACK_SHORT_CASTLE_MASK,
                 BLACK_SHORT_CASTLE_MOVE,

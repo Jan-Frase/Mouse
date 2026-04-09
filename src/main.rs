@@ -26,7 +26,7 @@ pub fn run_perftree_debug(mut input: Args) {
     let depth = depth.parse::<i32>().unwrap();
 
     let fen = &input.next().unwrap();
-    let mut game_state = State::new_from_fen(fen);
+    let mut state = State::new_from_fen(fen);
 
     for mooves in input {
         // Code golfing
@@ -34,11 +34,11 @@ pub fn run_perftree_debug(mut input: Args) {
             .split_whitespace()
             .map(moove_from_uci_notation)
             .for_each(|moove| {
-                game_state = game_state.make_move(moove);
+                state = state.make_move(moove);
             });
     }
 
-    root_debug_perft(&mut game_state, depth as u8);
+    root_debug_perft(&mut state, depth as u8);
 }
 
 pub fn root_debug_perft(root_state: &mut State, depth: u8) -> u64 {
