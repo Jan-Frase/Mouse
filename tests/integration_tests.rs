@@ -50,7 +50,7 @@ fn test_perft_01() {
     assert_eq!(nodes, 472915);
 
     // This currently takes too long to run.
-    // let nodes = perft(&state, 5);
+    // let nodes = perft(&game_state, 5);
     // assert_eq!(nodes, 11949411);
 }
 
@@ -107,7 +107,7 @@ fn test_perft_07() {
     assert_eq!(nodes, 49);
 
     // Missing slider logic atm
-    // let nodes = perft(&state, 3);
+    // let nodes = perft(&game_state, 3);
     // assert_eq!(nodes, 289);
 }
 

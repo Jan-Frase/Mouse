@@ -6,7 +6,7 @@ use crate::backend::types::square::Square;
 
 /// A struct that manages bitboards used for representing chess pieces and their positions on a chessboard.
 /// # Fields
-/// - `bitboards`: An array of bitboards where each entry represents the board state
+/// - `bitboards`: An array of bitboards where each entry represents the board game_state
 ///
 /// - `bitboard_index_to_piece`: An array that maps each index in the `bitboards` array
 ///   back to its corresponding `Piece`.

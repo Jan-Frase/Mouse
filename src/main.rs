@@ -1,8 +1,8 @@
 use crate::backend::movegen::check_decider::is_in_check;
 use crate::backend::movegen::move_gen::get_pseudo_legal_moves;
 use crate::backend::perft::perft;
-use crate::backend::state::fen_parser::moove_from_uci_notation;
-use crate::backend::state::state::State;
+use crate::backend::game_state::fen_parser::moove_from_uci_notation;
+use crate::backend::game_state::state::State;
 use std::env;
 use std::env::Args;
 

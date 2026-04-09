@@ -1,13 +1,13 @@
 use crate::backend::types::moove::Moove;
-use crate::backend::state::bb_manager::BBManager;
-use crate::backend::state::irreversible_data::IrreversibleData;
+use crate::backend::game_state::bb_manager::BBManager;
+use crate::backend::game_state::irreversible_data::IrreversibleData;
 use crate::backend::types::piece::Piece::{Bishop, King, Knight, Pawn, Queen, Rook};
 use crate::backend::types::piece::Side::{Black, White};
 use crate::backend::types::piece::{Piece, Side};
 use crate::backend::types::square::Square;
 use crate::backend::types::square::square_from_rank_and_file;
 
-/// Parses a FEN (Forsyth-Edwards Notation) string and updates the corresponding game state.
+/// Parses a FEN (Forsyth-Edwards Notation) string and updates the corresponding game game_state.
 /// https://www.chessprogramming.org/Forsyth-Edwards_Notation
 ///
 /// # Arguments

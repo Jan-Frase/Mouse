@@ -1,7 +1,7 @@
 use crate::backend::caches::{KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES};
 use crate::backend::movegen::move_gen_sliders::get_slider_moves_at_square;
 use crate::backend::types::bitboard::BitBoard;
-use crate::backend::state::state::State;
+use crate::backend::game_state::state::State;
 use crate::backend::types::piece::Piece::{Bishop, Queen, Rook};
 use crate::backend::types::piece::{ALL_PIECES, Piece, Side};
 use crate::backend::types::square::Square;
@@ -36,7 +36,7 @@ pub fn is_in_check_on_square(game_state: &State, color: Side, king_square: Squar
     false
 }
 
-/// Checks if a given player's king is in check in the current game state.
+/// Checks if a given player's king is in check in the current game game_state.
 ///
 /// This function determines whether the king of the specified `color` is under attack
 /// by any opposing pieces in the `game_state`. It does so by leveraging precomputed

@@ -5,16 +5,16 @@ use crate::backend::movegen::move_gen_king::gen_castles;
 use crate::backend::movegen::move_gen_pawn::gen_pawn_moves;
 use crate::backend::movegen::move_gen_sliders::get_slider_moves;
 use crate::backend::types::bitboard::BitBoard;
-use crate::backend::state::state::State;
+use crate::backend::game_state::state::State;
 use crate::backend::types::piece::Piece::*;
 use crate::backend::types::square::Square;
 
 /// Generates and returns all the pseudo legal moves for the current player's pieces
-/// based on the provided game state. This is the entry point for the move generation.
+/// based on the provided game game_state. This is the entry point for the move generation.
 ///
 /// # Parameters
 ///
-/// * `game_state`: A reference to the current game state, which contains
+/// * `game_state`: A reference to the current game game_state, which contains
 ///   information about the board, piece positions, and active color.
 ///
 /// # Returns

@@ -1,6 +1,6 @@
 use crate::backend::types::moove::Moove;
 use crate::backend::types::bitboard::BitBoard;
-use crate::backend::state::state::State;
+use crate::backend::game_state::state::State;
 use crate::backend::types::piece::Piece::Pawn;
 use crate::backend::types::piece::{PROMOTABLE_PIECES, Side};
 use crate::backend::types::square::{Square, get_rank};

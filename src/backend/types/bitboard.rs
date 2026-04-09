@@ -8,7 +8,7 @@ use crate::backend::types::square::Square;
 /// Each bit in the `u64` value represents a specific position on the board.
 ///
 /// # Fields
-/// - `value` (`u64`): The underlying 64-bit integer used to store the board's state.
+/// - `value` (`u64`): The underlying 64-bit integer used to store the board's game_state.
 #[derive(Copy, Clone, Debug)]
 pub struct BitBoard {
     pub value: u64,
