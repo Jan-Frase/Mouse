@@ -1,7 +1,3 @@
-use crate::backend::caches::{
-    BISHOP_PEXT_INDEX, BISHOP_PEXT_MASK, KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES, PEXT_TABLE,
-    ROOK_PEXT_INDEX, ROOK_PEXT_MASK,
-};
 use crate::backend::movegen::check_decider::is_in_check;
 use crate::backend::movegen::move_gen::get_pseudo_legal_moves;
 use crate::backend::perft::perft;

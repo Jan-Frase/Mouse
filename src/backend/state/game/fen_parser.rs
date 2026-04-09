@@ -243,7 +243,8 @@ fn parse_position(bit_board_manager: &mut BBManager, positions_string: &str) {
 }
 
 // -------------------
-
+// This is used during debugging and the uci interface.
+#[allow(unused)]
 pub fn square_from_uci_notation(uci_notation: &str) -> Square {
     let mut file = 0;
     let mut rank = 0;
@@ -259,6 +260,8 @@ pub fn square_from_uci_notation(uci_notation: &str) -> Square {
     square_from_rank_and_file(rank as i8, file as i8)
 }
 
+// This is used during debugging and the uci interface.
+#[allow(unused)]
 pub fn moove_from_uci_notation(uci_notation: &str) -> Moove {
     let from = square_from_uci_notation(&uci_notation[0..2]);
     let to = square_from_uci_notation(&uci_notation[2..4]);

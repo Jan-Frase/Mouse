@@ -14,13 +14,13 @@ fn main() {
     println!("cargo:rerun-if-changed=src/backend/caches.rs");
 
     let mut king_moves = [0u64; 64];
-    for square in 0..64 {
-        king_moves[square] = gen_caches_non_sliders::gen_king_moves(square as i8);
+    for (square, king_moves_for_square) in king_moves.iter_mut().enumerate() {
+        *king_moves_for_square = gen_caches_non_sliders::gen_king_moves(square as i8);
     }
 
     let mut knight_moves = [0u64; 64];
-    for square in 0..64 {
-        knight_moves[square] = gen_caches_non_sliders::gen_knight_moves(square as i8);
+    for (square , knight_moves_for_square) in knight_moves.iter_mut().enumerate() {
+        *knight_moves_for_square = gen_caches_non_sliders::gen_knight_moves(square as i8);
     }
 
     let capture_pawn_moves = gen_caches_non_sliders::gen_pawn_captures();

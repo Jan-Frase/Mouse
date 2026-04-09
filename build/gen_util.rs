@@ -19,7 +19,7 @@ pub fn is_square_at_bottom_edge(square: i8) -> bool {
 }
 
 pub fn is_square_valid(rank: i8, file: i8) -> bool {
-    rank >= 0 && rank < 8 && file >= 0 && file < 8
+    (0..8).contains(&rank) && (0..8).contains(&file)
 }
 
 pub fn square_to_bb(square: i8) -> u64 {

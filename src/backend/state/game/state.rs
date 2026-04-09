@@ -1,4 +1,4 @@
-use crate::backend::constants::{A1, A8, D1, D8, F1, F8, H1, H8};
+use crate::backend::constants::{A1, A8, H1, H8};
 use crate::backend::movegen::moove::{CastleType, Moove};
 use crate::backend::state::board::bb_manager::BBManager;
 use crate::backend::state::board::bitboard::BitBoard;
@@ -6,7 +6,7 @@ use crate::backend::state::game::fen_parser::parse_fen;
 use crate::backend::state::game::irreversible_data::IrreversibleData;
 use crate::backend::state::piece::Piece::{King, Pawn, Rook};
 use crate::backend::state::piece::{Piece, Side};
-use crate::backend::state::square::{Square, back_by_one, get_file, get_rank};
+use crate::backend::state::square::{Square, back_by_one};
 
 const ROOK_SWAP_WHITE_LONG_CASTLE_BB: BitBoard = BitBoard { value: 0x9 };
 const ROOK_SWAP_WHITE_SHORT_CASTLE_BB: BitBoard = BitBoard { value: 0xa0 };
@@ -27,6 +27,9 @@ pub struct State {
 
 impl State {
     /// Creates a new `GameState` instance with default values.
+    /// This is not turned into a `default` as many constuctors in this program need to be const.
+    /// Those cant be `default`ed and i would rather keep it constitent.
+    #[allow(clippy::new_without_default)]
     pub fn new() -> State {
         State {
             bb_manager: BBManager::new(),
@@ -70,12 +73,6 @@ impl State {
         let mut next_ir_data = IrreversibleData::new_from_previous_state(&self.irreversible_data);
 
         // Get the type of moved piece.
-        assert!(
-            get_rank(moove.from) >= 0
-                && get_rank(moove.from) < 8
-                && get_file(moove.from) >= 0
-                && get_file(moove.from) < 8,
-        );
         let moved_piece = self.bb_manager.get_piece_at_square(moove.from).unwrap();
 
         // Usually the square something was captured on (if something was captured at all) is the square we moved to...

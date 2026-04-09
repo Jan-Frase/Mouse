@@ -70,18 +70,12 @@ pub fn gen_knight_moves(square: i8) -> u64 {
 pub fn gen_pawn_captures() -> [[u64; 64]; 2] {
     let mut quiet_moves = [[0; 64]; 2];
 
-    for side in 0..2 {
-        let mut potential_moves = [0; 64];
-
+    for (side, quiet_moves_per_side) in quiet_moves.iter_mut().enumerate() {
         // iterate over all squares
         for square in 0..64 {
-            let bb = gen_pawn_captures_at_square(square, side == 0);
-
             // and generate the moves for that square
-            potential_moves[square as usize] = bb;
+            quiet_moves_per_side[square as usize] = gen_pawn_captures_at_square(square, side == 0);
         }
-
-        quiet_moves[side] = potential_moves;
     }
 
     quiet_moves

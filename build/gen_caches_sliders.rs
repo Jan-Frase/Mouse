@@ -22,7 +22,6 @@ const BOTTOM_SIDE_MASK: u64 = 126;
 enum Piece {
     Rook,
     Bishop,
-    Queen,
 }
 
 pub struct PextData {
@@ -79,7 +78,7 @@ fn gen_for_piece(
         piece_pext_index[square as usize] = *current_pext_table_index;
 
         let mut relevant_squares = calculate_slider_move_bitboard(piece, square, 0);
-        relevant_squares = relevant_squares & !adjust_edge_of_board(square);
+        relevant_squares &= !adjust_edge_of_board(square);
         piece_pext_mask[square as usize] = relevant_squares;
 
         let amount_of_blocker_squares = relevant_squares.count_ones();
@@ -184,16 +183,6 @@ const BISHOP_DIR: [SlideDirection; 4] = [
     SlideDirection::DownLeft,
     SlideDirection::UpLeft,
 ];
-const QUEEN_DIR: [SlideDirection; 8] = [
-    SlideDirection::Up,
-    SlideDirection::UpRight,
-    SlideDirection::Right,
-    SlideDirection::DownRight,
-    SlideDirection::Down,
-    SlideDirection::DownLeft,
-    SlideDirection::Left,
-    SlideDirection::UpLeft,
-];
 
 fn calculate_slider_move_bitboard(piece_type: &Piece, square: i8, blocker_bb: u64) -> u64 {
     let mut move_bitboard = 0u64;
@@ -212,13 +201,6 @@ fn calculate_slider_move_bitboard(piece_type: &Piece, square: i8, blocker_bb: u6
                 i += 1;
             }
         }
-        Piece::Queen => {
-            while i < 8 {
-                move_bitboard |= calculate_max_slide_range(square, &QUEEN_DIR[i], blocker_bb);
-                i += 1;
-            }
-        }
-        _ => unreachable!(),
     }
 
     move_bitboard
@@ -233,8 +215,7 @@ fn calculate_max_slide_range(square: i8, direction: &SlideDirection, blocker_bb:
     let mut next = direction.next(file, rank);
 
     while is_square_valid(next.1, next.0) {
-        let mut bb = 0u64;
-        bb = 1 << (next.1 * 8 + next.0);
+        let bb =  1 << (next.1 * 8 + next.0);
         result |= bb;
         if blocker_bb & bb != 0 {
             return result;
