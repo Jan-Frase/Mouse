@@ -1,4 +1,4 @@
-use crate::gen_util::{
+use crate::build_util::{
     is_square_at_bottom_edge, is_square_at_left_edge, is_square_at_right_edge,
     is_square_at_top_edge, is_square_valid, square_from_rank_and_file, square_to_bb,
     square_to_file, square_to_rank,

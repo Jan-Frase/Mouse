@@ -1,12 +1,12 @@
 use crate::backend::constants::{A1, A8, H1, H8};
-use crate::backend::movegen::moove::{CastleType, Moove};
-use crate::backend::state::board::bb_manager::BBManager;
-use crate::backend::state::board::bitboard::BitBoard;
-use crate::backend::state::game::fen_parser::parse_fen;
-use crate::backend::state::game::irreversible_data::IrreversibleData;
-use crate::backend::state::piece::Piece::{King, Pawn, Rook};
-use crate::backend::state::piece::{Piece, Side};
-use crate::backend::state::square::{Square, back_by_one};
+use crate::backend::types::moove::{CastleType, Moove};
+use crate::backend::state::bb_manager::BBManager;
+use crate::backend::types::bitboard::BitBoard;
+use crate::backend::state::fen_parser::parse_fen;
+use crate::backend::state::irreversible_data::IrreversibleData;
+use crate::backend::types::piece::Piece::{King, Pawn, Rook};
+use crate::backend::types::piece::{Piece, Side};
+use crate::backend::types::square::{Square, back_by_one};
 
 const ROOK_SWAP_WHITE_LONG_CASTLE_BB: BitBoard = BitBoard { value: 0x9 };
 const ROOK_SWAP_WHITE_SHORT_CASTLE_BB: BitBoard = BitBoard { value: 0xa0 };

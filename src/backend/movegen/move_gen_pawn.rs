@@ -1,10 +1,10 @@
-use crate::backend::movegen::moove::Moove;
-use crate::backend::state::board::bitboard::BitBoard;
-use crate::backend::state::game::state::State;
-use crate::backend::state::piece::Piece::Pawn;
-use crate::backend::state::piece::{PROMOTABLE_PIECES, Side};
-use crate::backend::state::square::{Square, get_rank};
-use crate::backend::state::square::{get_file, square_from_rank_and_file};
+use crate::backend::types::moove::Moove;
+use crate::backend::types::bitboard::BitBoard;
+use crate::backend::state::state::State;
+use crate::backend::types::piece::Piece::Pawn;
+use crate::backend::types::piece::{PROMOTABLE_PIECES, Side};
+use crate::backend::types::square::{Square, get_rank};
+use crate::backend::types::square::{get_file, square_from_rank_and_file};
 
 // Made with https://tearth.dev/bitboard-viewer/
 const BLACK_PROMOTION_RANK_BB: BitBoard = BitBoard { value: 0xff };

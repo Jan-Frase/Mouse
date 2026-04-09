@@ -1,6 +1,6 @@
-use crate::backend::state::piece::Piece;
-use crate::backend::state::square::{Square, get_file, square_to_string};
 use std::fmt::{Display, Formatter};
+use crate::backend::types::piece::Piece;
+use crate::backend::types::square::{get_file, square_to_string, Square};
 
 #[derive(Copy, Clone)]
 pub enum CastleType {

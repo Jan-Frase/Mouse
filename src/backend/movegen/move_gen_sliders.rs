@@ -1,11 +1,11 @@
 use crate::backend::caches::{
     BISHOP_PEXT_INDEX, BISHOP_PEXT_MASK, PEXT_TABLE, ROOK_PEXT_INDEX, ROOK_PEXT_MASK,
 };
-use crate::backend::movegen::moove::Moove;
+use crate::backend::types::moove::Moove;
 use crate::backend::movegen::move_gen::convert_bitboard_to_moves;
-use crate::backend::state::board::bitboard::BitBoard;
-use crate::backend::state::piece::Piece;
-use crate::backend::state::square::Square;
+use crate::backend::types::bitboard::BitBoard;
+use crate::backend::types::piece::Piece;
+use crate::backend::types::square::Square;
 use std::arch::x86_64::_pext_u64;
 
 pub fn get_slider_moves(

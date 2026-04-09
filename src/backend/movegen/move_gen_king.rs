@@ -1,11 +1,11 @@
 use crate::backend::constants::{C1, C8, D1, D8, E1, E8, F1, F8, G1, G8};
 use crate::backend::movegen::check_decider::is_in_check_on_square;
-use crate::backend::movegen::moove::{CastleType, Moove};
-use crate::backend::state::board::bitboard::BitBoard;
-use crate::backend::state::game::irreversible_data::IrreversibleData;
-use crate::backend::state::game::state::State;
-use crate::backend::state::piece::Side;
-use crate::backend::state::square::Square;
+use crate::backend::types::moove::{CastleType, Moove};
+use crate::backend::types::bitboard::BitBoard;
+use crate::backend::state::irreversible_data::IrreversibleData;
+use crate::backend::state::state::State;
+use crate::backend::types::piece::Side;
+use crate::backend::types::square::Square;
 
 // Made these values with: https://tearth.dev/bitboard-viewer/
 const WHITE_LONG_CASTLE_MASK: BitBoard = BitBoard { value: 0xe };

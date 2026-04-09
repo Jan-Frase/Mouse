@@ -1,6 +1,6 @@
 use crate::backend::movegen::check_decider::is_in_check;
 use crate::backend::movegen::move_gen::get_pseudo_legal_moves;
-use crate::backend::state::game::state::State;
+use crate::backend::state::state::State;
 
 pub fn perft(state: &State, depth: u8) -> u64 {
     // PERFT: I would love to make this work, but it does not atm.

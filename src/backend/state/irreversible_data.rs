@@ -1,6 +1,6 @@
-use crate::backend::movegen::moove::CastleType;
-use crate::backend::state::piece::{Piece, Side};
-use crate::backend::state::square::Square;
+use crate::backend::types::moove::CastleType;
+use crate::backend::types::piece::{Piece, Side};
+use crate::backend::types::square::Square;
 
 /// The `IrreversibleData` struct stores data that is irreversible.
 /// For example, this remembers what kind of piece was captured for `unmake_move()`.

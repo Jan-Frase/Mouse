@@ -1,5 +1,5 @@
 use crate::backend::constants::SIDE_LENGTH;
-use crate::backend::state::piece::Side;
+use crate::backend::types::piece::Side;
 
 // Square is simply an index where 0 is A1 and 63 is H8
 pub type Square = u8;

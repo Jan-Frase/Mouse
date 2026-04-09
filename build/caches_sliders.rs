@@ -1,4 +1,4 @@
-use crate::gen_util::{is_square_valid, square_to_file, square_to_rank};
+use crate::build_util::{is_square_valid, square_to_file, square_to_rank};
 
 pub const PEXT_TABLE_SIZE: usize = 107_648;
 

@@ -1,10 +1,10 @@
 use crate::backend::caches::{KING_MOVES, KNIGHT_MOVES, PAWN_CAPTURE_MOVES};
 use crate::backend::movegen::move_gen_sliders::get_slider_moves_at_square;
-use crate::backend::state::board::bitboard::BitBoard;
-use crate::backend::state::game::state::State;
-use crate::backend::state::piece::Piece::{Bishop, Queen, Rook};
-use crate::backend::state::piece::{ALL_PIECES, Piece, Side};
-use crate::backend::state::square::Square;
+use crate::backend::types::bitboard::BitBoard;
+use crate::backend::state::state::State;
+use crate::backend::types::piece::Piece::{Bishop, Queen, Rook};
+use crate::backend::types::piece::{ALL_PIECES, Piece, Side};
+use crate::backend::types::square::Square;
 
 pub fn is_in_check_on_square(game_state: &State, color: Side, king_square: Square) -> bool {
     let friendly_bb = game_state.bb_manager.get_all_pieces_bb_off(color);

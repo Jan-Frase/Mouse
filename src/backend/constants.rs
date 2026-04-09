@@ -2,7 +2,7 @@
 // The unused lint was disabled for this file
 // because I want to keep some square constants that are not needed atm.
 
-use crate::backend::state::square::Square;
+use crate::backend::types::square::Square;
 
 pub const SIDE_LENGTH: i8 = 8;
 pub const SQUARES_AMOUNT: usize = 64;

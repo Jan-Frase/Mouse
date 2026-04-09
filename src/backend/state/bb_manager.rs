@@ -1,8 +1,8 @@
 use crate::backend::constants::PIECE_TYPE_COUNT;
-use crate::backend::state::board::bitboard::BitBoard;
-use crate::backend::state::piece::ALL_PIECES;
-use crate::backend::state::piece::{Piece, Side};
-use crate::backend::state::square::Square;
+use crate::backend::types::bitboard::BitBoard;
+use crate::backend::types::piece::ALL_PIECES;
+use crate::backend::types::piece::{Piece, Side};
+use crate::backend::types::square::Square;
 
 /// A struct that manages bitboards used for representing chess pieces and their positions on a chessboard.
 /// # Fields
