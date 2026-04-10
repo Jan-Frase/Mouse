@@ -48,7 +48,7 @@ pub fn root_debug_perft(root_state: &mut State, depth: u8) -> u64 {
     // Generate all root moves.
     let mut moves = get_pseudo_legal_moves(root_state);
     // Sort them in the same way as perftree does
-    moves.sort();
+    // moves.sort();
     for chess_move in moves {
         let state = root_state.make_move(chess_move);
         // If we are in check after making the move -> skip.
