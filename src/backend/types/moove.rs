@@ -30,9 +30,9 @@ impl CastleType {
 /// To "make" this move we then would only need to xor it with the bitboard for the piece.
 #[derive(Copy, Clone, Debug, Ord, Eq, PartialEq, PartialOrd)]
 pub struct Moove {
-    pub from: Square,
-    pub to: Square,
-    pub promotion_type: Option<Piece>,
+    from: Square,
+    to: Square,
+    promotion_type: Option<Piece>,
 }
 
 impl Moove {
@@ -41,8 +41,28 @@ impl Moove {
         Moove {
             from,
             to,
-            promotion_type: Option::None,
+            promotion_type: None,
         }
+    }
+
+    pub const fn new_promotion(from: Square, to: Square, promotion_type: Piece) -> Moove {
+        Moove {
+            from,
+            to,
+            promotion_type: Some(promotion_type),
+        }
+    }
+
+    pub fn get_from(&self) -> Square {
+        self.from
+    }
+
+    pub fn get_to(&self) -> Square {
+        self.to
+    }
+
+    pub fn get_promotion_type(&self) -> Option<Piece> {
+        self.promotion_type
     }
 
     /// This assumes that the moved piece is a pawn and only checks if the rank changed by 2.

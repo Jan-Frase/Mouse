@@ -73,10 +73,10 @@ impl State {
         let mut next_ir_data = IrreversibleData::new_from_previous_state(&self.irreversible_data);
 
         // Get the type of moved piece.
-        let moved_piece = self.bb_manager.get_piece_at_square(moove.from).unwrap();
+        let moved_piece = self.bb_manager.get_piece_at_square(moove.get_from()).unwrap();
 
         // Usually the square something was captured on (if something was captured at all) is the square we moved to...
-        let mut capture_square = moove.to;
+        let mut capture_square = moove.get_to();
         if moved_piece == Pawn {
             // ... unless this is an en passant capture, we then need to update the capture square.
             next_state.make_move_ep_capture(moove, &mut capture_square);
@@ -91,26 +91,26 @@ impl State {
         let mut moved_piece_bb = next_state.bb_manager.get_piece_bb_mut(moved_piece);
 
         // Clear the square that the piece was moved from.
-        moved_piece_bb.clear_square(moove.from);
+        moved_piece_bb.clear_square(moove.get_from());
 
         // Update the moved piece bb if it was a pawn promotion
-        match moove.promotion_type {
+        match moove.get_promotion_type() {
             None => {}
             Some(promotion_type) => {
                 moved_piece_bb = next_state.bb_manager.get_piece_bb_mut(promotion_type);
             }
         }
         // Fill the square it moved to.
-        moved_piece_bb.fill_square(moove.to);
+        moved_piece_bb.fill_square(moove.get_to());
 
         next_state
             .bb_manager
             .get_all_pieces_bb_off_mut(self.active_color)
-            .fill_square(moove.to);
+            .fill_square(moove.get_to());
         next_state
             .bb_manager
             .get_all_pieces_bb_off_mut(self.active_color)
-            .clear_square(moove.from);
+            .clear_square(moove.get_from());
 
         // Some special king handling
         if moved_piece == King {
@@ -120,7 +120,7 @@ impl State {
         next_state.make_move_castling_rights_on_rook_move_or_capture(
             &mut next_ir_data,
             moved_piece,
-            moove.from,
+            moove.get_from(),
             self.active_color,
         );
 
@@ -136,10 +136,10 @@ impl State {
         // if an en passant square exists
         if let Some(ep_square) = ep_square
             // and if we moved to the ep_square
-            && ep_square == moove.to
+            && ep_square == moove.get_to()
         {
             // update the captured square to the ep_square - offset
-            *capture_square = back_by_one(moove.to, self.active_color);
+            *capture_square = back_by_one(moove.get_to(), self.active_color);
         }
     }
 
@@ -178,7 +178,7 @@ impl State {
     ) {
         if moove.is_double_pawn_push() {
             // the pawn starting square and one forward
-            let ep_square = back_by_one(moove.to, self.active_color);
+            let ep_square = back_by_one(moove.get_to(), self.active_color);
 
             irreversible_data.en_passant_square = Some(ep_square);
         }
