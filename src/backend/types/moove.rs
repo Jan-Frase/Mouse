@@ -39,8 +39,7 @@ impl Moove {
     }
 
     pub fn new_promotion(from: Square, to: Square, promotion_type: Piece) -> Moove {
-        let result = Moove { bitfield: from as u16 | ((to as u16) << 6) | (promotion_type as u16) << 12 | 1 << 14 };
-        result
+        Moove { bitfield: from as u16 | ((to as u16) << 6) | (promotion_type as u16) << 12 | 1 << 14 }
     }
 
     pub fn get_from(&self) -> Square {
