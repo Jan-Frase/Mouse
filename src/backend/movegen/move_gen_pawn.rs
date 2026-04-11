@@ -172,8 +172,7 @@ fn pawn_bb_to_moves_promotion(
         let rank = get_rank(square);
         let offset_square = square_from_rank_and_file(rank + rank_offset, file + file_offset);
         for piece_type in PROMOTABLE_PIECES {
-            let mut moove = Moove::new(offset_square, square);
-            moove.promotion_type = Some(piece_type);
+            let moove = Moove::new_promotion(offset_square, square, piece_type);
             moves.push(moove);
         }
     }

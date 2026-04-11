@@ -267,20 +267,16 @@ pub fn moove_from_uci_notation(uci_notation: &str) -> Moove {
     let to = square_from_uci_notation(&uci_notation[2..4]);
 
     let promotion_char = uci_notation.chars().nth(4);
-    let promotion_type = match promotion_char {
-        None => Option::None,
-        Some(char) => match char {
-            'r' => Some(Rook),
-            'n' => Some(Knight),
-            'b' => Some(Bishop),
-            'q' => Some(Queen),
+    if let Some(char) = promotion_char {
+        let promotion_type = match char {
+            'r' => (Rook),
+            'n' => (Knight),
+            'b' => (Bishop),
+            'q' => (Queen),
             _ => panic!("Invalid promotion type {:?}", uci_notation),
-        },
+        };
+        return Moove::new_promotion(from, to, promotion_type)
     };
 
-    Moove {
-        from,
-        to,
-        promotion_type,
-    }
+    Moove::new(from, to)
 }
