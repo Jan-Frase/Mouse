@@ -12,6 +12,7 @@ pub enum Piece {
     Pawn,
 }
 
+/// The order of this has to match with the Piece enum.
 pub const ALL_PIECES: [Piece; 6] = [
     Piece::Rook,
     Piece::Knight,

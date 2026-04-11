@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 use crate::backend::types::piece::{Piece, PROMOTABLE_PIECES};
 use crate::backend::types::square::{get_file, square_to_string, Square};
@@ -23,6 +24,7 @@ impl CastleType {
 /// The first six are for the from index, the next six for the to index, leaving us with 4 bits remaining.
 /// Two of those are used to encode the type of promotion piece. Either Rook, Knight, Bishop, or Queen
 /// The next stores whether promotion has occurred
+/// One bit and thus three possible data points free!
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct Moove {
     bitfield: u16
@@ -51,7 +53,6 @@ impl Moove {
         ((self.bitfield & mask) >> 6) as Square
     }
 
-    // TODO: Using Option here surely wasted like 3 clock cycles in perft run
     pub fn get_promotion_type(&self) -> Option<Piece> {
         let promo_mask = 0b0100_0000_0000_0000u16;
         if (self.bitfield & promo_mask) == 0 {
@@ -70,7 +71,6 @@ impl Moove {
     }
 
     /// This assumes that the moved piece is a king and only checks if the file changed by 2.
-    /// TODO: Not sure if this is bug free but i think so lol
     pub fn is_castle(&self) -> bool {
         self.get_from().abs_diff(self.get_to()) == 2
     }
@@ -105,3 +105,33 @@ impl Display for Moove {
         write!(f, "{}", result)
     }
 }
+
+/// Implements ordering. Needed to sort them when comparing with perftree output.
+/// This should only be called during debugging, not for performance-critical operations.
+impl PartialOrd for Moove {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(self.cmp(other)) }
+}
+
+impl Ord for Moove {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let own_from = self.get_from();
+        let other_from = other.get_from();
+
+        let own_to = self.get_to();
+        let other_to = self.get_to();
+
+        if own_from > other_from {
+            return Ordering::Greater;
+        } else if own_from < other_from {
+            return Ordering::Less;
+        }
+
+        if own_to > other_to {
+            return Ordering::Greater;
+        } else if own_to < other_to {
+            return Ordering::Less;
+        }
+        Ordering::Equal
+    }
+}
+
