@@ -3,6 +3,7 @@ use std::fs;
 mod caches_non_sliders;
 mod caches_sliders;
 mod build_util;
+mod cache_between;
 
 const DIR_PATH: &str = "src/backend/";
 
@@ -31,6 +32,8 @@ fn main() {
     let bishop_pext_mask = pext_data.bishop_pext_mask;
     let bishop_pext_index = pext_data.bishop_pext_index;
     let pext_table = pext_data.pext_table;
+
+    let between_cache = cache_between::gen_between_cache();
 
     let cache_strings = [
         format!(
@@ -67,6 +70,11 @@ fn main() {
             caches_sliders::PEXT_TABLE_SIZE,
             array_to_string(&pext_table)
         ),
+
+        format!(
+            "pub static BETWEEN_TABLE: [[BitBoard; SQUARES_AMOUNT]; SQUARES_AMOUNT] = unsafe{{std::mem::transmute({})}};",
+            two_d_array_to_string(&between_cache)
+        )
     ];
 
     let mut file_content = String::from(
@@ -94,6 +102,19 @@ fn array_to_string<const N: usize>(array: &[u64; N]) -> String {
     for bb in array {
         string.push_str(&format!("{}u64,", bb));
     }
+    string.push(']');
+    string
+}
+
+fn two_d_array_to_string<const M: usize, const N: usize> (array: &[[u64; N]; M]) -> String {
+    let mut string = String::new();
+    string.push('[');
+
+    for inner_array in array {
+        string.push_str(array_to_string(inner_array).as_str());
+        string.push(',');
+    }
+
     string.push(']');
     string
 }
