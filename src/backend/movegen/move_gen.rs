@@ -118,8 +118,6 @@ pub fn get_pseudo_legal_moves(state: &State) -> Vec<Moove> {
         checkmask
     );
 
-    println!("{}", moves.len());
-
     moves
 }
 

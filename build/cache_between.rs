@@ -17,25 +17,29 @@ pub fn gen_between_cache() -> [[u64; 64]; 64] {
 
             // if they are on the same horizontal line
             if from_rank == to_rank {
-                let smaller_file = min(from_file, to_file);
-                let bigger_file = max(from_file, to_file);
+                let dir = (to_file - from_file).signum();
 
-                for current_file in smaller_file..bigger_file {
+                let mut current_file = from_file;
+                while current_file != to_file {
                     let current_square = square_from_rank_and_file(from_rank, current_file);
                     let current_square_as_bb = square_to_bb(current_square);
                     between_cache[from_square as usize][to_square as usize] |= current_square_as_bb;
+
+                    current_file += dir;
                 }
             }
 
             // if they are on the same vertical line
             if from_file == to_file {
-                let smaller_rank = min(from_rank, to_rank);
-                let bigger_rank = max(from_rank, to_rank);
+                let dir = (to_rank - from_rank).signum();
 
-                for current_rank in smaller_rank..bigger_rank {
+                let mut current_rank = from_rank;
+                while current_rank != to_rank {
                     let current_square = square_from_rank_and_file(current_rank, from_file);
                     let current_square_as_bb = square_to_bb(current_square);
                     between_cache[from_square as usize][to_square as usize] |= current_square_as_bb;
+
+                    current_rank += dir;
                 }
             }
 
