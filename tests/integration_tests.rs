@@ -13,7 +13,7 @@ fn test_perft_normal() {
 }
 
 #[test]
-// This test takes quite a while. Thus it's disabled by default.
+// This test takes quite a while. Thus, it's disabled by default.
 // Can be run using 'cargo test -- --ignored'.
 #[ignore]
 fn test_perft_long() {
@@ -201,4 +201,13 @@ fn test_perft_18() {
 
     let nodes = perft(&state, 1);
     assert_eq!(nodes, 7);
+}
+
+#[test]
+fn test_perft_19() {
+    // Simple test for double checks :)
+    let state = State::new_from_fen("k3rR2/8/8/5n2/8/4K3/8/8 w - - 0 1");
+
+    let nodes = perft(&state, 1);
+    assert_eq!(nodes, 5);
 }

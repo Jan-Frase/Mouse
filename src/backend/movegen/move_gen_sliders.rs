@@ -14,9 +14,10 @@ pub fn get_slider_moves(
     piece_bb: BitBoard,
     friendly_pieces_bb: BitBoard,
     enemy_pieces_bb: BitBoard,
+    checkmask: BitBoard
 ) {
     for square in piece_bb {
-        let moves_for_piece_bb = match piece_type {
+        let mut moves_for_piece_bb = match piece_type {
             Piece::Rook => get_slider_moves_at_square::<true>(square, friendly_pieces_bb, enemy_pieces_bb),
             Piece::Bishop => get_slider_moves_at_square::<false>(square, friendly_pieces_bb, enemy_pieces_bb),
             Piece::Queen => {
@@ -25,22 +26,23 @@ pub fn get_slider_moves(
             }
             _ => panic!("Piece type is not a slider"),
         };
+        
+        moves_for_piece_bb &= checkmask;
 
         convert_bitboard_to_moves(moves, square, moves_for_piece_bb);
     }
 }
 
-/// ```rust
 /// Computes the sliding piece moves (either rook-like or bishop-like)
 /// for a given square on the chessboard based on occupancy bitboards.
 ///
 /// # Type Parameters
-/// - `IS_STRAIGHT`:
-///   - `true` for rook-like (horizontal and vertical) moves.
-///   - `false` for bishop-like (diagonal) moves.
+/// - IS_STRAIGHT:
+///   - True for rook-like (horizontal and vertical) moves.
+///   - False for bishop-like (diagonal) moves.
 ///
 /// # Returns
-/// - `BitBoard`
+/// - BitBoard
 ///   A bitboard representing all legal moves for the sliding piece from the given
 ///   square. This excludes moves that are blocked by friendly pieces.
 pub fn get_slider_moves_at_square<const IS_STRAIGHT: bool>(square: Square, friendly_bb: BitBoard, enemy_bb: BitBoard) -> BitBoard {

@@ -33,7 +33,7 @@ pub fn gen_pawn_moves(
     active_color: Side,
 ) {
     let occupancy_bb = friendly_pieces_bb | enemy_pieces_bb;
-    let pawn_bb = state.bb_manager.get_colored_piece_bb(Pawn, active_color);
+    let pawn_bb = state.bb_mngr.get_colored_piece_bb(Pawn, active_color);
 
     let rank_offset = match active_color {
         Side::White => -1,
