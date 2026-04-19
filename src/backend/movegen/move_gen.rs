@@ -43,7 +43,7 @@ pub fn get_pseudo_legal_moves(state: &State) -> Vec<Moove> {
         state
             .bb_mngr
             .get_colored_piece_bb(King, state.active_color),
-        friendly_pieces_bb,
+        !friendly_pieces_bb,
     );
 
     // Early return if we are in double check.
@@ -67,7 +67,7 @@ pub fn get_pseudo_legal_moves(state: &State) -> Vec<Moove> {
         state
             .bb_mngr
             .get_colored_piece_bb(Knight, state.active_color),
-        friendly_pieces_bb,
+        !friendly_pieces_bb & checkmask,
     );
 
     // Can't castle when in check.
@@ -81,6 +81,7 @@ pub fn get_pseudo_legal_moves(state: &State) -> Vec<Moove> {
         state,
         friendly_pieces_bb,
         enemy_pieces_bb,
+        checkmask,
         state.active_color,
     );
 
@@ -140,7 +141,7 @@ pub(crate) fn iterate_over_bitboard_for_non_slider(
         // SLIDER: (This only works this easily for non-sliders)
         let mut potential_moves_bb = moves_cache[square as usize];
         // ... apply the mask ...
-        potential_moves_bb &= !mask_bitboard;
+        potential_moves_bb &= mask_bitboard;
 
         //... and convert the resulting bitboard to a list of moves.
         convert_bitboard_to_moves(moves, square, potential_moves_bb);

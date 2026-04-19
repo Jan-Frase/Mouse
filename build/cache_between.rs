@@ -1,4 +1,3 @@
-use std::cmp::{max, min};
 use crate::build_util::{square_from_rank_and_file, square_to_bb, square_to_file, square_to_rank};
 
 pub fn gen_between_cache() -> [[u64; 64]; 64] {

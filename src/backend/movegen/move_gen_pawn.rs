@@ -30,6 +30,7 @@ pub fn gen_pawn_moves(
     state: &State,
     friendly_pieces_bb: BitBoard,
     enemy_pieces_bb: BitBoard,
+    mut checkmask: BitBoard,
     active_color: Side,
 ) {
     let occupancy_bb = friendly_pieces_bb | enemy_pieces_bb;
@@ -41,16 +42,17 @@ pub fn gen_pawn_moves(
     };
 
     // single push
-    single_push(moves, active_color, occupancy_bb, pawn_bb, rank_offset);
+    single_push(moves, active_color, occupancy_bb, checkmask, pawn_bb, rank_offset);
 
     // double push
-    double_push(moves, active_color, occupancy_bb, pawn_bb, rank_offset);
+    double_push(moves, active_color, occupancy_bb, checkmask, pawn_bb, rank_offset);
 
     let mut possible_captures_bb = enemy_pieces_bb;
     match state.irreversible_data.en_passant_square {
         None => {}
         Some(square) => {
             possible_captures_bb.fill_square(square);
+            checkmask.fill_square(square);
         }
     }
     // left captures
@@ -61,10 +63,10 @@ pub fn gen_pawn_moves(
     one_dir_capture(
         moves,
         possible_captures_bb,
-        pawn_bb,
+        pawn_bb & !LEFT_SIDE_BB,
+        checkmask,
         rank_offset,
         shift,
-        LEFT_SIDE_BB,
         1,
     );
 
@@ -76,10 +78,10 @@ pub fn gen_pawn_moves(
     one_dir_capture(
         moves,
         possible_captures_bb,
-        pawn_bb,
+        pawn_bb & !RIGHT_SIDE_BB,
+        checkmask,
         rank_offset,
         shift,
-        RIGHT_SIDE_BB,
         -1,
     );
 }
@@ -88,6 +90,7 @@ fn single_push(
     moves: &mut Vec<Moove>,
     active_color: Side,
     occupancy_bb: BitBoard,
+    checkmask_bb: BitBoard,
     pawn_bb: BitBoard,
     rank_offset: i8,
 ) {
@@ -97,6 +100,9 @@ fn single_push(
     };
     // cant go there if something is there
     push_pawn_bb &= !occupancy_bb;
+
+    // can't go there if the check mask forbids it
+    push_pawn_bb &= checkmask_bb;
 
     let no_promotion_push_pawn_bb = push_pawn_bb & !PROMOTION_RANKS_BB;
     pawn_bb_to_moves_no_promotion(moves, no_promotion_push_pawn_bb, 0, rank_offset);
@@ -109,10 +115,11 @@ fn double_push(
     moves: &mut Vec<Moove>,
     active_color: Side,
     occupancy_bb: BitBoard,
+    checkmask_bb: BitBoard,
     pawn_bb: BitBoard,
     rank_offset: i8,
 ) {
-    let double_push_bb = match active_color {
+    let mut double_push_bb = match active_color {
         Side::White => {
             (((pawn_bb & WHITE_PAWN_START_RANK_BB) << 8) & !occupancy_bb) << 8 & !occupancy_bb
         }
@@ -120,6 +127,8 @@ fn double_push(
             (((pawn_bb & BLACK_PAWN_START_RANK_BB) >> 8) & !occupancy_bb) >> 8 & !occupancy_bb
         }
     };
+    double_push_bb &= checkmask_bb;
+
     pawn_bb_to_moves_no_promotion(moves, double_push_bb, 0, 2 * rank_offset);
 }
 
@@ -127,19 +136,17 @@ fn one_dir_capture(
     moves: &mut Vec<Moove>,
     enemy_pieces_bb: BitBoard,
     mut pawn_bb: BitBoard,
+    checkmask: BitBoard,
     rank_offset: i8,
     shift: i32,
-    mask: BitBoard,
     file_offset: i8,
 ) {
-    pawn_bb &= !mask;
-
     if shift.is_negative() {
         pawn_bb >>= shift.unsigned_abs();
     } else {
         pawn_bb <<= shift;
     }
-    let capture_bb = pawn_bb & enemy_pieces_bb;
+    let capture_bb = pawn_bb & enemy_pieces_bb & checkmask;
 
     let capture_no_promotion = capture_bb & !PROMOTION_RANKS_BB;
     pawn_bb_to_moves_no_promotion(moves, capture_no_promotion, file_offset, rank_offset);
