@@ -31,6 +31,8 @@ pub fn gen_pawn_moves(
     friendly_pieces_bb: BitBoard,
     enemy_pieces_bb: BitBoard,
     mut checkmask: BitBoard,
+    straight_pin_mask: BitBoard,
+    diag_pin_mask: BitBoard,
     active_color: Side,
 ) {
     let occupancy_bb = friendly_pieces_bb | enemy_pieces_bb;
@@ -42,16 +44,17 @@ pub fn gen_pawn_moves(
     };
 
     // single push
-    single_push(moves, active_color, occupancy_bb, checkmask, pawn_bb, rank_offset);
+    single_push(moves, active_color, occupancy_bb, checkmask, straight_pin_mask, pawn_bb & !diag_pin_mask, rank_offset);
 
     // double push
-    double_push(moves, active_color, occupancy_bb, checkmask, pawn_bb, rank_offset);
+    double_push(moves, active_color, occupancy_bb, checkmask, straight_pin_mask, pawn_bb & !diag_pin_mask, rank_offset);
 
     let mut possible_captures_bb = enemy_pieces_bb;
     match state.irreversible_data.en_passant_square {
         None => {}
         Some(square) => {
             possible_captures_bb.fill_square(square);
+            // #TODO: Why is this needed? I forgot? This seems incorrect.
             checkmask.fill_square(square);
         }
     }
@@ -63,8 +66,9 @@ pub fn gen_pawn_moves(
     one_dir_capture(
         moves,
         possible_captures_bb,
-        pawn_bb & !LEFT_SIDE_BB,
+        pawn_bb & !LEFT_SIDE_BB & !straight_pin_mask,
         checkmask,
+        diag_pin_mask,
         rank_offset,
         shift,
         1,
@@ -78,8 +82,9 @@ pub fn gen_pawn_moves(
     one_dir_capture(
         moves,
         possible_captures_bb,
-        pawn_bb & !RIGHT_SIDE_BB,
+        pawn_bb & !RIGHT_SIDE_BB & !straight_pin_mask,
         checkmask,
+        diag_pin_mask,
         rank_offset,
         shift,
         -1,
@@ -91,24 +96,27 @@ fn single_push(
     active_color: Side,
     occupancy_bb: BitBoard,
     checkmask_bb: BitBoard,
+    straight_pin_mask: BitBoard,
     pawn_bb: BitBoard,
     rank_offset: i8,
 ) {
     let mut push_pawn_bb = match active_color {
-        Side::White => pawn_bb << 8,
-        Side::Black => pawn_bb >> 8,
+        Side::White => (pawn_bb & !straight_pin_mask) << 8,
+        Side::Black => (pawn_bb & !straight_pin_mask) >> 8,
     };
-    // cant go there if something is there
-    push_pawn_bb &= !occupancy_bb;
+    // cant go there if something is there or if the checkmask forbids it
+    push_pawn_bb &= !occupancy_bb & checkmask_bb;
+    pawn_bb_to_moves_no_promotion(moves, push_pawn_bb &!PROMOTION_RANKS_BB, 0, rank_offset);
+    pawn_bb_to_moves_promotion(moves, push_pawn_bb & PROMOTION_RANKS_BB, 0, rank_offset);
 
-    // can't go there if the check mask forbids it
-    push_pawn_bb &= checkmask_bb;
-
-    let no_promotion_push_pawn_bb = push_pawn_bb & !PROMOTION_RANKS_BB;
-    pawn_bb_to_moves_no_promotion(moves, no_promotion_push_pawn_bb, 0, rank_offset);
-
-    let promotion_push_pawn_bb = push_pawn_bb & PROMOTION_RANKS_BB;
-    pawn_bb_to_moves_promotion(moves, promotion_push_pawn_bb, 0, rank_offset);
+    let mut push_pawn_bb = match active_color {
+        Side::White => (pawn_bb & straight_pin_mask) << 8,
+        Side::Black => (pawn_bb & straight_pin_mask) >> 8,
+    };
+    // cant go there if something is there or if the checkmask forbids it
+    push_pawn_bb &= !occupancy_bb & checkmask_bb & straight_pin_mask;
+    pawn_bb_to_moves_no_promotion(moves, push_pawn_bb &!PROMOTION_RANKS_BB, 0, rank_offset);
+    pawn_bb_to_moves_promotion(moves, push_pawn_bb & PROMOTION_RANKS_BB, 0, rank_offset);
 }
 
 fn double_push(
@@ -116,20 +124,29 @@ fn double_push(
     active_color: Side,
     occupancy_bb: BitBoard,
     checkmask_bb: BitBoard,
+    straight_pin_mask: BitBoard,
     pawn_bb: BitBoard,
     rank_offset: i8,
 ) {
-    let mut double_push_bb = match active_color {
+    let double_push_bb = match active_color {
         Side::White => {
-            (((pawn_bb & WHITE_PAWN_START_RANK_BB) << 8) & !occupancy_bb) << 8 & !occupancy_bb
+            (((pawn_bb & WHITE_PAWN_START_RANK_BB & !straight_pin_mask) << 8) & !occupancy_bb) << 8 & !occupancy_bb
         }
         Side::Black => {
-            (((pawn_bb & BLACK_PAWN_START_RANK_BB) >> 8) & !occupancy_bb) >> 8 & !occupancy_bb
+            (((pawn_bb & BLACK_PAWN_START_RANK_BB & !straight_pin_mask) >> 8) & !occupancy_bb) >> 8 & !occupancy_bb
         }
     };
-    double_push_bb &= checkmask_bb;
+    pawn_bb_to_moves_no_promotion(moves, double_push_bb & checkmask_bb, 0, 2 * rank_offset);
 
-    pawn_bb_to_moves_no_promotion(moves, double_push_bb, 0, 2 * rank_offset);
+    let double_push_bb = match active_color {
+        Side::White => {
+            (((pawn_bb & WHITE_PAWN_START_RANK_BB & straight_pin_mask) << 8) & !occupancy_bb) << 8 & !occupancy_bb
+        }
+        Side::Black => {
+            (((pawn_bb & BLACK_PAWN_START_RANK_BB & straight_pin_mask) >> 8) & !occupancy_bb) >> 8 & !occupancy_bb
+        }
+    };
+    pawn_bb_to_moves_no_promotion(moves, double_push_bb & checkmask_bb & straight_pin_mask, 0, 2 * rank_offset);
 }
 
 fn one_dir_capture(
@@ -137,22 +154,35 @@ fn one_dir_capture(
     enemy_pieces_bb: BitBoard,
     mut pawn_bb: BitBoard,
     checkmask: BitBoard,
+    diag_pin_mask: BitBoard,
     rank_offset: i8,
     shift: i32,
     file_offset: i8,
 ) {
-    if shift.is_negative() {
-        pawn_bb >>= shift.unsigned_abs();
-    } else {
-        pawn_bb <<= shift;
-    }
-    let capture_bb = pawn_bb & enemy_pieces_bb & checkmask;
+    let free_pawns: BitBoard = match shift.is_negative() {
+        true => {
+            (pawn_bb & !diag_pin_mask) >> shift.unsigned_abs() as i32
+        },
+        false => {
+            (pawn_bb & !diag_pin_mask) << shift
+        },
+    };
+    let capture_bb = free_pawns & enemy_pieces_bb & checkmask;
 
-    let capture_no_promotion = capture_bb & !PROMOTION_RANKS_BB;
-    pawn_bb_to_moves_no_promotion(moves, capture_no_promotion, file_offset, rank_offset);
+    pawn_bb_to_moves_no_promotion(moves, capture_bb & !PROMOTION_RANKS_BB, file_offset, rank_offset);
+    pawn_bb_to_moves_promotion(moves, capture_bb & PROMOTION_RANKS_BB, file_offset, rank_offset);
 
-    let captures_promotion = capture_bb & PROMOTION_RANKS_BB;
-    pawn_bb_to_moves_promotion(moves, captures_promotion, file_offset, rank_offset);
+    let free_pawns: BitBoard = match shift.is_negative() {
+        true => {
+            (pawn_bb & diag_pin_mask) >> shift.unsigned_abs() as i32
+        },
+        false => {
+            (pawn_bb & diag_pin_mask) << shift
+        },
+    };
+    let capture_bb = free_pawns & enemy_pieces_bb & checkmask & diag_pin_mask;
+    pawn_bb_to_moves_no_promotion(moves, capture_bb & !PROMOTION_RANKS_BB, file_offset, rank_offset);
+    pawn_bb_to_moves_promotion(moves, capture_bb & PROMOTION_RANKS_BB, file_offset, rank_offset);
 }
 
 fn pawn_bb_to_moves_no_promotion(

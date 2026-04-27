@@ -24,7 +24,7 @@ impl BitBoard {
     }
 
     /// Converts a given `Square` into a corresponding bitboard.
-    fn new_from_square(square: Square) -> BitBoard {
+    pub fn new_from_square(square: Square) -> BitBoard {
         BitBoard { value: 1 << square }
     }
 
