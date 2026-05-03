@@ -1,13 +1,14 @@
-use crate::backend::caches::{KING_MOVES, KNIGHT_MOVES};
+use crate::backend::caches::{BETWEEN_TABLE, KING_MOVES, KNIGHT_MOVES};
 use crate::backend::constants::SQUARES_AMOUNT;
 use crate::backend::types::moove::Moove;
 use crate::backend::movegen::move_gen_king::gen_castles;
 use crate::backend::movegen::move_gen_pawn::gen_pawn_moves;
-use crate::backend::movegen::move_gen_sliders::get_slider_moves;
+use crate::backend::movegen::move_gen_sliders::{get_slider_moves, get_slider_xray_moves_at_square};
 use crate::backend::types::bitboard::BitBoard;
 use crate::backend::game_state::state::State;
+use crate::backend::movegen::check_decider::{get_checking_squares, is_in_check_on_square};
 use crate::backend::types::piece::Piece::*;
-use crate::backend::types::square::Square;
+use crate::backend::types::square::{back_by_one, Square};
 
 /// Generates and returns all the pseudo legal moves for the current player's pieces
 /// based on the provided game game_state. This is the entry point for the move generation.
@@ -21,71 +22,146 @@ use crate::backend::types::square::Square;
 ///
 /// * A `Vec<Moove>` containing all the computed pseudo legal moves for the current player's
 ///   pieces.
-pub fn get_pseudo_legal_moves(state: &State) -> Vec<Moove> {
-    let friendly_pieces_bb = state.bb_manager.get_all_pieces_bb_off(state.active_color);
+pub fn get_pseudo_legal_moves(state: &mut State) -> Vec<Moove> {
+    let friendly_pieces_bb = state.bb_mngr.get_all_pieces_bb_off(state.active_side);
     let enemy_pieces_bb = state
-        .bb_manager
-        .get_all_pieces_bb_off(state.active_color.opposite());
+        .bb_mngr
+        .get_all_pieces_bb_off(state.active_side.oppo());
+
+    // This is a bitboard marking each piece that is currently checking the king (at most 2).
+    let checking_squares = get_checking_squares(state);
+    let true_bit_amount = checking_squares.value.count_ones();
+    let double_check = true_bit_amount == 2;
+    let no_check = true_bit_amount == 0;
 
     let mut moves = Vec::with_capacity(50);
 
-    // Move gen for king and knight (excluding castles)
-    iterate_over_bitboard_for_non_slider(
+    // Move gen for king (excluding castles) ...
+    iterate_over_bitboard_for_non_slider::<true>(
         &mut moves,
         KING_MOVES,
         state
-            .bb_manager
-            .get_colored_piece_bb(King, state.active_color),
-        friendly_pieces_bb,
+            .bb_mngr
+            .get_colored_piece_bb(King, state.active_side),
+        !friendly_pieces_bb,
+        state,
     );
 
-    iterate_over_bitboard_for_non_slider(
+    // Early return if we are in double check.
+    if double_check { return moves; }
+
+    // Completely filled with ones by default.
+    // Idea from here: https://web.archive.org/web/20250910134338/https://www.codeproject.com/articles/Worlds-fastest-Bitboard-Chess-Movegenerator
+    let mut check_mask = BitBoard{ value: u64::MAX };
+    let king_square = state.bb_mngr
+        .get_colored_piece_bb(King, state.active_side)
+        .next().unwrap();
+    if !no_check {
+        check_mask.value = 0;
+        for square in checking_squares {
+            check_mask |= BETWEEN_TABLE[square as usize][king_square as usize];
+        }
+    }
+
+    let straight_xray_bb = get_slider_xray_moves_at_square::<true>(king_square, friendly_pieces_bb | enemy_pieces_bb);
+    let diag_xray_bb = get_slider_xray_moves_at_square::<false>(king_square, friendly_pieces_bb | enemy_pieces_bb);
+
+    let straight_xray_attackers_bb = straight_xray_bb & (state.bb_mngr.get_piece_bb(Rook) | state.bb_mngr.get_piece_bb(Queen)) & enemy_pieces_bb;
+    let diag_xray_attackers_bb = diag_xray_bb & (state.bb_mngr.get_piece_bb(Bishop) | state.bb_mngr.get_piece_bb(Queen)) & enemy_pieces_bb;
+
+    let mut straight_pin_mask = BitBoard{ value: 0 };
+    for square in straight_xray_attackers_bb {
+        // the order of indices is important
+        // the square of the first index is included
+        // the second is not
+        // this way its possible to capture the checker :)
+        straight_pin_mask |= BETWEEN_TABLE[square as usize][king_square as usize];
+    }
+
+    let mut diag_pin_mask = BitBoard{ value: 0 };
+    for square in  diag_xray_attackers_bb {
+        // the order of indices is important
+        // the square of the first index is included
+        // the second is not
+        // this way its possible to capture the checker :)
+        diag_pin_mask |= BETWEEN_TABLE[square as usize][king_square as usize];
+    }
+
+    // TODO: 1.
+    // See: 8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1
+    // 1. Whenever a pawn is double moved, check if its on the same horizontal line as  the enemy king
+    // -> If so, capturing this pawn via en passant might be illegal!
+    // 2. If so, check if it at most one pawn left or right of it that could capture it via en passant
+    // 3. If so, dont create the en passant square
+
+    // This is for a scenario like this: 1k4q1/8/8/3pP3/8/1K6/8/8 w - d6 0 1
+    // The ep takable pawn is pinned, thus the ep is not legal and has to be removed
+    if state.irreversible_data.en_passant_square.is_some_and(|ep_square| (BitBoard::new_from_square(back_by_one(ep_square, state.active_side)) & diag_pin_mask).is_not_empty()) {
+        state.irreversible_data.en_passant_square = None;
+    }
+
+
+    // ... and knights.
+    iterate_over_bitboard_for_non_slider::<false>(
         &mut moves,
         KNIGHT_MOVES,
         state
-            .bb_manager
-            .get_colored_piece_bb(Knight, state.active_color),
-        friendly_pieces_bb,
+            .bb_mngr
+            .get_colored_piece_bb(Knight, state.active_side) & !(straight_pin_mask | diag_pin_mask),
+        !friendly_pieces_bb & check_mask,
+        state,
     );
 
-    gen_castles(&mut moves, state, state.bb_manager.get_all_pieces_bb());
+    // Can't castle when in check.
+    if no_check {
+        gen_castles(&mut moves, state, state.bb_mngr.get_all_pieces_bb());
+    }
 
     // Gen pawn moves, quiet, captures, double pushes
+    // Pawns are not allowed to switch between pin masks!
+    // See here: https://lichess.org/editor/1q4qk/8/8/1p6/2P5/1K6/8/8_w_-_-_0_1?color=white
     gen_pawn_moves(
         &mut moves,
         state,
         friendly_pieces_bb,
         enemy_pieces_bb,
-        state.active_color,
+        check_mask,
+        straight_pin_mask,
+        diag_pin_mask,
+        state.active_side,
     );
 
-    // Gen queen, bishop and rook moves
-    get_slider_moves(
-        &mut moves,
-        Queen,
-        state
-            .bb_manager
-            .get_colored_piece_bb(Queen, state.active_color),
-        friendly_pieces_bb,
-        enemy_pieces_bb,
-    );
+    // ..bishop..
     get_slider_moves(
         &mut moves,
         Bishop,
+        (state
+            .bb_mngr
+            .get_colored_piece_bb(Bishop, state.active_side) |
         state
-            .bb_manager
-            .get_colored_piece_bb(Bishop, state.active_color),
+            .bb_mngr
+            .get_colored_piece_bb(Queen, state.active_side))
+            & !straight_pin_mask,
         friendly_pieces_bb,
         enemy_pieces_bb,
+        check_mask,
+        diag_pin_mask
     );
+    //..and rook moves :)
     get_slider_moves(
         &mut moves,
         Rook,
-        state
-            .bb_manager
-            .get_colored_piece_bb(Rook, state.active_color),
+        (state
+            .bb_mngr
+            .get_colored_piece_bb(Rook, state.active_side) |
+            state
+                .bb_mngr
+                .get_colored_piece_bb(Queen, state.active_side))
+            & !diag_pin_mask,
         friendly_pieces_bb,
         enemy_pieces_bb,
+        check_mask,
+        straight_pin_mask
     );
 
     moves
@@ -95,11 +171,12 @@ pub fn get_pseudo_legal_moves(state: &State) -> Vec<Moove> {
 // Move gen core logic
 // ------------------------------------
 
-pub(crate) fn iterate_over_bitboard_for_non_slider(
+pub(crate) fn iterate_over_bitboard_for_non_slider<const IS_KING: bool>(
     moves: &mut Vec<Moove>,
     moves_cache: [BitBoard; SQUARES_AMOUNT],
     piece_bb: BitBoard,
     mask_bitboard: BitBoard,
+    state: &mut State,
 ) {
     // Example: We are doing this for all knights.
     // The `moves_cache` array would for each square contain all viable moves for a knight.
@@ -110,10 +187,28 @@ pub(crate) fn iterate_over_bitboard_for_non_slider(
         // SLIDER: (This only works this easily for non-sliders)
         let mut potential_moves_bb = moves_cache[square as usize];
         // ... apply the mask ...
-        potential_moves_bb &= !mask_bitboard;
+        potential_moves_bb &= mask_bitboard;
 
-        //... and convert the resulting bitboard to a list of moves.
-        convert_bitboard_to_moves(moves, square, potential_moves_bb);
+        // TODO: This can surely be sped up! For example: Loop over enemy pieces and generate their seen squares :)
+        // Whenever the king moves, check if the square it moved to can be seen by an enemy.
+        if IS_KING {
+            state.bb_mngr.get_piece_bb_mut(King).clear_square(square);
+            state.bb_mngr.get_all_pieces_bb_off_mut(state.active_side).clear_square(square);
+
+            for to_square in potential_moves_bb {
+                let would_put_in_check = is_in_check_on_square(state, state.active_side, to_square);
+                if !would_put_in_check {
+                    moves.push(Moove::new(square, to_square))
+                }
+            }
+
+            state.bb_mngr.get_piece_bb_mut(King).fill_square(square);
+            state.bb_mngr.get_all_pieces_bb_off_mut(state.active_side).fill_square(square);
+        } else {
+            //... and convert the resulting bitboard to a list of moves.
+            convert_bitboard_to_moves(moves, square, potential_moves_bb);
+        }
+
     }
 }
 
