@@ -15,7 +15,6 @@ fn test_perft_normal() {
 #[test]
 // This test takes quite a while. Thus, it's disabled by default.
 // Can be run using 'cargo test -- --ignored'.
-#[ignore]
 fn test_perft_long() {
     test_perft_fixtures(&LONG_PERFT);
 }
@@ -247,10 +246,10 @@ fn test_perft_23() {
 #[test]
 fn test_perft_24() {
     // The mean ep pin one!
-    let mut state = State::new_from_fen("8/8/8/KPp4r/8/8/8/k7 w - - 0 1");
+    let mut state = State::new_from_fen("8/8/8/KPp4r/8/8/8/k7 w - c6 0 1");
 
     let nodes = perft(&mut state, 1);
-    assert_eq!(nodes, 3);
+    assert_eq!(nodes, 4);
 }
 
 #[test]
@@ -267,4 +266,12 @@ fn test_perft_26() {
 
     let nodes = perft(&mut state, 1);
     assert_eq!(nodes, 7);
+}
+
+#[test]
+fn test_perft_27() {
+    let mut state = State::new_from_fen("8/8/8/1Ppp3r/RK3p1k/8/4P1P1/8 w - c6 0 1");
+
+    let nodes = perft(&mut state, 1);
+    assert_eq!(nodes, 6);
 }

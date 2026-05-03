@@ -50,8 +50,6 @@ pub fn root_debug_perft(root_state: &mut State, depth: u8) -> u64 {
     // Sort them in the same way as perftree does
     moves.sort();
 
-    println!("{}", depth);
-
     // Catch trivial depth 1 case
     if depth == 1 {
         nodes = moves.len() as u64;

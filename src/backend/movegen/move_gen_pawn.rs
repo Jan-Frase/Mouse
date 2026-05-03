@@ -1,7 +1,10 @@
+use std::os::linux::raw::stat;
+use crate::backend::constants::{LEFT_SIDE_BB, RIGHT_SIDE_BB, SIDE_LENGTH};
 use crate::backend::types::moove::Moove;
 use crate::backend::types::bitboard::BitBoard;
 use crate::backend::game_state::state::State;
-use crate::backend::types::piece::Piece::Pawn;
+use crate::backend::movegen::move_gen_sliders::get_slider_moves_at_square;
+use crate::backend::types::piece::Piece::{King, Pawn, Queen, Rook};
 use crate::backend::types::piece::{PROMOTABLE_PIECES, Side};
 use crate::backend::types::square::{Square, get_rank};
 use crate::backend::types::square::{get_file, square_from_rank_and_file};
@@ -18,19 +21,17 @@ const BLACK_PAWN_START_RANK_BB: BitBoard = BitBoard {
 const PROMOTION_RANKS_BB: BitBoard = BitBoard {
     value: (BLACK_PROMOTION_RANK_BB.value | WHITE_PROMOTION_RANK_BB.value),
 };
-const LEFT_SIDE_BB: BitBoard = BitBoard {
-    value: 0x101010101010101,
-};
-const RIGHT_SIDE_BB: BitBoard = BitBoard {
-    value: 0x8080808080808080,
-};
+
+const WHITE_DOUBLE_PUSH_BB: BitBoard = BitBoard { value: 0xff000000 };
+const BLACK_DOUBLE_PUSH_BB: BitBoard = BitBoard { value: 0xff00000000 };
+
 
 pub fn gen_pawn_moves(
     moves: &mut Vec<Moove>,
     state: &State,
     friendly_pieces_bb: BitBoard,
     enemy_pieces_bb: BitBoard,
-    mut checkmask: BitBoard,
+    checkmask: BitBoard,
     straight_pin_mask: BitBoard,
     diag_pin_mask: BitBoard,
     active_color: Side,
@@ -50,14 +51,25 @@ pub fn gen_pawn_moves(
     double_push(moves, active_color, occupancy_bb, checkmask, straight_pin_mask, pawn_bb & !diag_pin_mask, rank_offset);
 
     let mut possible_captures_bb = enemy_pieces_bb;
-    match state.irreversible_data.en_passant_square {
-        None => {}
-        Some(square) => {
-            possible_captures_bb.fill_square(square);
-            // #TODO: Why is this needed? I forgot? This seems incorrect.
-            checkmask.fill_square(square);
+    let mut capture_checkmask = checkmask;
+    if is_ep_legal(state) {
+        let ep_square = state.irreversible_data.en_passant_square.unwrap();
+
+        // Add ep square to possible captures
+        possible_captures_bb.fill_square(ep_square);
+
+        // This is needed for situation where taking the ep pawn removes the check:
+        // 8/8/8/1Ppp3r/RK3p1k/8/4P1P1/8 w - c6 0 1
+        let ep_pawn_square = match state.active_side {
+            Side::White => ep_square - SIDE_LENGTH as u8,
+            Side::Black => ep_square + SIDE_LENGTH as u8
+        };
+        let ep_pawn_square = BitBoard::new_from_square(ep_pawn_square);
+        if (ep_pawn_square & checkmask).is_not_empty() {
+            capture_checkmask.fill_square(ep_square);
         }
     }
+
     // left captures
     let shift = match active_color {
         Side::White => 7,
@@ -67,7 +79,7 @@ pub fn gen_pawn_moves(
         moves,
         possible_captures_bb,
         pawn_bb & !LEFT_SIDE_BB & !straight_pin_mask,
-        checkmask,
+        capture_checkmask,
         diag_pin_mask,
         rank_offset,
         shift,
@@ -83,12 +95,64 @@ pub fn gen_pawn_moves(
         moves,
         possible_captures_bb,
         pawn_bb & !RIGHT_SIDE_BB & !straight_pin_mask,
-        checkmask,
+        capture_checkmask,
         diag_pin_mask,
         rank_offset,
         shift,
         -1,
     );
+}
+
+fn is_ep_legal(state: &State, ) -> bool{
+    if state.irreversible_data.en_passant_square.is_none() {
+        return false;
+    }
+
+    let double_push_rank = match state.active_side {
+        Side::White => BLACK_DOUBLE_PUSH_BB,
+        Side::Black => WHITE_DOUBLE_PUSH_BB
+    };
+
+    let ep_square = state.irreversible_data.en_passant_square.unwrap();
+    let ep_pawn = match state.active_side {
+        Side::White => ep_square - SIDE_LENGTH as u8,
+        Side::Black => ep_square + SIDE_LENGTH as u8
+    };
+    let ep_pawn_bb = BitBoard::new_from_square(ep_pawn);
+
+    let friend_king = state.bb_mngr.get_colored_piece_bb(King, state.active_side);
+    let oppo_queen_rook = state.bb_mngr.get_colored_piece_bb(Queen, state.active_side.oppo())
+        | state.bb_mngr.get_colored_piece_bb(Rook, state.active_side.oppo());
+
+    if (friend_king & double_push_rank).is_empty() || (oppo_queen_rook & double_push_rank).is_empty() {
+        return true;
+    }
+
+    let friend_pawn_bb = state.bb_mngr.get_colored_piece_bb(Pawn, state.active_side);
+
+    let left_pawn = friend_pawn_bb & ((ep_pawn_bb & !LEFT_SIDE_BB) >> 1);
+    let right_pawn = friend_pawn_bb & ((ep_pawn_bb & !RIGHT_SIDE_BB) << 1);
+
+    let friend_occ = state.bb_mngr.get_all_pieces_bb_off(state.active_side);
+    let oppo_occ = state.bb_mngr.get_all_pieces_bb_off(state.active_side.oppo());
+    let oppo_occ = oppo_occ & !ep_pawn_bb;
+
+    let king_square = friend_king.clone().next().unwrap();
+
+    if left_pawn.is_not_empty() {
+        let moves = get_slider_moves_at_square::<true>(king_square, friend_occ & !left_pawn, oppo_occ);
+        if (moves & oppo_queen_rook).is_not_empty() {
+            return false;
+        }
+    }
+    if right_pawn.is_not_empty() {
+        let moves = get_slider_moves_at_square::<true>(king_square, friend_occ & !right_pawn, oppo_occ);
+        if (moves & oppo_queen_rook).is_not_empty() {
+            return false;
+        }
+    }
+
+    true
 }
 
 fn single_push(
